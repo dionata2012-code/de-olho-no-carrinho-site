@@ -145,6 +145,12 @@ ol.how{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;fon
 .nav button.add[aria-pressed="true"]{background:var(--acc-deep);color:#fff}
 button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible,label.btn:focus-within{outline:3px solid var(--info);outline-offset:2px}
 .back{align-self:flex-start}
+.camov{position:fixed;inset:0;z-index:30;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:max(16px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px))}
+.camov .cv{position:relative;width:min(92vw,420px);aspect-ratio:1;border-radius:18px;overflow:hidden;background:#111}
+.camov video{width:100%;height:100%;object-fit:cover;display:block}
+.camov .mira{position:absolute;inset:15%;border:3px solid #fff;border-radius:14px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.camov p{color:#fff;font-weight:600;text-align:center;margin:0}
+.camov .btns{width:min(92vw,420px)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:9;background:var(--ink);color:#fff;font:600 15px var(--body);padding:12px 18px;border-radius:14px;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(13,26,18,.25)}
 summary::-webkit-details-marker{display:none}
 summary{cursor:pointer;list-style:none}
@@ -669,7 +675,7 @@ var PDFI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-widt
 function chaveBox(){var d=DR,ck=d.ck||"";
 var h='<p class="soft"><b>Já tem o PDF da consulta da nota?</b> Envie direto. A chave e os itens são lidos do próprio PDF.</p><div class="btns">'+fbtn("pdff","Enviar PDF da nota",PDFI)+'</div><input class="vh" type="file" id="pdff" accept="application/pdf,.pdf" data-file="pdf" tabindex="-1">';
 h+='<details><summary class="link">Colar o texto da página</summary><div style="display:flex;flex-direction:column;gap:10px;margin-top:10px"><label class="f">Texto da consulta da nota<textarea id="tx" placeholder="Cole aqui o texto copiado do portal"></textarea></label><button type="button" class="btn line" data-act="readtx">Ler texto</button></div></details>';
-h+='<p class="soft" style="border-top:1px solid var(--line);padding-top:12px"><b>Ainda não tem o PDF?</b> Comece pela chave de acesso ou pelo QR code da nota.</p><label class="f">Chave de acesso (44 números)<input type="text" inputmode="numeric" id="ck" value="'+esc(fmtChave(ck))+'" data-in="ck" autocomplete="off" placeholder="3126 1028 5484 …"></label><div class="btns">'+(window.Android?'<button type="button" class="btn line" data-act="qrapp">'+CAM+'Ler QR code da nota</button>':fbtn("qrf","Ler QR code da nota",CAM,1))+'</div><input class="vh" type="file" id="qrf" accept="image/*" capture="environment" data-file="qr" tabindex="-1"><div id="ckinfo">'+ckInfo()+'</div>';
+h+='<p class="soft" style="border-top:1px solid var(--line);padding-top:12px"><b>Ainda não tem o PDF?</b> Comece pela chave de acesso ou pelo QR code da nota.</p><label class="f">Chave de acesso (44 números)<input type="text" inputmode="numeric" id="ck" value="'+esc(fmtChave(ck))+'" data-in="ck" autocomplete="off" placeholder="3126 1028 5484 …"></label><div class="btns">'+(camOk()?'<button type="button" class="btn line" data-act="qrcam">'+CAM+'Ler QR code da nota</button>':(window.Android?'<button type="button" class="btn line" data-act="qrapp">'+CAM+'Ler QR code da nota</button>':fbtn("qrf","Ler QR code da nota",CAM,1)))+'</div><input class="vh" type="file" id="qrf" accept="image/*" capture="environment" data-file="qr" tabindex="-1"><div id="ckinfo">'+ckInfo()+'</div>';
 if(window.APP){var cut=h.indexOf('<p class="soft" style="border-top'),pdf=h.slice(0,cut),key=h.slice(cut);key=key.replace(' style="border-top:1px solid var(--line);padding-top:12px"','').replace('<b>Ainda não tem o PDF?</b> Comece pela chave de acesso ou pelo QR code da nota.','<b>Leia o QR code da nota</b> ou digite a chave de acesso. O app consulta o portal da Fazenda e pega os itens.');pdf=pdf.replace('<p class="soft"><b>Já tem o PDF','<p class="soft" style="border-top:1px solid var(--line);padding-top:12px"><b>Já tem o PDF');h=key+pdf}
 return h}
 function ckInfo(){var ck=DR.ck||"";if(ck.length<44)return ck.length?'<p class="soft small">'+ck.length+' de 44 números.</p>':'';
@@ -728,11 +734,28 @@ var LOADED={};
 function loadScript(url,global){if(window[global])return Promise.resolve();if(LOADED[url])return LOADED[url];LOADED[url]=new Promise(function(res,rej){var s=document.createElement("script");s.src=url;s.onload=function(){res()};s.onerror=function(){delete LOADED[url];rej({code:"lib"})};document.head.appendChild(s)});return LOADED[url]}
 async function decodeQR(f){var c=await toCanvas(f,1600);
 if("BarcodeDetector" in window){try{var det=new BarcodeDetector({formats:["qr_code"]}),rs=await det.detect(c);if(rs&&rs[0]&&rs[0].rawValue)return rs[0].rawValue}catch(e){}}
-await loadScript(LIB.qr,"jsQR");var x=c.getContext("2d"),d=x.getImageData(0,0,c.width,c.height),r=window.jsQR(d.data,c.width,c.height,{inversionAttempts:"attemptBoth"});return r?r.data:""}
+await loadScript(LIB.qr,"jsQR");return qrNoCanvas(c)}
+/* O QR do cupom costuma ser pequeno na foto: tenta a foto inteira e depois recortes do centro, ampliados. */
+function qrNoCanvas(c){var tent=[[1,0],[.7,900],[.5,800],[.35,700],[1,900]];for(var i=0;i<tent.length;i++){var fr=tent[i][0],sz=tent[i][1],w=c.width,h=c.height,cw=Math.round(w*fr),ch=Math.round(h*fr),k=document.createElement("canvas");
+if(fr==1&&!sz){k=c}else{var sc=sz?Math.min(sz/Math.max(cw,ch),3):1;k.width=Math.round(cw*sc);k.height=Math.round(ch*sc);k.getContext("2d").drawImage(c,(w-cw)/2,(h-ch)/2,cw,ch,0,0,k.width,k.height)}
+var d=k.getContext("2d").getImageData(0,0,k.width,k.height),r=window.jsQR(d.data,k.width,k.height,{inversionAttempts:"attemptBoth"});if(r&&r.data)return r.data}return""}
+function aplicarQR(t){var m=dig((String(t).match(/p=([\d|]+)/)||[])[1]||t),ch="";for(var i=0;i+44<=m.length;i++){if(chaveOk(m.slice(i,i+44))){ch=m.slice(i,i+44);break}}
+if(!ch){msg("Li o QR code, mas não encontrei uma chave de acesso válida nele. Digite a chave impressa na nota.","warn");return false}
+if(!DR)DR=blank();DR.ck=ch;if(!DR.chave)DR.chave=ch;render();msg("QR code lido. Siga os passos abaixo.","ok");return true}
+/* Câmera ao vivo (iPhone e navegador): lê o QR enquanto a pessoa aponta. No app Android quem lê é o leitor do Google. */
+function camOk(){return !window.Android&&!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)&&window.isSecureContext!==false}
+var CAMS=null,CAMT=0;
+function camFechar(){if(CAMS){CAMS.getTracks().forEach(function(x){x.stop()});CAMS=null}clearTimeout(CAMT);var o=document.getElementById("qrcam");if(o)o.remove()}
+async function camAbrir(){camFechar();var o=document.createElement("div");o.id="qrcam";o.className="camov";o.setAttribute("role","dialog");o.setAttribute("aria-label","Ler QR code com a câmera");
+o.innerHTML='<p>Aponte a câmera para o QR code do cupom</p><div class="cv"><video playsinline muted autoplay></video><div class="mira"></div></div><p class="small" id="qrcam_m" style="opacity:.8">Deixe o QR dentro do quadrado, com boa luz.</p><div class="btns"><button type="button" class="btn line" data-act="qrcamfoto">Usar uma foto</button><button type="button" class="btn" data-act="qrcamfechar">Cancelar</button></div>';
+document.body.appendChild(o);var v=o.querySelector("video");
+try{await loadScript(LIB.qr,"jsQR");CAMS=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:1280}},audio:false});v.srcObject=CAMS;await v.play()}
+catch(e){camFechar();msg(e&&e.code=="lib"?"Não consegui carregar o leitor de QR code. Digite a chave impressa na nota.":"Não consegui abrir a câmera. Permita o uso da câmera para este site ou use “Usar uma foto”.","warn");return}
+var k=document.createElement("canvas"),n=0,loop=function(){if(!CAMS)return;var w=v.videoWidth,h=v.videoHeight;if(w&&h){var lado=Math.min(w,h)*.8,sz=Math.min(720,lado);k.width=k.height=Math.round(sz);var x=k.getContext("2d");x.drawImage(v,(w-lado)/2,(h-lado)/2,lado,lado,0,0,k.width,k.height);
+var d=x.getImageData(0,0,k.width,k.height),r=window.jsQR(d.data,k.width,k.height,{inversionAttempts:(n++%3==2)?"attemptBoth":"dontInvert"});if(r&&r.data){var txt=r.data;camFechar();if(navigator.vibrate)try{navigator.vibrate(60)}catch(e){}aplicarQR(txt);return}}
+CAMT=setTimeout(loop,150)};loop()}
 async function readQR(inp){var f=inp.files&&inp.files[0];inp.value="";if(!f)return;msg("Lendo o QR code…","busy");
-try{var t=await decodeQR(f),m=dig((String(t).match(/p=([\d|]+)/)||[])[1]||t),ch="";for(var i=0;i+44<=m.length;i++){if(chaveOk(m.slice(i,i+44))){ch=m.slice(i,i+44);break}}
-if(!ch){msg(t?"Li o QR code, mas não encontrei uma chave de acesso válida nele. Digite a chave impressa na nota.":"Não encontrei um QR code na foto. Tente outra foto, mais perto e reta, ou digite a chave.","warn");return}
-DR.ck=ch;if(!DR.chave)DR.chave=ch;render();msg("QR code lido. Siga os passos abaixo.","ok")}
+try{var t=await decodeQR(f);if(!t){msg("Não encontrei um QR code na foto. Tente outra foto, mais perto e reta, ou digite a chave.","warn");return}aplicarQR(t)}
 catch(e){msg(e&&e.code=="lib"?"Não consegui carregar o leitor de QR code. Digite a chave impressa na nota.":"Não consegui ler o QR code. Digite a chave impressa na nota.","warn")}}
 async function pdfText(f){await loadScript(LIB.pdf,"pdfjsLib");await loadScript(LIB.pdfw,"pdfjsWorker");var lib=window.pdfjsLib;lib.GlobalWorkerOptions.workerSrc=LIB.pdfw;
 var doc=await lib.getDocument({data:new Uint8Array(await f.arrayBuffer()),isEvalSupported:false}).promise,out=[];
@@ -829,6 +852,9 @@ claude.use("downloads").then(function(d){if(!d){copy();return}return d.save({fil
 function toggleTag(list,t){var i=list.indexOf(t);if(i>=0)list.splice(i,1);else list.push(t);return list}
 document.addEventListener("click",function(ev){var b=ev.target.closest("[data-act]");if(!b)return;var a=b.getAttribute("data-act"),d=b.dataset,n;
 if(a=="tab"){if(d.v=="new"&&V=="new")return;go(d.v)}
+else if(a=="qrcam"){if(!DR){DR=blank()}readForm&&readForm();camAbrir()}
+else if(a=="qrcamfechar"){camFechar()}
+else if(a=="qrcamfoto"){camFechar();var qi=document.getElementById("qrf");if(qi)qi.click()}
 else if(a=="susok"){if(!d.k)return;CFG.saltos[d.k]=1;saveCfg();render();toast("Preço confirmado. Ele volta a contar nos alertas.")}
 else if(a=="note"){SEL=d.id;V="nd";CONF=null;EDIT=null;ASK=null;NEWTAG=false;if(DR&&!DR.id){DR=null}render();window.scrollTo(0,0)}
 else if(a=="prod"){if(!d.k)return;PK=d.k;V="pd";JOIN=false;RENAME=false;TPE=false;render();window.scrollTo(0,0)}
