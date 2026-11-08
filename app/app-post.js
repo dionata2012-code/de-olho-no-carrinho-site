@@ -321,3 +321,130 @@
   render();
 })();
 
+
+/* ---------- Grupo da família ----------
+   Cada pessoa continua com a própria conta. O grupo divide só preços e produtos dos últimos 3 meses, sem mostrar quem comprou:
+   o banco (funções familia_*) entrega os itens dos outros sem nome, nota ou total, e o site os usa como "visto pela família"
+   (FAM, em famAttach). Notas, gastos, orçamento e o que cada um compra junto continuam só com cada um. */
+(function () {
+  if (!window.appFamilia) return;
+  var FI, FM = "", CONV = null, FMSG = null, BUSY = false, K = "mn_fam", T = 0;
+  function lsG(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsS(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function guardar() { lsS(K, JSON.stringify({ uid: appUid(), info: FI || null, rows: FAM, t: T })); }
+  try {
+    var c0 = JSON.parse(lsG(K) || "null");
+    if (c0 && c0.uid && c0.uid === appUid()) { FI = c0.info; FAM = Array.isArray(c0.rows) ? c0.rows : []; T = +c0.t || 0; }
+  } catch (e) {}
+  function demo() { return N.some(function (n) { return n.demo; }); }
+  function erroTxt(e, r) {
+    var c = r && r.erro;
+    if (c === "invalido") return "Código não encontrado ou vencido. Confira as letras ou peça um código novo.";
+    if (c === "muitas") return "Muitos códigos errados seguidos. Espere uma hora e tente de novo.";
+    if (c === "grupo_cheio") return "Esse grupo já tem 6 pessoas, o máximo.";
+    if (c === "ja_no_grupo") return "Você já está num grupo. Saia dele antes de entrar em outro.";
+    if (c === "nome_invalido") return "Preencha os nomes (até 30 letras).";
+    if (e && e.code === "unavailable") return "Sem conexão com o servidor. Confira a internet e tente de novo.";
+    return "Não deu certo agora. Tente de novo.";
+  }
+  function atualizar(forcar) {
+    if (!appUid() || BUSY) return Promise.resolve();
+    if (!forcar && Date.now() - T < 30 * 60e3) return Promise.resolve();
+    return appFamilia.info().then(function (i) {
+      FI = i || null;
+      return FI ? appFamilia.precos() : [];
+    }).then(function (rows) {
+      FAM = Array.isArray(rows) ? rows : []; T = Date.now(); guardar(); if (V === "m" || V === "pd" || V === "l" || V === "cmd") render();
+    }, function () { if (FI === undefined) { FI = null; if (V === "m") render(); } });
+  }
+  function quando(iso) { var d = new Date(iso); if (isNaN(d)) return ""; return ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2) + " às " + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); }
+  var PRIV = 'O grupo vê só os preços e produtos dos últimos 3 meses, sem saber quem comprou. Suas notas, seus gastos e o que você compra junto continuam só com você.';
+  function aviso2(n) { return n <= 2 ? '<p class="soft small">Num grupo de 2 pessoas, a outra pode deduzir que o preço é seu.</p>' : ''; }
+  function msgHtml() { return FMSG ? '<div class="status' + (FMSG.k ? " " + FMSG.k : "") + '" role="status">' + esc(FMSG.t) + '</div>' : ''; }
+  function card() {
+    var h = '<div class="card" id="fam"><h3 style="margin:0">Família</h3>';
+    if (demo()) return h + '<p class="soft">Saia do modo demonstração para usar o grupo da família.</p></div>';
+    if (FI === undefined) return h + '<p class="soft">Carregando…</p></div>';
+    if (!FI) {
+      if (FM === "criar") {
+        h += '<label class="f">Nome do grupo<input type="text" id="fm_g" maxlength="40" placeholder="Ex.: Família Silva" autocomplete="off"></label>' +
+          '<label class="f">Seu nome no grupo<input type="text" id="fm_a" maxlength="30" placeholder="Como a família te conhece" autocomplete="off"></label>' +
+          '<p class="soft small">' + PRIV + '</p><div class="btns"><button type="button" class="btn" data-act="famcriarok">Criar grupo</button><button type="button" class="btn line" data-act="famcancel">Cancelar</button></div>';
+      } else if (FM === "entrar") {
+        h += '<label class="f">Código de convite<input type="text" id="fm_c" maxlength="6" placeholder="6 letras e números" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-transform:uppercase;letter-spacing:2px"></label>' +
+          '<label class="f">Seu nome no grupo<input type="text" id="fm_a" maxlength="30" placeholder="Como a família te conhece" autocomplete="off"></label>' +
+          '<div class="btns"><button type="button" class="btn" data-act="famver">Continuar</button><button type="button" class="btn line" data-act="famcancel">Cancelar</button></div>';
+      } else if (FM === "conv" && CONV) {
+        var ms = CONV.membros || [];
+        h += '<p>Grupo <b>' + esc(CONV.nome) + '</b>' + (ms.length ? ', com ' + esc(ms.join(", ")) : '') + '.</p><p class="soft small">' + PRIV + ' Você também passa a ver os preços do grupo.</p>' + aviso2(ms.length + 1) +
+          (CONV.cheio ? '<div class="status warn">Esse grupo já tem 6 pessoas, o máximo.</div><div class="btns"><button type="button" class="btn line" data-act="famcancel">Voltar</button></div>'
+            : '<div class="btns"><button type="button" class="btn" data-act="famentrarok">Entrar no grupo</button><button type="button" class="btn line" data-act="famcancel">Cancelar</button></div>');
+      } else {
+        h += '<p class="soft">Compare preços com a família: cada um continua com a própria conta, e o app mostra o que alguém do grupo pagou no mesmo produto e em qual mercado. ' + PRIV + '</p>' +
+          '<div class="btns"><button type="button" class="btn line" data-act="famcriar">Criar grupo</button><button type="button" class="btn line" data-act="famentrar">Entrar com código</button></div>';
+      }
+      return h + msgHtml() + '</div>';
+    }
+    var M = FI.membros || [], adm = M.filter(function (m) { return m.admin; })[0], r = famResumo();
+    h += '<p>Grupo <b>' + esc(FI.nome) + '</b></p><div class="list">';
+    M.forEach(function (m) {
+      h += '<div class="row flat"><span class="txt"><span class="t">' + esc(m.apelido) + (m.eu ? ' (você)' : '') + '</span>' + (m.admin ? '<span class="soft small">cuida do grupo</span>' : '') + '</span>' +
+        (FI.admin && m.id ? '<button type="button" class="cbtn" data-act="famtira" data-id="' + esc(m.id) + '">Tirar</button>' : '') + '</div>';
+    });
+    h += '</div><p class="small">' + (r.precos ? 'A família trouxe <b>' + r.precos + ' preço' + (r.precos == 1 ? '' : 's') + '</b> em ' + r.produtos + ' produto' + (r.produtos == 1 ? '' : 's') + ' que você também compra. Eles aparecem como “visto pela família”.' :
+      M.length < 2 ? 'Convide alguém para começar a comparar.' : 'Ainda não há preços da família nos produtos que você compra. Eles aparecem quando alguém do grupo cadastra notas.') + '</p>';
+    if (FI.codigo) {
+      var txt = "Entre no meu grupo da família no De Olho no Carrinho: no app, vá até o fim da aba Mercados, no quadro Família, toque em Entrar com código e digite " + FI.codigo + " (vale até " + quando(FI.codigo_ate) + "). O grupo vê só os preços dos últimos 3 meses, sem saber quem comprou. Ainda não tem o app? " + "https://dionata2012-code.github.io/de-olho-no-carrinho-site/";
+      h += '<p>Código de convite: <b style="font-size:20px;letter-spacing:3px">' + esc(FI.codigo) + '</b><br><span class="soft small">vale até ' + esc(quando(FI.codigo_ate)) + '</span></p>' +
+        '<a class="btn line" href="https://wa.me/?text=' + encodeURIComponent(txt) + '">Mandar convite pelo WhatsApp</a>';
+    }
+    if (FI.admin) h += '<button type="button" class="btn line" data-act="famnovo">' + (FI.codigo ? 'Gerar código novo' : 'Gerar código de convite') + '</button>';
+    else if (!FI.codigo) h += '<p class="soft small">Para convidar alguém, peça um código a ' + esc(adm ? adm.apelido : "quem cuida do grupo") + '.</p>';
+    h += '<p class="soft small">' + PRIV + '</p>' + aviso2(M.length) + '<button type="button" class="btn line" data-act="famsair">Sair do grupo</button>';
+    return h + msgHtml() + '</div>';
+  }
+  var vm0 = vm;
+  vm = function () {
+    var h = vm0(), k = '<div class="card"><h3 style="margin:0">Seus dados</h3>', i = h.indexOf(k);
+    if (!N.length) return h;
+    return i >= 0 ? h.slice(0, i) + card() + h.slice(i) : h + card();
+  };
+  function val(id) { var e = document.getElementById(id); return e ? e.value.replace(/\s+/g, " ").trim() : ""; }
+  function rolar() { var c = document.getElementById("fam"); if (c && c.scrollIntoView) c.scrollIntoView({ block: "start" }); }
+  function feito(i, t) { FI = i || null; FM = ""; CONV = null; FMSG = t ? { t: t, k: "ok" } : null; BUSY = false; T = 0; render(); rolar(); atualizar(true); }
+  function falhou(e, r) { BUSY = false; FMSG = { t: erroTxt(e, r), k: "warn" }; render(); rolar(); }
+  var APEL = "";
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-act]"); if (!b) return;
+    var a = b.getAttribute("data-act"); if (a.indexOf("fam") !== 0) return;
+    if (BUSY) return;
+    if (a === "famcriar" || a === "famentrar") { FM = a === "famcriar" ? "criar" : "entrar"; FMSG = null; render(); var f = document.getElementById(FM === "criar" ? "fm_g" : "fm_c"); if (f) f.focus(); }
+    else if (a === "famcancel") { FM = ""; CONV = null; FMSG = null; render(); }
+    else if (a === "famcriarok") {
+      var g = val("fm_g"), ap = val("fm_a");
+      if (!g || !ap) { FMSG = { t: "Preencha o nome do grupo e o seu nome.", k: "warn" }; render(); document.getElementById("fm_g").value = g; document.getElementById("fm_a").value = ap; return; }
+      BUSY = true; appFamilia.criar(g, ap).then(function (i) { feito(i, "Grupo criado. Mande o código para a família."); }, function (e) { falhou(e); });
+    } else if (a === "famver") {
+      var c = val("fm_c").toUpperCase().replace(/[^A-Z0-9]/g, ""), ap2 = val("fm_a");
+      if (c.length !== 6 || !ap2) { FMSG = { t: "Digite o código de 6 letras e números e o seu nome.", k: "warn" }; render(); document.getElementById("fm_c").value = c; document.getElementById("fm_a").value = ap2; return; }
+      BUSY = true; APEL = ap2;
+      appFamilia.convite(c).then(function (r) {
+        BUSY = false; if (!r || r.erro) { falhou(null, r || { erro: "invalido" }); document.getElementById("fm_c").value = c; document.getElementById("fm_a").value = ap2; return; }
+        CONV = r; CONV.codigo = c; FM = "conv"; FMSG = null; render(); rolar();
+      }, function (e) { falhou(e); });
+    } else if (a === "famentrarok" && CONV) {
+      BUSY = true;
+      appFamilia.entrar(CONV.codigo, APEL).then(function (r) { if (!r || r.erro) { FM = "entrar"; falhou(null, r || {}); return; } feito(r, "Você entrou no grupo " + r.nome + "."); }, function (e) { falhou(e); });
+    } else if (a === "famnovo") {
+      BUSY = true; appFamilia.novoConvite().then(function (i) { feito(i, "Código novo gerado. O anterior deixou de valer."); }, function (e) { falhou(e); });
+    } else if (a === "famtira") {
+      if (b.getAttribute("data-ok") !== "1") { b.setAttribute("data-ok", "1"); b.textContent = "Tirar mesmo?"; return; }
+      BUSY = true; appFamilia.remover(b.getAttribute("data-id")).then(function (i) { feito(i, "Pessoa tirada do grupo. Os preços dela deixam de aparecer."); }, function (e) { falhou(e); });
+    } else if (a === "famsair") {
+      if (b.getAttribute("data-ok") !== "1") { b.setAttribute("data-ok", "1"); b.textContent = "Toque de novo para sair do grupo"; return; }
+      BUSY = true; appFamilia.sair().then(function () { FAM = []; feito(null, "Você saiu do grupo. Seus preços deixaram de aparecer para a família."); }, function (e) { falhou(e); });
+    }
+  });
+  (function primeiro() { if (!appUid()) { setTimeout(primeiro, 3000); return; } atualizar(FI === undefined || !T); })();
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) atualizar(false); });
+})();

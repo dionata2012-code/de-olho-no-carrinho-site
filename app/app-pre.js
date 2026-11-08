@@ -22,7 +22,7 @@ window.APP = true;
     lsSet(K_SES, JSON.stringify(SES));
     window.APP_EMAIL = SES.user.email;
   }
-  function limparLocal() { ["mn_v3", "mn_cfg", "mn_del"].forEach(lsDel); }
+  function limparLocal() { ["mn_v3", "mn_cfg", "mn_del", "mn_fam"].forEach(lsDel); }
 
   async function auth(path, body) {
     var r;
@@ -110,6 +110,20 @@ window.APP = true;
     if (!r.ok) throw { code: "unavailable" };
     return r.json();
   };
+  /* Grupo da família: tudo passa por funções do banco, que só entregam preços e produtos dos últimos 3 meses,
+     sem quem comprou. Erros de código e de grupo cheio voltam como {erro: "..."}. */
+  function rpc(nome, corpo) { return rest("POST", "rpc/" + nome, corpo || {}); }
+  window.appFamilia = {
+    info: function () { return rpc("familia_info"); },
+    criar: function (nome, apelido) { return rpc("familia_criar", { p_nome: nome, p_apelido: apelido }); },
+    convite: function (codigo) { return rpc("familia_convite", { p_codigo: codigo }); },
+    entrar: function (codigo, apelido) { return rpc("familia_entrar", { p_codigo: codigo, p_apelido: apelido }); },
+    sair: function () { return rpc("familia_sair"); },
+    novoConvite: function () { return rpc("familia_novo_convite"); },
+    remover: function (id) { return rpc("familia_remover", { p_user: id }); },
+    precos: function () { return rpc("familia_precos"); }
+  };
+  window.appUid = function () { return SES && SES.user ? SES.user.id : ""; };
   window.claude = { use: function (n) { return Promise.resolve({ db: db, user: user, downloads: downloads }[n] || null); } };
 
   function sair(expirou) {
