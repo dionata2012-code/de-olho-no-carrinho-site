@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nova senha · De Olho no Carrinho</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<header><div class="in"><span class="tile"><svg viewBox="0 0 100 100" width="29" height="29" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 22H20L29 66H75L83 34H24"/><path d="M37 50Q53 37 69 50Q53 63 37 50Z" stroke-width="6"/><circle cx="53" cy="50" r="6" fill="#fff" stroke="none"/><circle cx="34" cy="80" r="5.5"/><circle cx="70" cy="80" r="5.5"/></svg></span><a class="marca" href="./"><small>De Olho no</small><span>Carrinho</span></a></div></header>
+<main class="in">
+<h1>Criar uma senha nova</h1>
+<div class="card" id="caixa">
+<form id="f" hidden>
+<div style="display:flex;flex-direction:column;gap:12px">
+<label>Senha nova (pelo menos 6 letras ou números)<input type="password" id="s1" autocomplete="new-password" required></label>
+<label>Repita a senha nova<input type="password" id="s2" autocomplete="new-password" required></label>
+<button type="submit" id="ok">Salvar senha nova</button>
+</div>
+</form>
+<div id="msg" role="status"></div>
+</div>
+</main>
+<footer><div class="in"><div class="links"><a href="./">Início</a><a href="privacidade.html">Política de privacidade</a><a href="excluir-conta.html">Excluir conta</a></div><p>Contato: <a href="mailto:dionata2012@gmail.com">dionata2012@gmail.com</a></p></div></footer>
+<script>
+var SB="https://mcunapjixjgvwlsdpcjo.supabase.co",KEY="sb_publishable_GjNz-3rFxHtOK4DnlZ4o_A_TK7fIQFQ";
+function lerHash(){var h=new URLSearchParams((location.hash||"").replace(/^#/,"")),q=new URLSearchParams(location.search||"");
+var o={};["access_token","type","error","error_code","error_description"].forEach(function(k){o[k]=h.get(k)||q.get(k)||""});
+/* tira o token do endereço para ele não ficar no histórico */
+if(location.hash||location.search)history.replaceState(null,"",location.pathname);return o}
+function el(id){return document.getElementById(id)}
+function aviso(t,k){el("msg").innerHTML=t?'<div class="status '+(k||"")+'">'+t+'</div>':""}
+
+var P=lerHash();
+if(P.access_token&&P.type==="recovery"){el("f").hidden=false;el("s1").focus()}
+else if(P.error_code==="otp_expired"||P.error)aviso("Este link expirou ou já foi usado. No app, toque em <b>Esqueci a senha</b> para receber um link novo.","warn");
+else aviso("Abra esta página pelo link do e-mail de nova senha. Para pedir o e-mail, toque em <b>Esqueci a senha</b> na tela de entrada do app.","warn");
+el("f").addEventListener("submit",async function(ev){ev.preventDefault();
+var a=el("s1").value,b=el("s2").value;
+if(a.length<6){aviso("A senha precisa ter pelo menos 6 letras ou números.","warn");return}
+if(a!==b){aviso("As duas senhas não são iguais.","warn");return}
+el("ok").disabled=true;aviso("Salvando…");
+try{var r=await fetch(SB+"/auth/v1/user",{method:"PUT",headers:{apikey:KEY,Authorization:"Bearer "+P.access_token,"Content-Type":"application/json"},body:JSON.stringify({password:a})});
+var j={};try{j=await r.json()}catch(e){}
+if(r.ok){P.access_token="";el("f").hidden=true;aviso("Pronto! Sua senha foi trocada. Volte ao app e entre com a senha nova.","ok");return}
+var m=String(j.error_code||j.code||"")+" "+String(j.msg||j.message||"");
+if(/same_password/.test(m))aviso("A senha nova precisa ser diferente da antiga.","warn");
+else if(/weak_password|password/i.test(m)&&/short|weak|6/.test(m))aviso("Essa senha é fraca. Use pelo menos 6 letras ou números.","warn");
+else if(r.status===401||/expired|jwt/i.test(m)){el("f").hidden=true;aviso("Este link expirou. No app, toque em <b>Esqueci a senha</b> para receber um link novo.","warn")}
+else aviso("Não deu certo agora. Tente de novo em alguns minutos.","warn")}
+catch(e){aviso("Sem internet. Confira a conexão e tente de novo.","warn")}
+el("ok").disabled=false});
+</script>
+</body>
+</html>
