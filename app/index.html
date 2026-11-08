@@ -176,7 +176,7 @@ var CON=["Azul","Rosa","Laranja","Verde-água","Roxo","Verde-oliva","Verde","Ver
 var TAGS=["Compra do mês","Reposição","Promoção","Emergência"];
 var MESES=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
 var PORTAL="https://portalsped.fazenda.mg.gov.br/portalnfce/sistema/consultaarg.xhtml";
-var LIB={pdf:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",pdfw:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",qr:"https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"};
+var LIB={pdf:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",pdfw:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",qr:"https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js",zx:"https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"};
 var FORMATO='{"loja":"nome do mercado","cnpj":"00.000.000/0000-00","data":"AAAA-MM-DD","hora":"HH:MM","chave":"44 dígitos sem espaços ou vazio","total":0,"itens":[{"c":"código","n":"descrição","q":1,"u":"UN","p":0,"t":0}]}';
 var REGRAS=[
 "Regras:",
@@ -732,13 +732,17 @@ msg(resumoLeitura(tot0,fail?" "+fail+" foto(s) não puderam ser lidas: "+last:""
 /* leitura do QR code, do PDF e do texto do portal */
 var LOADED={};
 function loadScript(url,global){if(window[global])return Promise.resolve();if(LOADED[url])return LOADED[url];LOADED[url]=new Promise(function(res,rej){var s=document.createElement("script");s.src=url;s.onload=function(){res()};s.onerror=function(){delete LOADED[url];rej({code:"lib"})};document.head.appendChild(s)});return LOADED[url]}
-async function decodeQR(f){var c=await toCanvas(f,1600);
+async function decodeQR(f){var c=await toCanvas(f,2400);try{await loadScript(LIB.zx,"ZXing")}catch(e){}
 if("BarcodeDetector" in window){try{var det=new BarcodeDetector({formats:["qr_code"]}),rs=await det.detect(c);if(rs&&rs[0]&&rs[0].rawValue)return rs[0].rawValue}catch(e){}}
 await loadScript(LIB.qr,"jsQR");return qrNoCanvas(c)}
 /* O QR do cupom costuma ser pequeno na foto: tenta a foto inteira e depois recortes do centro, ampliados. */
-function qrNoCanvas(c){var tent=[[1,0],[.7,900],[.5,800],[.35,700],[1,900]];for(var i=0;i<tent.length;i++){var fr=tent[i][0],sz=tent[i][1],w=c.width,h=c.height,cw=Math.round(w*fr),ch=Math.round(h*fr),k=document.createElement("canvas");
+function qrNoCanvas(c){var tent=[[1,0],[.7,1000],[.5,900],[.35,800],[1,1200]];for(var i=0;i<tent.length;i++){var fr=tent[i][0],sz=tent[i][1],w=c.width,h=c.height,cw=Math.round(w*fr),ch=Math.round(h*fr),k=document.createElement("canvas");
 if(fr==1&&!sz){k=c}else{var sc=sz?Math.min(sz/Math.max(cw,ch),3):1;k.width=Math.round(cw*sc);k.height=Math.round(ch*sc);k.getContext("2d").drawImage(c,(w-cw)/2,(h-ch)/2,cw,ch,0,0,k.width,k.height)}
-var d=k.getContext("2d").getImageData(0,0,k.width,k.height),r=window.jsQR(d.data,k.width,k.height,{inversionAttempts:"attemptBoth"});if(r&&r.data)return r.data}return""}
+var d=k.getContext("2d").getImageData(0,0,k.width,k.height),r=qrDecode(d,true);if(r)return r}return""}
+/* Dois leitores: jsQR e, quando carregado, o ZXing (melhor com QR denso e papel térmico desbotado). */
+function qrDecode(d,forte){var r=window.jsQR?window.jsQR(d.data,d.width,d.height,{inversionAttempts:forte?"attemptBoth":"dontInvert"}):null;if(r&&r.data)return r.data;
+var Z=window.ZXing;if(!Z||!Z.QRCodeReader)return"";try{var px=d.data,n=d.width*d.height,g=new Uint8ClampedArray(n);for(var i=0,j=0;i<n;i++,j+=4)g[i]=(px[j]*77+px[j+1]*150+px[j+2]*29)>>8;
+var hints=new Map();hints.set(Z.DecodeHintType.TRY_HARDER,true);var res=new Z.QRCodeReader().decode(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.RGBLuminanceSource(g,d.width,d.height))),hints);return res&&res.getText?res.getText():""}catch(e){return""}}
 function aplicarQR(t){var m=dig((String(t).match(/p=([\d|]+)/)||[])[1]||t),ch="";for(var i=0;i+44<=m.length;i++){if(chaveOk(m.slice(i,i+44))){ch=m.slice(i,i+44);break}}
 if(!ch){msg("Li o QR code, mas não encontrei uma chave de acesso válida nele. Digite a chave impressa na nota.","warn");return false}
 if(!DR)DR=blank();DR.ck=ch;if(!DR.chave)DR.chave=ch;render();msg("QR code lido. Siga os passos abaixo.","ok");return true}
@@ -749,11 +753,12 @@ function camFechar(){if(CAMS){CAMS.getTracks().forEach(function(x){x.stop()});CA
 async function camAbrir(){camFechar();var o=document.createElement("div");o.id="qrcam";o.className="camov";o.setAttribute("role","dialog");o.setAttribute("aria-label","Ler QR code com a câmera");
 o.innerHTML='<p>Aponte a câmera para o QR code do cupom</p><div class="cv"><video playsinline muted autoplay></video><div class="mira"></div></div><p class="small" id="qrcam_m" style="opacity:.8">Deixe o QR dentro do quadrado, com boa luz.</p><div class="btns"><button type="button" class="btn line" data-act="qrcamfoto">Usar uma foto</button><button type="button" class="btn" data-act="qrcamfechar">Cancelar</button></div>';
 document.body.appendChild(o);var v=o.querySelector("video");
-try{await loadScript(LIB.qr,"jsQR");CAMS=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:1280}},audio:false});v.srcObject=CAMS;await v.play()}
+try{await loadScript(LIB.qr,"jsQR");loadScript(LIB.zx,"ZXing").catch(function(){});CAMS=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}},audio:false});v.srcObject=CAMS;await v.play()}
 catch(e){camFechar();msg(e&&e.code=="lib"?"Não consegui carregar o leitor de QR code. Digite a chave impressa na nota.":"Não consegui abrir a câmera. Permita o uso da câmera para este site ou use “Usar uma foto”.","warn");return}
-var k=document.createElement("canvas"),n=0,loop=function(){if(!CAMS)return;var w=v.videoWidth,h=v.videoHeight;if(w&&h){var lado=Math.min(w,h)*.8,sz=Math.min(720,lado);k.width=k.height=Math.round(sz);var x=k.getContext("2d");x.drawImage(v,(w-lado)/2,(h-lado)/2,lado,lado,0,0,k.width,k.height);
-var d=x.getImageData(0,0,k.width,k.height),r=window.jsQR(d.data,k.width,k.height,{inversionAttempts:(n++%3==2)?"attemptBoth":"dontInvert"});if(r&&r.data){var txt=r.data;camFechar();if(navigator.vibrate)try{navigator.vibrate(60)}catch(e){}aplicarQR(txt);return}}
-CAMT=setTimeout(loop,150)};loop()}
+var k=document.createElement("canvas"),n=0,t0=Date.now(),FR=[.8,.55,.4],loop=function(){if(!CAMS)return;var w=v.videoWidth,h=v.videoHeight;if(w&&h){var fr=FR[n%FR.length],lado=Math.min(w,h)*fr,sz=Math.round(Math.min(1000,lado));k.width=k.height=sz;var x=k.getContext("2d");x.drawImage(v,(w-lado)/2,(h-lado)/2,lado,lado,0,0,sz,sz);
+var d=x.getImageData(0,0,sz,sz),r=qrDecode(d,n%4==3);n++;if(r){camFechar();if(navigator.vibrate)try{navigator.vibrate(60)}catch(e){}aplicarQR(r);return}
+if(Date.now()-t0>7000){var mm=document.getElementById("qrcam_m");if(mm&&!mm.getAttribute("data-dica")){mm.setAttribute("data-dica","1");mm.textContent="Aproxime ou afaste o celular devagar até o QR ficar nítido. Se não ler, toque em “Usar uma foto” ou digite a chave."}}}
+CAMT=setTimeout(loop,180)};loop()}
 async function readQR(inp){var f=inp.files&&inp.files[0];inp.value="";if(!f)return;msg("Lendo o QR code…","busy");
 try{var t=await decodeQR(f);if(!t){msg("Não encontrei um QR code na foto. Tente outra foto, mais perto e reta, ou digite a chave.","warn");return}aplicarQR(t)}
 catch(e){msg(e&&e.code=="lib"?"Não consegui carregar o leitor de QR code. Digite a chave impressa na nota.":"Não consegui ler o QR code. Digite a chave impressa na nota.","warn")}}
