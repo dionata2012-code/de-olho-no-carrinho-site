@@ -21,6 +21,9 @@
     QRU = mq ? { ck: ch, url: "https://portalsped.fazenda.mg.gov.br" + mq[1] } : null;
     render(); msg("QR code lido. Agora toque em Consultar no portal.", "ok");
   };
+  /* Código de barras lido pelo leitor do Google (Android). */
+  window.appCodigo = function (t) { if (t) bcAbrir(t); };
+  window.appCodigoErro = function () { BC = { ean: "", cands: [], busy: false }; V = "bc"; render(); toast("Não consegui abrir o leitor. Digite os números do código."); };
   window.appQRerro = function () { if (V === "new") msg("Não consegui abrir o leitor de QR code neste celular. Digite a chave impressa na nota.", "warn"); };
   /* A tela do portal manda {a: texto como aparece na tela, b: texto de cada pedaço da página, u: endereço}.
      Tenta ler os produtos de cada um; se nenhum servir, guarda o texto na conta (CFG.diag) para análise. */
@@ -41,7 +44,7 @@
   window.appArquivo = function (r) { var e = document.getElementById("cm"); if (e) e.textContent = r === "ok" ? "Escolha onde salvar a planilha ou com quem compartilhar." : "Não consegui gerar a planilha."; };
   window.appVoltar = function () {
     if (document.getElementById("login")) return false;
-    if (V === "pd" || V === "cm") { go("p"); return true; }
+    if (V === "pd" || V === "cm" || V === "bc") { go("p"); return true; }
     if (V === "cmd") { go("cm"); return true; }
     if (V === "nd") { go("n"); return true; }
     if (V !== "m") { go("m"); return true; }

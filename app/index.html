@@ -149,6 +149,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible,
 .camov .cv{position:relative;width:min(92vw,420px);aspect-ratio:1;border-radius:18px;overflow:hidden;background:#111}
 .camov video{width:100%;height:100%;object-fit:cover;display:block}
 .camov .mira{position:absolute;inset:15%;border:3px solid #fff;border-radius:14px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.camov .mira.bc{inset:34% 6%}
 .camov p{color:#fff;font-weight:600;text-align:center;margin:0}
 .camov .btns{width:min(92vw,420px)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:9;background:var(--ink);color:#fff;font:600 15px var(--body);padding:12px 18px;border-radius:14px;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(13,26,18,.25)}
@@ -201,7 +202,7 @@ var ST={},G={},OKEY={},SUG=[],IX={},IXN={},IXMIN=5,PAR={},BI={},ALIAS={},DB=null
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function sv(){lsSet(KEY,JSON.stringify(N))}
-function blankCfg(){return{cores:{},etiquetas:[],nomes:{},juntar:[],nao:[],lista:[],apelidos:{},sugIA:[],tipos:{},saltos:{},diag:{},upd:0}}
+function blankCfg(){return{cores:{},etiquetas:[],nomes:{},juntar:[],nao:[],lista:[],apelidos:{},sugIA:[],tipos:{},saltos:{},diag:{},cods:{},upd:0}}
 function loadCfg(o){var c=blankCfg();if(o&&typeof o=="object"){Object.keys(c).forEach(function(k){if(k!=="upd"&&o[k]!=null&&Array.isArray(o[k])===Array.isArray(c[k])&&typeof o[k]==="object")c[k]=o[k]});c.upd=+o.upd||0}return c}
 function valid(n){return n&&typeof n.id=="string"&&n.loja&&/^\d{4}-\d{2}-\d{2}$/.test(n.data||"")&&Array.isArray(n.itens)}
 try{N=JSON.parse(lsGet(KEY)||"[]")}catch(e){N=[]}
@@ -426,6 +427,43 @@ CMPL.sort(function(a,b){return(b.R.length>0)-(a.R.length>0)||b.f-a.f||a.lab.loca
 function tipoKey(lb){var n0=norm(lb),k=Object.keys(TYL).filter(function(t){return norm(TYL[t])==n0||norm(t)==n0})[0];if(k)return k;k=Object.keys(TL).filter(function(t){return norm(TL[t])==n0||norm(t)==n0})[0];return k||"u:"+n0}
 function cmRow(c,r,i,b){var pkg=r.kg?"R$ "+R2(r.p)+" o kg":"R$ "+R2(r.p)+" · "+fq(r.q,c.b),df=b&&i>0?r.pe-b.pe:0;
 return'<button type="button" class="row" data-act="prod" data-k="'+esc(r.g.k)+'"><span class="txt"><span class="t">'+(i>=0?(i+1)+'º · ':'')+esc(r.g.nm)+'</span><span class="soft small"><span class="dot" style="background:'+storeColor(r.s)+';margin-right:6px;width:9px;height:9px"></span>'+esc(sn(r.s))+' · '+dl(r.d)+'</span><span class="soft small">'+pkg+'</span></span><span class="r">R$ '+R2(r.pe)+(r.old?'<span class="pill gray">referência</span>':i==0&&c.R.length>1?'<span class="pill ok">mais em conta</span>':df>=.005?'<span class="up small">+R$ '+R2(df)+'</span>':i>0?'<span class="soft small">mesmo preço</span>':'')+'</span></button>'}
+/* ---------- Código de barras: quanto paguei da última vez ----------
+   O portal de MG mostra o código interno do mercado, não o código de barras. Então o app aprende: quando um código
+   não está nas notas, sugere produtos parecidos (pelo nome da base pública Open Food Facts) e grava a ligação na conta. */
+var BC=null,BCQ="";
+function eanNorm(c){c=dig(c);if(c.length==12)c="0"+c;var i13=inner13(c);if(i13)return i13;if(c.length==14&&c[0]=="0")c=c.slice(1);return eanOk(c)?c:""}
+function bcProd(e){var b="e:"+e;if(PAR[b]!==undefined&&G[fnd(b)])return G[fnd(b)];var m=(CFG.cods||{})[e];if(m&&PAR[m]!==undefined&&G[fnd(m)])return G[fnd(m)];return null}
+function bcBtn(){return'<button type="button" class="row" data-act="bc"><span class="txt"><span class="t">Consultar pelo código de barras</span><span class="soft small">Leia o código do produto na prateleira e veja quanto você pagou da última vez</span></span><span class="r" aria-hidden="true" style="font-size:22px">›</span></button>'}
+function bcAbrir(e){var e2=eanNorm(e);if(!e2){BC={ean:"",cands:[],busy:false,erro:dig(e)};V="bc";render();return}
+var g=bcProd(e2);BC={ean:e2,k:g?g.k:null,nome:"",cands:[],busy:!g};BCQ="";if(g){PK=g.k;V="pd";render();window.scrollTo(0,0);return}V="bc";render();window.scrollTo(0,0);bcNome(e2)}
+async function bcNome(e){try{var c=new AbortController(),tm=setTimeout(function(){c.abort()},8000);
+var r=await fetch("https://world.openfoodfacts.org/api/v2/product/"+e+".json?fields=product_name,product_name_pt,brands,quantity",{signal:c.signal});clearTimeout(tm);
+var j=await r.json(),p=j&&j.product||{},nm=[p.product_name_pt||p.product_name||"",p.brands||"",p.quantity||""].map(function(x){return String(x).split(",")[0].trim()}).filter(Boolean).join(" ").slice(0,120);
+if(BC&&BC.ean===e){BC.nome=nm;BC.cands=bcCands(nm);BC.busy=false;if(V=="bc")render()}}
+catch(x){if(BC&&BC.ean===e){BC.busy=false;BC.cands=[];if(V=="bc")render()}}}
+function bcCands(nm){if(!nm)return[];var tk=toks(nm),tn=tk.n.split(",").filter(Boolean),res=[];
+Object.keys(G).forEach(function(k){var g=G[k],t2=toks(g.nm),n2=t2.n.split(","),sc=0;
+tk.a.forEach(function(a){if(t2.a.some(function(b){return b===a||(a.length>=4&&b.indexOf(a)===0)||(b.length>=4&&a.indexOf(b)===0)}))sc+=2});
+tn.forEach(function(n){if(n2.indexOf(n)>=0)sc+=1});if(sc>=3)res.push([sc,g])});
+return res.sort(function(a,b){return b[0]-a[0]||b[1].occ.length-a[1].occ.length}).slice(0,6).map(function(x){return x[1]})}
+function bcRow(g){return'<button type="button" class="row" data-act="bcliga" data-k="'+esc(g.k)+'"><span class="txt"><span class="t">'+esc(g.nm)+'</span><span class="soft small">'+g.occ.length+' compra'+(g.occ.length==1?'':'s')+' · última R$ '+R2(g.last.pu)+' em '+dl(g.last.n.data)+'</span></span></button>'}
+function bcl(){var q=norm(BCQ);if(q.length<2)return"";var L=Object.keys(G).map(function(k){return G[k]}).filter(function(g){return norm(g.nm).indexOf(q)>=0}).sort(function(a,b){return b.occ.length-a.occ.length}).slice(0,8);
+return L.length?L.map(bcRow).join(""):'<p class="soft small">Nenhum produto com esse nome no seu histórico.</p>'}
+function vbc(){var h='<button type="button" class="link back" data-act="tab" data-v="p">‹ Voltar para produtos</button><div class="card">';
+if(!BC||!BC.ean){h+='<h2 style="margin:0">Consultar pelo código de barras</h2>'+(BC&&BC.erro?'<div class="status warn">O código '+esc(BC.erro)+' não parece um código de barras válido. Confira os números.</div>':'')+'<label class="f">Números do código de barras<input type="text" id="bcm" inputmode="numeric" autocomplete="off" placeholder="7891234567890"></label><button type="button" class="btn" data-act="bcmanual">Consultar</button></div>';return h}
+h+='<h2 style="margin:0">Código '+esc(BC.ean)+'</h2>';
+if(BC.busy)h+='<p class="soft"><span class="spin" aria-hidden="true"></span>Procurando o nome deste produto…</p>';
+else{h+='<p>Este código ainda não está ligado a um produto do seu histórico.'+(BC.nome?' Na base pública ele aparece como <b>'+esc(BC.nome)+'</b>.':' Não achei o nome dele na base pública.')+'</p>';
+if(BC.cands.length)h+='<p class="soft small">É um destes? Toque para ligar. O app guarda a ligação na sua conta e da próxima vez abre direto.</p><div class="list">'+BC.cands.map(bcRow).join("")+'</div>';
+h+='<label class="f">'+(BC.cands.length?'Ou procure':'Procure')+' o produto pelo nome<input type="search" id="bcq" data-in="bcq" value="'+esc(BCQ)+'" autocomplete="off" placeholder="ex.: arroz camil"></label><div class="list" id="bcl">'+bcl()+'</div>'}
+return h+'<p class="soft small">Se você nunca comprou este produto, ele aparece aqui depois que você cadastrar uma nota com ele.</p></div>'}
+/* No produto aberto pelo código: comparar com o preço da prateleira. */
+function bcCard(g){if(!BC||BC.k!==g.k)return"";var un=g.u&&/kg/i.test(g.u)?" por kg":"";
+return'<div class="card" style="border-color:var(--acc)"><h3 style="margin:0">Preço na prateleira</h3><p class="soft small">Código '+esc(BC.ean)+'. Digite o preço que você está vendo agora'+un+' para comparar com as suas compras.</p><input type="text" id="bcp" data-in="bcp" inputmode="decimal" placeholder="R$" autocomplete="off"><div id="bcr" role="status"></div>'+((CFG.cods||{})[BC.ean]?'<button type="button" class="link" data-act="bcdesliga">Não é este produto</button>':'')+'</div>'}
+function bcCompara(v){var g=G[PK];if(!g||!(v>0))return"";var l=g.last,b=cheapest(g),f=function(a,ref,txt){var d=a-ref,pc0=ref>0?Math.abs(d)/ref*100:0;return Math.abs(d)<.005?'<p>Igual '+txt+'.</p>':'<p><b class="'+(d>0?'up':'down')+'">R$ '+R2(Math.abs(d))+' ('+pc0.toFixed(0)+'%) '+(d>0?'mais caro':'mais barato')+'</b> '+txt+'.</p>'};
+var h=f(v,l.pu,'que a sua última compra (R$ '+R2(l.pu)+' no '+esc(sn(l.s))+' em '+dl(l.n.data)+')');
+if(b&&(b.s!==l.s||Math.abs(b.p-l.pu)>.005))h+=f(v,b.p,'que o mais barato '+(b.old?'que você já pagou':'dos últimos 3 meses')+' (R$ '+R2(b.p)+' no '+esc(sn(b.s))+' em '+dl(b.d)+')');
+return'<div class="status" style="display:flex;flex-direction:column;gap:6px">'+h+'</div>'}
 function cmpBtn(){var n=CMPL.length;if(!n)return"";
 return'<button type="button" class="row" data-act="tab" data-v="cm"><span class="txt"><span class="t">Comparar marcas</span><span class="soft small">'+n+' tipo'+(n==1?'':'s')+' de produto com mais de uma marca ou opção no seu histórico</span></span><span class="r" aria-hidden="true" style="font-size:22px">›</span></button>'}
 function vcm(){var h='<button type="button" class="link back" data-act="tab" data-v="p">‹ Voltar para produtos</button><div class="card"><h2 style="margin:0">Comparar marcas</h2><p class="soft small">Produtos do mesmo tipo, de marcas diferentes, comparados pelo preço no mesmo tamanho. Vale o último preço em cada mercado nos últimos 3 meses. Preços mais antigos aparecem só como referência.</p></div>';
@@ -477,8 +515,8 @@ Object.keys(ac).forEach(function(s){IXN[s]=ac[s].length;if(ac[s].length>=IXMIN){
 function go(v){V=v;SEL=null;PK=null;CONF=null;EDIT=null;ASK=null;PICK=null;JOIN=false;RENAME=false;NEWTAG=false;APL=null;SELM=false;SELS={};TPE=false;
 if(v=="new"&&!DR){DR=blank();THUMBS=[];MSG={t:"",k:""};MODE=window.APP?"chave":"foto"}render();window.scrollTo(0,0)}
 function render(){comp();
-["m","n","p","l","new"].forEach(function(x){document.getElementById("n_"+x).setAttribute("aria-pressed",String(V==x||((V=="pd"||V=="cm"||V=="cmd")&&x=="p")||(V=="nd"&&x=="n")))});
-document.getElementById("app").innerHTML=({m:vm,n:vn,nd:vnd,p:vp,pd:vpd,cm:vcm,cmd:vcmd,l:vl,new:vnew})[V]();
+["m","n","p","l","new"].forEach(function(x){document.getElementById("n_"+x).setAttribute("aria-pressed",String(V==x||((V=="pd"||V=="cm"||V=="cmd"||V=="bc")&&x=="p")||(V=="nd"&&x=="n")))});
+document.getElementById("app").innerHTML=({m:vm,n:vn,nd:vnd,p:vp,pd:vpd,cm:vcm,cmd:vcmd,bc:vbc,l:vl,new:vnew})[V]();
 if(V=="new"&&MODE=="foto")checkAI()}
 function empty(t){return'<div class="card"><h2>'+t+'</h2><p class="soft">Cadastre a primeira nota de compra para começar. Dá para usar '+(window.APP?'o QR code da nota, o PDF da consulta':'a foto do cupom, a chave de acesso')+' ou digitar os itens.</p><button type="button" class="btn" data-act="tab" data-v="new">Cadastrar nota</button>'+(window.APP?'<button type="button" class="btn line" data-act="demo">Ver como funciona, com notas de exemplo</button><p class="soft small">Conta: '+esc(window.APP_EMAIL||'')+'</p><button type="button" class="btn line" data-act="sair">Sair da conta</button><button type="button" class="btn danger" data-act="excluirconta">Excluir minha conta</button>'+(window.appRodape?appRodape():'')+'':'')+'</div>'}
 
@@ -543,7 +581,13 @@ function tagPills(n){return(n.tags&&n.tags.length)?'<span class="pills">'+n.tags
 function tagEditor(tags,act){var h='<div class="chips">';allTags().forEach(function(t){h+='<button type="button" class="chip tag" aria-pressed="'+(tags.indexOf(t)>=0)+'" data-act="'+act+'" data-t="'+esc(t)+'">'+esc(t)+'</button>'});
 h+=NEWTAG?'</div><div class="two"><label class="f">Nova etiqueta<input type="text" id="nt" maxlength="30" autocomplete="off"></label></div><div class="btns"><button type="button" class="btn sm" data-act="addtag" data-a="'+act+'">Criar etiqueta</button><button type="button" class="btn sm line" data-act="notag">Cancelar</button></div>':'<button type="button" class="chip" data-act="newtag">+ Nova etiqueta</button></div>';return h}
 var PEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/></svg>';
-function edForm(it){return'<div class="ed"><label class="f">Nome do produto<input type="text" id="ed_n" value="'+esc(it.n)+'" autocomplete="off"></label><div class="two"><label class="f">Quantidade<input type="text" inputmode="decimal" id="ed_q" value="'+qfmt(it.q)+'"></label><label class="f">Preço unitário (R$)<input type="text" inputmode="decimal" id="ed_p" value="'+R2(it.p)+'"></label></div>'+(/kg/i.test(it.u||"")?'':'<label class="f">Unidades na embalagem<input type="text" inputmode="numeric" id="ed_x" value="'+emb(it)+'" style="max-width:140px"></label><p class="soft small">Se for caixa ou fardo, diga quantas unidades vinham (ex.: 12). O site compara pelo preço de cada unidade.</p>')+'<p class="soft small">O total do item é recalculado: quantidade × preço.</p><div class="btns"><button type="button" class="btn sm" data-act="edsave">Salvar item</button><button type="button" class="btn sm line" data-act="edcancel">Cancelar</button></div></div>'}
+/* Desconto do item: guardado como diferença entre quantidade × preço e o total pago. */
+function descVal(it){var d=r2(num(it.q)*num(it.p)-num(it.t));return d>.009?d:0}
+function descTxt(it){var d=descVal(it);return d?' − R$ '+R2(d)+' ('+(d/(num(it.q)*num(it.p))*100).toFixed(2).replace(".",",")+'%)':''}
+function edDesc(it){var d=descVal(it);return'<div class="two"><label class="f">Desconto<input type="text" inputmode="decimal" id="ed_d" value="'+(d?R2(d):'')+'" placeholder="0" data-in="edcalc"></label><label class="f">Tipo<select id="ed_dt" data-in="edcalc"><option value="r">R$</option><option value="p">%</option></select></label></div><p class="small" id="ed_tot" role="status">'+edTotTxt(num(it.q),num(it.p),d,"r")+'</p>'}
+function edDescCalc(q,p,d,tp){var bruto=q*p,dv=tp=="p"?bruto*d/100:d;return{bruto:bruto,dv:r2(dv),t:r2(bruto-dv)}}
+function edTotTxt(q,p,d,tp){if(!(q>0)||!(p>0))return"";var c=edDescCalc(q,p,d||0,tp);if(c.dv<0||c.dv>=c.bruto)return'<span class="up">O desconto precisa ser menor que R$ '+R2(c.bruto)+'.</span>';return'Total pago: <b>R$ '+R2(c.t)+'</b>'+(c.dv>0?' · desconto de R$ '+R2(c.dv)+' ('+(c.dv/c.bruto*100).toFixed(2).replace(".",",")+'%)':'')}
+function edForm(it){return'<div class="ed"><label class="f">Nome do produto<input type="text" id="ed_n" value="'+esc(it.n)+'" autocomplete="off"></label><div class="two"><label class="f">Quantidade<input type="text" inputmode="decimal" id="ed_q" value="'+qfmt(it.q)+'" data-in="edcalc"></label><label class="f">Preço unitário (R$)<input type="text" inputmode="decimal" id="ed_p" value="'+R2(it.p)+'" data-in="edcalc"></label></div>'+edDesc(it)+(/kg/i.test(it.u||"")?'':'<label class="f">Unidades na embalagem<input type="text" inputmode="numeric" id="ed_x" value="'+emb(it)+'" style="max-width:140px"></label><p class="soft small">Se for caixa ou fardo, diga quantas unidades vinham (ex.: 12). O site compara pelo preço de cada unidade.</p>')+'<p class="soft small">Total pago = quantidade × preço − desconto. Se não houve desconto, deixe o campo vazio.</p><div class="btns"><button type="button" class="btn sm" data-act="edsave">Salvar item</button><button type="button" class="btn sm line" data-act="edcancel">Cancelar</button></div></div>'}
 function vnd(){var n=byId(SEL);if(!n){V="n";return vn()}
 var s=sk(n),h='<button type="button" class="link back" data-act="tab" data-v="n">‹ Voltar para notas</button><div class="card"><div class="row flat"><span class="main"><span class="dot" style="background:'+storeColor(s)+'"></span><span class="t">'+esc(sn(s))+'</span></span></div><p class="soft small">'+esc(n.loja)+'</p><p class="soft">'+dl(n.data)+(n.hora?" às "+esc(n.hora):"")+(n.cnpj?" · CNPJ "+esc(n.cnpj):"")+'</p>'+(n.chave?'<p class="key">Chave '+esc(fmtChave(n.chave))+'</p>':'')+'<p class="soft small">Etiquetas</p>'+tagEditor(n.tags||[],"ntag")+'</div>';
 var al=[];n.itens.forEach(function(it,i){var g=gOf(n,i);if(!g)return;var o=g.occ.filter(function(o){return o.n===n&&o.i===i})[0];if(o&&o.ch>1.1&&!o.sus)al.push(esc(g.nm)+" ("+pc(o.ch)+")")});
@@ -553,14 +597,14 @@ h+='<div class="list">';
 n.itens.forEach(function(it,i){var g=gOf(n,i),t="";
 if(EDIT&&EDIT.w=="nd"&&EDIT.i===i){h+=edForm(it);return}
 var oc=g?g.occ.filter(function(x){return x.n===n&&x.i===i})[0]:null;if(oc&&oc.cq)t='<span class="pill warn">caixa a conferir</span>';else if(g&&Object.keys(g.s).length>1){var q=up(it)/gAvg(g);t=q>1.04?'<span class="pill warn">acima da média</span>':q<.96?'<span class="pill ok">abaixo da média</span>':'<span class="pill gray">na média</span>'}
-h+='<div class="irow"><button type="button" class="row" data-act="prod" data-k="'+esc(g?g.k:"")+'"><span class="txt"><span class="t">'+esc(it.n)+'</span><span class="soft small">'+qfmt(it.q)+' '+esc(it.u)+' × R$ '+R2(it.p)+embTxt(it)+'</span></span><span class="r">R$ '+R2(it.t)+t+'</span></button><button type="button" class="ib" aria-label="Editar '+esc(it.n)+'" data-act="ed" data-i="'+i+'">'+PEN+'</button></div>'});
+h+='<div class="irow"><button type="button" class="row" data-act="prod" data-k="'+esc(g?g.k:"")+'"><span class="txt"><span class="t">'+esc(it.n)+'</span><span class="soft small">'+qfmt(it.q)+' '+esc(it.u)+' × R$ '+R2(it.p)+descTxt(it)+embTxt(it)+'</span></span><span class="r">R$ '+R2(it.t)+t+'</span></button><button type="button" class="ib" aria-label="Editar '+esc(it.n)+'" data-act="ed" data-i="'+i+'">'+PEN+'</button></div>'});
 var sm=tot(n),ok=n.total>0&&Math.abs(sm-n.total)<.015;
 h+='</div><div class="card"><div class="row flat"><span class="t">Soma dos itens</span><span class="r">R$ '+R2(sm)+'</span></div><div class="status '+(n.total>0?(ok?"ok":"warn"):"")+'">'+(n.total>0?(ok?"Conferido: a soma bate com o total da nota (R$ "+R2(n.total)+").":"O total da nota é R$ "+R2(n.total)+". A soma dos itens não bate: falta ou sobra R$ "+R2(Math.abs(n.total-sm))+"."):"Esta nota não tem total para conferir.")+'</div></div>';
 h+=CONF=="del"?'<div class="card"><p><b>Excluir esta nota?</b> Isso não pode ser desfeito.</p><div class="btns"><button type="button" class="btn danger solid" data-act="del2" data-id="'+esc(n.id)+'">Excluir</button><button type="button" class="btn line" data-act="noconf">Cancelar</button></div></div>':'<div class="btns"><button type="button" class="btn line" data-act="edit" data-id="'+esc(n.id)+'">Editar nota</button><button type="button" class="btn danger" data-act="del">Excluir nota</button></div>';
 return h}
 
 /* ---------- Produtos ---------- */
-function vp(){if(!N.length)return empty("Seus produtos aparecem aqui");var h=cxCard(CXQ)+cmpBtn();
+function vp(){if(!N.length)return empty("Seus produtos aparecem aqui");var h=cxCard(CXQ)+bcBtn()+cmpBtn();
 if(SUG.length){h+='<div class="card"><h3 style="margin:0">Possíveis produtos repetidos ('+SUG.length+')</h3><p class="soft small">Encontrei itens que parecem ser o mesmo produto escrito de jeitos diferentes. Junte os que forem iguais.</p><div class="list">';
 (SUGALL?SUG:SUG.slice(0,4)).forEach(function(x,i){var a=G[x.ra],b=G[x.rb];h+='<div class="item" style="flex-direction:column;align-items:stretch"><p><b>'+esc(a.nm)+'</b><br><span class="soft small">'+(a.code?"código "+a.code+" · ":"")+a.occ.length+' compra(s)</span></p><p><b>'+esc(b.nm)+'</b><br><span class="soft small">'+(b.code?"código "+b.code+" · ":"")+b.occ.length+' compra(s) · '+esc(x.why)+'</span></p><div class="btns"><button type="button" class="btn sm" data-act="sjoin" data-i="'+i+'">Juntar</button><button type="button" class="btn sm line" data-act="sno" data-i="'+i+'">São diferentes</button></div></div>'});
 h+='</div>'+(SUG.length>4?'<button type="button" class="link" data-act="sugall">'+(SUGALL?"Mostrar menos":"Ver todas as "+SUG.length)+'</button>':'')+'</div>'}
@@ -582,7 +626,7 @@ h+='<button type="button" class="row"'+(on?' style="border-color:var(--acc);back
 return c?h:'<div class="card"><p class="soft">Nenhum produto encontrado.</p></div>'}
 function vpd(){var g=G[PK];if(!g){V="p";return vp()}
 var L=g.occ,Lk=g.ok,f=Lk[0].pu,l=Lk[Lk.length-1],avgp=Lk.reduce(function(t,o){return t+o.pu},0)/Lk.length,ss=Object.keys(g.s).sort(function(a,b){return avg(g,a)-avg(g,b)}),mn=avg(g,ss[0]),un=g.u&&/kg/i.test(g.u)?"kg":"unidade",lp=l.pu;
-var h='<button type="button" class="link back" data-act="tab" data-v="p">‹ Voltar para produtos</button>'+cxCard(CXQ.filter(function(c){return c.g===g}),1)+'<div class="card">';
+var h='<button type="button" class="link back" data-act="tab" data-v="p">‹ Voltar para produtos</button>'+bcCard(g)+cxCard(CXQ.filter(function(c){return c.g===g}),1)+'<div class="card">';
 h+=RENAME?'<div class="ed"><label class="f">Nome do produto em todas as notas<input type="text" id="rn" value="'+esc(g.nm)+'" autocomplete="off"></label><div class="btns"><button type="button" class="btn sm" data-act="rnsave">Salvar nome</button><button type="button" class="btn sm line" data-act="rncancel">Cancelar</button></div></div>':'<div class="row flat"><h2 style="margin:0">'+esc(g.nm)+'</h2><button type="button" class="ib" aria-label="Renomear produto" data-act="rename">'+PEN+'</button></div>';
 h+='<p class="soft small">'+(g.code?"Código "+esc(g.code)+" · ":"")+'preço por '+un+' · '+L.length+' compra'+(L.length==1?"":"s")+'</p>'+(g.prev?upTag(g.ch):"")+chart(Lk,ss)+'<div class="k3"><div><b>R$ '+R2(lp)+'</b><span>última</span></div><div><b>R$ '+R2(avgp)+'</b><span>média</span></div><div><b class="'+(lp>f?"up":lp<f?"down":"")+'">'+pc(f?lp/f:1)+'</b><span>desde a 1ª</span></div></div></div>';
 h+=cmpCard(g);
@@ -691,7 +735,7 @@ function mkOpts(){var seen={},h="";buildAlias(N);N.forEach(function(n){var s=sk(
 function thumbs(){return THUMBS.map(function(u,i){return'<img src="'+u+'" alt="Foto '+(i+1)+' da nota">'}).join("")}
 function msgHtml(){if(!MSG.t)return"";return'<div class="status '+(MSG.k||"")+'">'+(MSG.k=="busy"?'<span class="spin" aria-hidden="true"></span>':'')+esc(MSG.t)+'</div>'}
 function msg(t,k){MSG={t:t,k:k||""};var e=document.getElementById("msg");if(e)e.innerHTML=msgHtml()}
-function il(){return DR.itens.length?DR.itens.map(function(i,x){if(EDIT&&EDIT.w=="dr"&&EDIT.i===x)return edForm(i);var bad=dig(i.c).length>=8&&!eanOk(i.c);return'<div class="item"><span class="txt"><b>'+esc(i.n)+'</b><span class="soft small">'+qfmt(i.q)+' '+esc(i.u)+' × R$ '+R2(i.p)+' = <b>R$ '+R2(i.t)+'</b>'+embTxt(i)+'</span>'+(cxPend(i)&&CXU[uu(i)]?'<span class="pill warn">caixa: toque no lápis e diga quantas unidades vinham</span>':'')+(bad?'<span class="pill warn">código de barras parece errado</span>':'')+'</span><button type="button" class="ib" aria-label="Editar '+esc(i.n)+'" data-act="ed" data-i="'+x+'">'+PEN+'</button><button type="button" class="ib x" aria-label="Remover '+esc(i.n)+'" data-act="rm" data-x="'+x+'">✕</button></div>'}).join(""):'<p class="soft">Nenhum item ainda.</p>'}
+function il(){return DR.itens.length?DR.itens.map(function(i,x){if(EDIT&&EDIT.w=="dr"&&EDIT.i===x)return edForm(i);var bad=dig(i.c).length>=8&&!eanOk(i.c);return'<div class="item"><span class="txt"><b>'+esc(i.n)+'</b><span class="soft small">'+qfmt(i.q)+' '+esc(i.u)+' × R$ '+R2(i.p)+descTxt(i)+' = <b>R$ '+R2(i.t)+'</b>'+embTxt(i)+'</span>'+(cxPend(i)&&CXU[uu(i)]?'<span class="pill warn">caixa: toque no lápis e diga quantas unidades vinham</span>':'')+(bad?'<span class="pill warn">código de barras parece errado</span>':'')+'</span><button type="button" class="ib" aria-label="Editar '+esc(i.n)+'" data-act="ed" data-i="'+x+'">'+PEN+'</button><button type="button" class="ib x" aria-label="Remover '+esc(i.n)+'" data-act="rm" data-x="'+x+'">✕</button></div>'}).join(""):'<p class="soft">Nenhum item ainda.</p>'}
 function bd(){var s=tot(DR),k="",t;
 if(DR.total>0){var ok=Math.abs(s-DR.total)<.015;k=ok?"ok":"warn";t=ok?"Conferido: a soma dos itens bate com o total da nota (R$ "+R2(DR.total)+").":"A soma dos itens é R$ "+R2(s)+" e o total da nota é R$ "+R2(DR.total)+". Falta ou sobra R$ "+R2(Math.abs(DR.total-s))+"."}
 else t="Soma dos itens: R$ "+R2(s)+". Informe o total da nota para conferir.";
@@ -740,6 +784,10 @@ function qrNoCanvas(c){var tent=[[1,0],[.7,1000],[.5,900],[.35,800],[1,1200]];fo
 if(fr==1&&!sz){k=c}else{var sc=sz?Math.min(sz/Math.max(cw,ch),3):1;k.width=Math.round(cw*sc);k.height=Math.round(ch*sc);k.getContext("2d").drawImage(c,(w-cw)/2,(h-ch)/2,cw,ch,0,0,k.width,k.height)}
 var d=k.getContext("2d").getImageData(0,0,k.width,k.height),r=qrDecode(d,true);if(r)return r}return""}
 /* Dois leitores: jsQR e, quando carregado, o ZXing (melhor com QR denso e papel térmico desbotado). */
+/* Código de barras de produto (EAN-13, EAN-8, UPC) pelo ZXing. */
+function barDecode(d){var Z=window.ZXing;if(!Z||!Z.MultiFormatReader)return"";try{var px=d.data,n=d.width*d.height,g=new Uint8ClampedArray(n);for(var i=0,j=0;i<n;i++,j+=4)g[i]=(px[j]*77+px[j+1]*150+px[j+2]*29)>>8;
+var hints=new Map();hints.set(Z.DecodeHintType.POSSIBLE_FORMATS,[Z.BarcodeFormat.EAN_13,Z.BarcodeFormat.EAN_8,Z.BarcodeFormat.UPC_A,Z.BarcodeFormat.UPC_E]);hints.set(Z.DecodeHintType.TRY_HARDER,true);
+var rd=new Z.MultiFormatReader();var res=rd.decode(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.RGBLuminanceSource(g,d.width,d.height))),hints);return res&&res.getText?res.getText():""}catch(e){return""}}
 function qrDecode(d,forte){var r=window.jsQR?window.jsQR(d.data,d.width,d.height,{inversionAttempts:forte?"attemptBoth":"dontInvert"}):null;if(r&&r.data)return r.data;
 var Z=window.ZXing;if(!Z||!Z.QRCodeReader)return"";try{var px=d.data,n=d.width*d.height,g=new Uint8ClampedArray(n);for(var i=0,j=0;i<n;i++,j+=4)g[i]=(px[j]*77+px[j+1]*150+px[j+2]*29)>>8;
 var hints=new Map();hints.set(Z.DecodeHintType.TRY_HARDER,true);var res=new Z.QRCodeReader().decode(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.RGBLuminanceSource(g,d.width,d.height))),hints);return res&&res.getText?res.getText():""}catch(e){return""}}
@@ -750,14 +798,17 @@ if(!DR)DR=blank();DR.ck=ch;if(!DR.chave)DR.chave=ch;render();msg("QR code lido. 
 function camOk(){return !window.Android&&!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)&&window.isSecureContext!==false}
 var CAMS=null,CAMT=0;
 function camFechar(){if(CAMS){CAMS.getTracks().forEach(function(x){x.stop()});CAMS=null}clearTimeout(CAMT);var o=document.getElementById("qrcam");if(o)o.remove()}
-async function camAbrir(){camFechar();var o=document.createElement("div");o.id="qrcam";o.className="camov";o.setAttribute("role","dialog");o.setAttribute("aria-label","Ler QR code com a câmera");
-o.innerHTML='<p>Aponte a câmera para o QR code do cupom</p><div class="cv"><video playsinline muted autoplay></video><div class="mira"></div></div><p class="small" id="qrcam_m" style="opacity:.8">Deixe o QR dentro do quadrado, com boa luz.</p><div class="btns"><button type="button" class="btn line" data-act="qrcamfoto">Usar uma foto</button><button type="button" class="btn" data-act="qrcamfechar">Cancelar</button></div>';
+async function camAbrir(modo){var BAR=modo=="bc";camFechar();var o=document.createElement("div");o.id="qrcam";o.className="camov";o.setAttribute("role","dialog");o.setAttribute("aria-label","Ler QR code com a câmera");
+o.innerHTML=BAR?'<p>Aponte a câmera para o código de barras do produto</p><div class="cv"><video playsinline muted autoplay></video><div class="mira bc"></div></div><p class="small" id="qrcam_m" style="opacity:.8">Deixe as barras dentro do retângulo, na horizontal.</p><div class="btns"><button type="button" class="btn line" data-act="bcdigitar">Digitar o código</button><button type="button" class="btn" data-act="qrcamfechar">Cancelar</button></div>'
+:'<p>Aponte a câmera para o QR code do cupom</p><div class="cv"><video playsinline muted autoplay></video><div class="mira"></div></div><p class="small" id="qrcam_m" style="opacity:.8">Deixe o QR dentro do quadrado, com boa luz.</p><div class="btns"><button type="button" class="btn line" data-act="qrcamfoto">Usar uma foto</button><button type="button" class="btn" data-act="qrcamfechar">Cancelar</button></div>';
 document.body.appendChild(o);var v=o.querySelector("video");
-try{await loadScript(LIB.qr,"jsQR");loadScript(LIB.zx,"ZXing").catch(function(){});CAMS=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}},audio:false});v.srcObject=CAMS;await v.play()}
+try{if(BAR)await loadScript(LIB.zx,"ZXing");else{await loadScript(LIB.qr,"jsQR");loadScript(LIB.zx,"ZXing").catch(function(){})}CAMS=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}},audio:false});v.srcObject=CAMS;await v.play()}
 catch(e){camFechar();msg(e&&e.code=="lib"?"Não consegui carregar o leitor de QR code. Digite a chave impressa na nota.":"Não consegui abrir a câmera. Permita o uso da câmera para este site ou use “Usar uma foto”.","warn");return}
-var k=document.createElement("canvas"),n=0,t0=Date.now(),FR=[.8,.55,.4],loop=function(){if(!CAMS)return;var w=v.videoWidth,h=v.videoHeight;if(w&&h){var fr=FR[n%FR.length],lado=Math.min(w,h)*fr,sz=Math.round(Math.min(1000,lado));k.width=k.height=sz;var x=k.getContext("2d");x.drawImage(v,(w-lado)/2,(h-lado)/2,lado,lado,0,0,sz,sz);
-var d=x.getImageData(0,0,sz,sz),r=qrDecode(d,n%4==3);n++;if(r){camFechar();if(navigator.vibrate)try{navigator.vibrate(60)}catch(e){}aplicarQR(r);return}
-if(Date.now()-t0>7000){var mm=document.getElementById("qrcam_m");if(mm&&!mm.getAttribute("data-dica")){mm.setAttribute("data-dica","1");mm.textContent="Aproxime ou afaste o celular devagar até o QR ficar nítido. Se não ler, toque em “Usar uma foto” ou digite a chave."}}}
+var k=document.createElement("canvas"),n=0,t0=Date.now(),FR=[.8,.55,.4],loop=function(){if(!CAMS)return;var w=v.videoWidth,h=v.videoHeight;if(w&&h){var x=k.getContext("2d"),d,r;
+if(BAR){/* faixa horizontal no centro, como a mira */var sc=Math.min(1,1280/w),sh=Math.min(w,h)*.4;k.width=Math.round(w*sc);k.height=Math.max(60,Math.round(sh*sc));x.drawImage(v,0,(h-sh)/2,w,sh,0,0,k.width,k.height);d=x.getImageData(0,0,k.width,k.height);r=barDecode(d)}
+else{var fr=FR[n%FR.length],lado=Math.min(w,h)*fr,sz=Math.round(Math.min(1000,lado));k.width=k.height=sz;x.drawImage(v,(w-lado)/2,(h-lado)/2,lado,lado,0,0,sz,sz);d=x.getImageData(0,0,sz,sz);r=qrDecode(d,n%4==3)}
+n++;if(r){camFechar();if(navigator.vibrate)try{navigator.vibrate(60)}catch(e){}if(BAR)bcAbrir(r);else aplicarQR(r);return}
+if(Date.now()-t0>7000){var mm=document.getElementById("qrcam_m");if(mm&&!mm.getAttribute("data-dica")){mm.setAttribute("data-dica","1");mm.textContent=BAR?"Aproxime ou afaste devagar até as barras ficarem nítidas. Se não ler, toque em “Digitar o código”.":"Aproxime ou afaste o celular devagar até o QR ficar nítido. Se não ler, toque em “Usar uma foto” ou digite a chave."}}}
 CAMT=setTimeout(loop,180)};loop()}
 async function readQR(inp){var f=inp.files&&inp.files[0];inp.value="";if(!f)return;msg("Lendo o QR code…","busy");
 try{var t=await decodeQR(f);if(!t){msg("Não encontrei um QR code na foto. Tente outra foto, mais perto e reta, ou digite a chave.","warn");return}aplicarQR(t)}
@@ -833,7 +884,9 @@ persist(n);DR=null;THUMBS=[];MSG={t:"",k:""};V="nd";SEL=n.id;CONF=null;EDIT=null
 function addM(){var n=document.getElementById("mn").value.trim(),q=num(document.getElementById("mq").value)||1,p=num(document.getElementById("mp").value);
 if(!n||!(p>0)){msg("Para adicionar à mão, informe o nome e o preço do item.","warn");return}
 DR.itens.push({c:"",n:n,q:q,u:q%1?"kg":"un",p:r2(p),t:r2(q*p)});document.getElementById("mn").value="";document.getElementById("mp").value="";document.getElementById("mq").value="1";refreshDraft();msg("Item adicionado.","ok");document.getElementById("mn").focus()}
-function edRead(){var n=document.getElementById("ed_n").value.replace(/\s+/g," ").trim(),q=num(document.getElementById("ed_q").value),p=num(document.getElementById("ed_p").value);if(!n||!(q>0)||!(p>0))return null;var xe=document.getElementById("ed_x"),x=xe?Math.round(num(xe.value)):0;return{n:n,q:q,p:r2(p),t:r2(q*p),x:x>=1&&x<=500?x:0}}
+function edRead(){var n=document.getElementById("ed_n").value.replace(/\s+/g," ").trim(),q=num(document.getElementById("ed_q").value),p=num(document.getElementById("ed_p").value);if(!n||!(q>0)||!(p>0))return null;var xe=document.getElementById("ed_x"),x=xe?Math.round(num(xe.value)):0;
+var de=document.getElementById("ed_d"),te=document.getElementById("ed_dt"),c=edDescCalc(q,p,de?num(de.value):0,te?te.value:"r");if(c.dv<0||c.dv>=c.bruto)return null;
+return{n:n,q:q,p:r2(p),t:c.t,x:x>=1&&x<=500?x:0}}
 
 /* Procurar repetidos com o Claude: manda só a lista de nomes e códigos, recebe grupos de números. */
 async function iaScan(){var sm=await getSample();if(!sm){toast("O Claude não está disponível aqui. Abra o link no app Claude ou em claude.ai.");return}
@@ -857,6 +910,11 @@ claude.use("downloads").then(function(d){if(!d){copy();return}return d.save({fil
 function toggleTag(list,t){var i=list.indexOf(t);if(i>=0)list.splice(i,1);else list.push(t);return list}
 document.addEventListener("click",function(ev){var b=ev.target.closest("[data-act]");if(!b)return;var a=b.getAttribute("data-act"),d=b.dataset,n;
 if(a=="tab"){if(d.v=="new"&&V=="new")return;go(d.v)}
+else if(a=="bc"){if(window.Android&&Android.lerCodigo){Android.lerCodigo()}else if(camOk()){camAbrir("bc")}else{BC={ean:"",cands:[],busy:false};V="bc";render()}}
+else if(a=="bcdigitar"){camFechar();BC={ean:"",cands:[],busy:false};V="bc";render();var bm0=document.getElementById("bcm");if(bm0)bm0.focus()}
+else if(a=="bcmanual"){var bm=document.getElementById("bcm");bcAbrir(bm?bm.value:"")}
+else if(a=="bcliga"){var gl=G[d.k];if(!gl||!BC)return;CFG.cods=CFG.cods||{};CFG.cods[BC.ean]=tpBases(gl)[0];saveCfg();BC.k=gl.k;PK=gl.k;V="pd";render();window.scrollTo(0,0);toast("Código ligado a "+gl.nm+". Da próxima vez abre direto.")}
+else if(a=="bcdesliga"){if(!BC)return;delete CFG.cods[BC.ean];saveCfg();var e3=BC.ean;BC={ean:e3,k:null,nome:"",cands:[],busy:true};V="bc";render();bcNome(e3)}
 else if(a=="qrcam"){if(!DR){DR=blank()}readForm&&readForm();camAbrir()}
 else if(a=="qrcamfechar"){camFechar()}
 else if(a=="qrcamfoto"){camFechar();var qi=document.getElementById("qrf");if(qi)qi.click()}
@@ -936,7 +994,7 @@ else if(a=="save"){if(!BUSY)saveN()}
 else if(a=="cancel"){if(BUSY)return;var back=DR&&DR.id;DR=null;THUMBS=[];MSG={t:"",k:""};EDIT=null;if(back){SEL=back;V="nd";render()}else go("n")}
 else if(a=="edit"){n=byId(d.id);if(n){DR=JSON.parse(JSON.stringify(n));DR._autoDate=false;DR.ck=dig(n.chave);DR.tags=DR.tags||[];THUMBS=[];MSG={t:"",k:""};MODE="manual";EDIT=null;V="new";render();window.scrollTo(0,0)}}
 });
-function alertEd(){var e=document.querySelector(".ed");if(!e)return;var p=e.querySelector(".status");if(!p){p=document.createElement("div");p.className="status warn";e.insertBefore(p,e.firstChild)}p.textContent="Preencha o nome, uma quantidade e um preço maiores que zero."}
+function alertEd(){var e=document.querySelector(".ed");if(!e)return;var p=e.querySelector(".status");if(!p){p=document.createElement("div");p.className="status warn";e.insertBefore(p,e.firstChild)}p.textContent="Preencha o nome, uma quantidade e um preço maiores que zero, e um desconto menor que o total."}
 document.addEventListener("change",function(ev){var t=ev.target,f=t.dataset&&t.dataset.file;
 if(f=="foto"){photos(t);return}if(f=="qr"){readQR(t);return}if(f=="pdf"){readPDF(t);return}
 var k=t.dataset&&t.dataset.in;if(!k)return;
@@ -944,6 +1002,9 @@ if(k=="f1"||k=="f2"){if(k=="f1")F1=t.value;else F2=t.value;render()}
 else if(DR&&(k=="loja"||k=="data"||k=="total")){readForm();if(k=="data")DR._autoDate=false;var e=document.getElementById("bd");if(e)e.innerHTML=bd()}});
 document.addEventListener("input",function(ev){var t=ev.target,k=t.dataset&&t.dataset.in;
 if(k=="q"){Q=t.value;document.getElementById("pl").innerHTML=pl()}
+else if(k=="bcq"){BCQ=t.value;var bl=document.getElementById("bcl");if(bl)bl.innerHTML=bcl()}
+else if(k=="bcp"){var br=document.getElementById("bcr");if(br)br.innerHTML=bcCompara(num(t.value))}
+else if(k=="edcalc"){var et=document.getElementById("ed_tot"),g=function(id){var e=document.getElementById(id);return e?e.value:""};if(et)et.innerHTML=edTotTxt(num(g("ed_q")),num(g("ed_p")),num(g("ed_d")),g("ed_dt")||"r")}
 else if(k=="cq"){CQ=t.value;document.getElementById("cml").innerHTML=cml()}
 else if(k=="jq"){JQ=t.value;document.getElementById("jl").innerHTML=jl()}
 else if(k=="lq"){LQ=t.value;document.getElementById("ls").innerHTML=lsug()}
