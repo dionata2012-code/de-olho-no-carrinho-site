@@ -105,6 +105,11 @@ window.APP = true;
     if (!r.ok) throw { code: "unavailable" };
     var j = await r.json(); return j && j[0] || null;
   };
+  window.appIndicadores = async function () {
+    var r = await fetch(SB_URL + "/rest/v1/indicadores?select=nome,valor,periodo,fonte", { headers: { apikey: SB_KEY } });
+    if (!r.ok) throw { code: "unavailable" };
+    return r.json();
+  };
   window.claude = { use: function (n) { return Promise.resolve({ db: db, user: user, downloads: downloads }[n] || null); } };
 
   function sair(expirou) {

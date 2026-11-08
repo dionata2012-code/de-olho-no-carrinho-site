@@ -159,9 +159,12 @@
     var P = L.filter(function (r) { return r.tipo === "produto"; }), meus = [], outros = [];
     P.forEach(function (r) { var ps = seusProdutos(r); if (ps.length) meus.push({ r: r, ps: ps }); else outros.push(r); });
     var ordem = { desce: 0, sobe: 1, estavel: 2, incerta: 3 };
-    meus.sort(function (a, b) { return (ordem[a.r.tendencia] || 3) - (ordem[b.r.tendencia] || 3); });
+    /* Primeiro as notícias dos produtos que mais pesam no seu bolso (gasto dos últimos 12 meses), calculado aqui no celular. */
+    var cut12 = mesesAtras(12), gasto = function (x) { return x.ps.reduce(function (t, g) { return t + g.occ.reduce(function (u, o) { return u + (o.n.data >= cut12 ? num(o.it.t) : 0); }, 0); }, 0); };
+    meus.forEach(function (x) { x.v = gasto(x); });
+    meus.sort(function (a, b) { return b.v - a.v || (ordem[a.r.tendencia] || 3) - (ordem[b.r.tendencia] || 3); });
     if (meus.length) {
-      h += '<h3>Nos produtos que você compra</h3>';
+      h += '<h3>Nos produtos que você compra</h3><p class="soft small">Primeiro os que mais pesam no seu bolso.</p>';
       meus.forEach(function (x) {
         h += '<div class="card nt"><div class="row flat"><span class="t">' + esc(x.r.produto) + '</span>' + selo(x.r.tendencia) + '</div>' + corpo(x.r) + '<div class="list">';
         x.ps.slice(0, 3).forEach(function (g) { h += '<button type="button" class="row" data-act="prod" data-k="' + esc(g.k) + '"><span class="txt"><span class="t">' + esc(g.nm) + '</span><span class="soft small">Você pagou R$ ' + R2(g.last.pu) + ' em ' + dl(g.last.n.data) + ' · ' + esc(sn(g.last.s)) + '</span></span></button>'; });
@@ -308,6 +311,12 @@
   }, true);
 
   checarVersao();
+  /* Indicadores públicos (ex.: inflação oficial de alimentos no domicílio), para o quadro "Sua inflação no mercado". */
+  try { var ic = JSON.parse(localStorage.getItem("mn_ind") || "null"); if (ic && ic.ipca_alim) window.IND = ic; } catch (e) {}
+  if (window.appIndicadores) appIndicadores().then(function (L) {
+    var o = {}; (L || []).forEach(function (r) { o[r.nome] = { valor: +r.valor, periodo: r.periodo, fonte: r.fonte }; });
+    if (o.ipca_alim) { window.IND = o; lsS("mn_ind", JSON.stringify(o)); if (V === "m") render(); }
+  }, function () {});
   document.addEventListener("visibilitychange", function () { if (!document.hidden && !NOVA) checarVersao(); });
   render();
 })();
