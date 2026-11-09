@@ -202,7 +202,7 @@ var ST={},G={},OKEY={},SUG=[],IX={},IXN={},IXMIN=5,PAR={},BI={},ALIAS={},DB=null
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function sv(){lsSet(KEY,JSON.stringify(N))}
-function blankCfg(){return{cores:{},etiquetas:[],nomes:{},juntar:[],nao:[],lista:[],apelidos:{},sugIA:[],tipos:{},saltos:{},diag:{},cods:{},cats:{},orc:{},upd:0}}
+function blankCfg(){return{cores:{},etiquetas:[],nomes:{},juntar:[],nao:[],lista:[],apelidos:{},sugIA:[],tipos:{},saltos:{},diag:{},cods:{},cats:{},orc:{},repo:{},upd:0}}
 function loadCfg(o){var c=blankCfg();if(o&&typeof o=="object"){Object.keys(c).forEach(function(k){if(k!=="upd"&&o[k]!=null&&Array.isArray(o[k])===Array.isArray(c[k])&&typeof o[k]==="object")c[k]=o[k]});c.upd=+o.upd||0}return c}
 function valid(n){return n&&typeof n.id=="string"&&n.loja&&/^\d{4}-\d{2}-\d{2}$/.test(n.data||"")&&Array.isArray(n.itens)}
 try{N=JSON.parse(lsGet(KEY)||"[]")}catch(e){N=[]}
@@ -538,11 +538,14 @@ return h+'</div>'+(L.length>3?'<button type="button" class="link" data-act="ecoa
 function repoList(){var cut=mesesAtras(9),hoje=hojeISO(),grp={};Object.keys(G).forEach(function(k){var g=G[k],key=g.tp&&!g.tp.x&&g.tp.t?"t:"+g.tp.t+"|"+g.tp.b:"g:"+g.k,e=grp[key]=grp[key]||{ds:{},g:null};
 g.occ.forEach(function(o){if(o.n.data>=cut)e.ds[o.n.data]=1});if(!e.g||g.last.n.data>e.g.last.n.data)e.g=g});
 var out=[];Object.keys(grp).forEach(function(key){var e=grp[key],ds=Object.keys(e.ds).sort();if(ds.length<3)return;var iv=[];for(var i=1;i<ds.length;i++)iv.push(diasEntre(ds[i-1],ds[i]));iv.sort(function(a,b){return a-b});
-var m=iv[Math.floor(iv.length/2)];if(m<3||m>60)return;var ult=ds[ds.length-1],d=diasEntre(ult,hoje);if(d<m*.75||d>m*2)return;out.push({g:e.g,lab:tipoLab(e.g),m:m,d:d,ult:ult,r:d/m})});
+var m=iv[Math.floor(iv.length/2)];if(m<3||m>60)return;var ult=ds[ds.length-1],d=diasEntre(ult,hoje),nd=CFG.repo&&CFG.repo[key];
+/* "Ainda tenho": a contagem recomeça no dia em que a pessoa disse que ainda tinha; uma compra nova depois disso volta ao normal. */
+if(nd&&nd.u===ult&&nd.em){var d2=diasEntre(nd.em,hoje);if(d2<m*.75)return;out.push({g:e.g,key:key,lab:tipoLab(e.g),m:m,d:d,ult:ult,tem:nd.em,dt:d2,r:d2/m});return}
+if(d<m*.75||d>m*2)return;out.push({g:e.g,key:key,lab:tipoLab(e.g),m:m,d:d,ult:ult,dt:d,r:d/m})});
 return out.sort(function(a,b){return b.r-a.r}).slice(0,3)}
 function repoCard(){var L=repoList();if(!L.length)return"";var na=function(g){return CFG.lista.some(function(x){return lg(x)===g})};
 var h='<div class="card"><h3 style="margin:0">Pode estar acabando</h3><p class="soft small">Pelo seu ritmo de compra nos últimos meses.</p><div class="list">';
-L.forEach(function(e){var falta=Math.round(e.m-e.d);h+='<div class="item"><span class="txt"><b>'+esc(e.lab)+'</b><span class="soft small">Você compra a cada ~'+e.m+' dias; a última foi há '+e.d+' dia'+(e.d==1?'':'s')+' ('+dl(e.ult)+'). '+(falta>0?'Deve acabar em ~'+falta+' dia'+(falta==1?'':'s')+'.':'Já deve ter acabado.')+'</span></span>'+(na(e.g)?'<span class="pill ok">na lista</span>':'<button type="button" class="cbtn" data-act="repl" data-k="'+esc(e.g.k)+'">Pôr na lista</button>')+'</div>'});
+L.forEach(function(e){var falta=Math.round(e.m-e.dt);h+='<div class="item"><span class="txt"><b>'+esc(e.lab)+'</b><span class="soft small">Você compra a cada ~'+e.m+' dias; a última foi há '+e.d+' dia'+(e.d==1?'':'s')+' ('+dl(e.ult)+'). '+(e.tem?'Em '+dl(e.tem)+' você ainda tinha. ':'')+(falta>0?'Deve acabar em ~'+falta+' dia'+(falta==1?'':'s')+'.':'Já deve ter acabado.')+'</span></span>'+(na(e.g)?'<span class="pill ok">na lista</span>':'<span style="display:flex;flex-direction:column;gap:6px;align-items:stretch"><button type="button" class="cbtn" data-act="repl" data-k="'+esc(e.g.k)+'">Pôr na lista</button><button type="button" class="cbtn" data-act="repnao" data-r="'+esc(e.key)+'" data-u="'+esc(e.ult)+'" aria-label="Ainda tenho '+esc(e.lab)+'">Ainda tenho</button></span>')+'</div>'});
 return h+'</div></div>'}
 
 /* ---------- Sua inflação x inflação oficial ----------
@@ -1086,6 +1089,7 @@ else if(a=="orcsave"){var vv=num((document.getElementById("orcv")||{}).value);if
 else if(a=="orcdel"){CFG.orc={};saveCfg();ORCE=false;render()}
 else if(a=="ecoall"){ECOALL=!ECOALL;render()}
 else if(a=="repl"){addList(d.k);render();toast("Coloquei na lista.")}
+else if(a=="repnao"){var hj=hojeISO(),ano=mesesAtras(12);CFG.repo=CFG.repo||{};Object.keys(CFG.repo).forEach(function(k){if(!CFG.repo[k]||!(CFG.repo[k].em>=ano))delete CFG.repo[k]});CFG.repo[d.r]={u:d.u,em:hj};saveCfg();render();toast("Certo. Aviso de novo no próximo ciclo.")}
 else if(a=="calcon"){CALC.on=!CALC.on;render();if(CALC.on){var cl=document.getElementById("calc");if(cl)cl.scrollIntoView({block:"start"})}}
 else if(a=="calcx"){CALC.on=false;render()}
 else if(a=="calcadd"){if(CALC.rows.length<4)CALC.rows.push({p:"",q:"",u:CALC.rows[0].u});render()}
