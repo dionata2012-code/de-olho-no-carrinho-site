@@ -202,7 +202,7 @@ var ST={},G={},OKEY={},SUG=[],IX={},IXN={},IXMIN=5,PAR={},BI={},ALIAS={},DB=null
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function sv(){lsSet(KEY,JSON.stringify(N))}
-function blankCfg(){return{cores:{},etiquetas:[],nomes:{},juntar:[],nao:[],lista:[],apelidos:{},sugIA:[],tipos:{},saltos:{},diag:{},cods:{},cats:{},orc:{},repo:{},rp:{},upd:0}}
+function blankCfg(){return{cores:{},etiquetas:[],nomes:{},juntar:[],nao:[],lista:[],apelidos:{},sugIA:[],tipos:{},saltos:{},diag:{},cods:{},cats:{},orc:{},repo:{},rp:{},ofl:{},ofv:{},upd:0}}
 function loadCfg(o){var c=blankCfg();if(o&&typeof o=="object"){Object.keys(c).forEach(function(k){if(k!=="upd"&&o[k]!=null&&Array.isArray(o[k])===Array.isArray(c[k])&&typeof o[k]==="object")c[k]=o[k]});c.upd=+o.upd||0}return c}
 function valid(n){return n&&typeof n.id=="string"&&n.loja&&/^\d{4}-\d{2}-\d{2}$/.test(n.data||"")&&Array.isArray(n.itens)}
 try{N=JSON.parse(lsGet(KEY)||"[]")}catch(e){N=[]}
@@ -722,7 +722,7 @@ var h="",rk=Object.keys(IX).sort(function(a,b){return IX[a]-IX[b]}),ss=Object.ke
 if(rk.length>=2){var b=rk[0];h+='<div class="hero"><span class="lbl">Mais barato nos últimos 3 meses</span><span class="big">'+esc(sn(b))+'</span><p>'+Math.abs((IX[b]-1)*100).toFixed(1).replace(".",",")+'% '+(IX[b]<1?'abaixo':'acima')+' da média dos mercados, comparado em '+IXN[b]+' produtos</p></div>'}
 else{rk=[];var cut=cutDate(),rec=uniq(N.filter(function(n){return n.data>=cut}).map(sk));
 h+='<div class="status">'+(!rec.length?'Você não tem notas dos últimos 3 meses. O mercado mais barato é calculado só com preços recentes, porque eles mudam muito.':rec.length==1?'Nos últimos 3 meses, suas notas são todas do <b>'+esc(sn(rec[0]))+'</b>. Para saber qual mercado sai mais barato, cadastre compras de outro mercado com produtos que você também compra lá.':'Ainda não dá para apontar o mercado mais barato com segurança. Nos últimos 3 meses, é preciso ter pelo menos 2 mercados com '+IXMIN+' produtos em comum. Continue cadastrando as notas.')+'</div>'}
-h+=orcCard()+gastoMes()+ecoCard()+alertas()+susCard()+inflCard();
+h+=ofertasCard()+orcCard()+gastoMes()+ecoCard()+alertas()+susCard()+inflCard();
 h+='<h3>Seus mercados</h3><div class="list">';
 ss.sort(function(a,b){return(rk.indexOf(a)<0?99:IX[a])-(rk.indexOf(b)<0?99:IX[b])||(IXN[b]||0)-(IXN[a]||0)}).forEach(function(s){var nn=N.filter(function(n){return sk(n)==s}),g=nn.reduce(function(t,n){return t+pago(n)},0),x=rk.indexOf(s)>=0?(IX[s]-1)*100:null,c=storeColor(s);
 h+='<div class="card"><div class="row flat"><span class="main"><span class="dot" style="background:'+c+'"></span><span class="txt"><span class="t">'+esc(sn(s))+'</span><span class="soft small">'+esc(ST[s].n)+'</span></span></span>'+(x!=null?'<span class="r"><span class="'+(x<0?"down":"up")+'">'+pc(IX[s])+'</span>'+(s==rk[0]?'<span class="pill ok">mais barato</span>':'')+'</span>':'<span class="r"><span class="pill gray">poucos dados</span></span>')+'</div>';
@@ -825,7 +825,7 @@ var L=g.occ,Lk=g.ok,f=Lk[0].pu,l=Lk[Lk.length-1],avgp=Lk.reduce(function(t,o){re
 var h='<button type="button" class="link back" data-act="tab" data-v="p">‹ Voltar para produtos</button>'+bcCard(g)+cxCard(CXQ.filter(function(c){return c.g===g}),1)+'<div class="card">';
 h+=RENAME?'<div class="ed"><label class="f">Nome do produto em todas as notas<input type="text" id="rn" value="'+esc(g.nv||g.nm)+'" autocomplete="off"></label><div class="btns"><button type="button" class="btn sm" data-act="rnsave">Salvar nome</button><button type="button" class="btn sm line" data-act="rncancel">Cancelar</button></div></div>':'<div class="row flat"><h2 style="margin:0">'+esc(g.nv||g.nm)+'</h2><button type="button" class="ib" aria-label="Renomear produto" data-act="rename">'+PEN+'</button></div>'+(g.nota&&norm(g.nota)!==norm(g.nv||g.nm)?'<p class="soft small">Na nota: '+esc(g.nota)+'</p>':'');
 h+='<p class="soft small">'+(g.code?"Código "+esc(g.code)+" · ":"")+'preço por '+un+' · '+L.length+' compra'+(L.length==1?"":"s")+'</p>'+(g.prev?upTag(g.ch):"")+chart(Lk,ss)+'<div class="k3"><div><b>R$ '+R2(lp)+'</b><span>última</span></div><div><b>R$ '+R2(avgp)+'</b><span>média</span></div><div><b class="'+(lp>f?"up":lp<f?"down":"")+'">'+pc(f?lp/f:1)+'</b><span>desde a 1ª</span></div></div></div>';
-h+=cmpCard(g)+famCard(g)+catSel(g);
+h+=cmpCard(g)+ofCard(g)+famCard(g)+catSel(g);
 h+='<h3>Histórico de compras</h3><div class="card"><table>';
 L.slice().reverse().forEach(function(o){var ch=o.ch,cls=ch>1.001?"up":ch<.999?"down":"soft";
 var k=emb(o.it);if(o.cq)cls="up";
@@ -911,12 +911,69 @@ h+=ac?(mc?'<span class="soft small">'+mc+'</span>':''):'<span class="soft small"
 h+='<span class="row flat" style="justify-content:flex-start;gap:10px"><span class="small">Quantidade</span><span class="qty"><button type="button" aria-label="Menos" data-act="rpq" data-d="-1">−</button><b>'+q+'</b><button type="button" aria-label="Mais" data-act="rpq" data-d="1">+</button></span><span class="soft small">'+(kg?'unidade(s) na lista':'unidade(s)')+'</span></span></div>';
 h+='<div class="btns"><button type="button" class="btn" data-act="rpsim">Pôr na lista</button><button type="button" class="btn line" data-act="rpnao">'+(ac?'Ainda tenho':'Agora não')+'</button></div>';
 return h+'<div class="row flat">'+(dsf||'<span></span>')+'<button type="button" class="link" data-act="rpfecha">Ver depois</button></div></div>'}
+/* ---------- Ofertas ----------
+   Sem ler sites de mercado automaticamente (folhetos são imagens, pedem CEP e têm direitos autorais):
+   1) "Folhetos dos seus mercados": links que a pessoa guarda (CFG.ofl.l) para abrir a oferta do dia com um toque;
+   2) "Anotar uma oferta": a pessoa digita (ou, no site, fotografa) a oferta que viu, e o app compara com o histórico dela.
+   As ofertas anotadas (CFG.ofv.l) valem até a data informada e aparecem na lista de compras e na página do produto. */
+var OFS=[["Economart","https://economart.com.br/ofertas/","28548486"],["Mart Minas","https://www.martminas.com.br/","04737552"],["Supermercados BH","https://www.supermercadosbh.com.br/","04641376"],["Apoio Entrega","https://www.apoioentrega.com/ofertas-do-folheto",""]];
+var OFE=null,OFLF=false,OFB=false;
+function ofLinks(){CFG.ofl=CFG.ofl||{};if(!Array.isArray(CFG.ofl.l))CFG.ofl.l=[];return CFG.ofl.l}
+function ofVistas(){CFG.ofv=CFG.ofv||{};if(!Array.isArray(CFG.ofv.l))CFG.ofv.l=[];return CFG.ofv.l}
+function ofAtivas(){var h=hojeISO();return ofVistas().filter(function(o){return o&&o.ate>=h})}
+function ofG(o){return o.b&&PAR[o.b]!==undefined?G[fnd(o.b)]:null}
+function ofDe(g){if(!g)return null;var L=ofAtivas().filter(function(o){return ofG(o)===g}).sort(function(a,b){return a.p-b.p});return L[0]||null}
+function ofUrl(u){u=String(u||"").trim();if(!u)return"";if(!/^https?:\/\//i.test(u))u="https://"+u;try{var x=new URL(u);return/^https?:$/.test(x.protocol)&&x.hostname.indexOf(".")>0?x.href:""}catch(e){return""}}
+/* Comparação da oferta com o que a pessoa já pagou (preço por unidade, ou por kg) */
+function ofCmp(g,p){if(!g||!(p>0))return"";var l=g.last,b=cheapest(g),kg=g.u&&/kg/i.test(g.u)?" o kg":"",f=function(ref){var d=p-ref,pc0=ref>0?Math.abs(d)/ref*100:0;return Math.abs(d)<.005?"igual":'<b class="'+(d>0?"up":"down")+'">R$ '+R2(Math.abs(d))+' ('+pc0.toFixed(0)+'%) '+(d>0?"mais cara":"mais barata")+'</b>'};
+var h='<p>'+f(l.pu)+' que a sua última compra (R$ '+R2(l.pu)+kg+' no '+esc(sn(l.s))+' em '+dl(l.n.data)+').</p>';
+if(b&&(b.s!==l.s||Math.abs(b.p-l.pu)>.005))h+='<p>'+f(b.p)+' que o mais barato '+(b.old?"que você já pagou":"dos últimos 3 meses")+' (R$ '+R2(b.p)+kg+' no '+esc(sn(b.s))+').</p>';
+if(b&&p<b.p-.005&&!b.old)h+='<p>💡 É o menor preço que você já viu para este produto nos últimos 3 meses.</p>';
+return'<div class="status" style="display:flex;flex-direction:column;gap:6px">'+h+'</div>'+estocarTxt(g,p)}
+function ofRow(o){var g=ofG(o),l=g&&g.last,d=l&&l.pu>0?(o.p-l.pu)/l.pu*100:null;
+return'<div class="item"><span class="txt"><b>'+esc(g?(g.nv||g.nm):o.n)+'</b><span class="soft small">R$ '+R2(o.p)+(o.a>o.p?' (antes R$ '+R2(o.a)+')':'')+' no '+esc(o.s)+' · até '+dl(o.ate)+'</span>'+(d!=null&&Math.abs(d)>=.5?'<span class="small '+(d<0?'down':'up')+'">'+(d<0?Math.abs(d).toFixed(0)+'% abaixo':d.toFixed(0)+'% acima')+' da sua última compra (R$ '+R2(l.pu)+')</span>':'')+'</span><span style="display:flex;flex-direction:column;gap:6px">'+(g&&!naLista(g)?'<button type="button" class="cbtn" data-act="addlist" data-k="'+esc(g.k)+'">Pôr na lista</button>':'')+'<button type="button" class="cbtn" data-act="ofrem" data-id="'+esc(o.id)+'" aria-label="Apagar oferta de '+esc(o.n)+'">Apagar</button></span></div>'}
+function ofForm(){var e=OFE,g=e.k&&G[e.k],mk=uniq(Object.keys(ST).map(sn).concat(ofLinks().map(function(x){return x.n})));
+var h='<div class="ed" id="ofe"><b>Anotar uma oferta</b>';
+if(OFB)h+='<p class="soft"><span class="spin" aria-hidden="true"></span>Lendo a foto da oferta…</p>';
+if(e.foto)h+='<p class="soft small">Lido na foto: <b>'+esc(e.foto)+'</b>. Confira os dados.</p>';
+if(g)h+='<div class="row flat"><span class="txt"><span class="t">✓ '+esc(g.nv||g.nm)+'</span><span class="soft small">Última compra: R$ '+R2(g.last.pu)+' em '+dl(g.last.n.data)+'</span></span><button type="button" class="link" data-act="oftroca">Trocar</button></div>';
+else h+='<label class="f">Produto<input type="search" id="ofq" data-in="ofq" value="'+esc(e.q||"")+'" placeholder="Ex.: leite italac" autocomplete="off"></label><div class="list" id="ofl">'+ofSug()+'</div>';
+h+='<div class="two"><label class="f">Preço da oferta (R$)<input type="text" id="ofp" data-in="ofp" inputmode="decimal" value="'+(e.p?R2(e.p):'')+'" placeholder="0,00" autocomplete="off"></label><label class="f">Válida até<input type="date" id="ofa" value="'+esc(e.ate||hojeISO())+'" min="'+hojeISO()+'"></label></div>';
+h+='<label class="f">Mercado<input type="text" id="ofs" list="ofmk" value="'+esc(e.s||"")+'" autocomplete="off" placeholder="Onde está a oferta"></label><datalist id="ofmk">'+mk.map(function(n){return'<option value="'+esc(n)+'">'}).join("")+'</datalist>';
+h+='<div id="ofr" role="status">'+(g&&e.p?ofCmp(g,e.p):'')+'</div>';
+return h+'<div class="btns"><button type="button" class="btn sm" data-act="ofsave">Salvar oferta</button><button type="button" class="btn sm line" data-act="ofcancel">Cancelar</button></div></div>'}
+function ofSug(){var e=OFE;if(!e)return"";var L=[];if(e.cands&&e.cands.length&&!e.q2)L=e.cands;else{var q=norm(e.q||"");if(q.length<2)return"";L=Object.keys(G).map(function(k){return G[k]}).filter(function(g){return gMatch(g,q,dig(e.q))}).sort(function(a,b){return b.occ.length-a.occ.length}).slice(0,6)}
+if(!L.length)return'<p class="soft small">Não achei esse produto no seu histórico. Dá para salvar mesmo assim, mas sem comparar com o que você já pagou.</p>';
+return'<p class="soft small">É um destes? Toque para comparar com o que você já pagou.</p>'+L.map(function(g){return'<button type="button" class="row" data-act="ofpick" data-k="'+esc(g.k)+'"><span class="txt"><span class="t">'+esc(g.nv||g.nm)+'</span><span class="soft small">Última: R$ '+R2(g.last.pu)+' em '+dl(g.last.n.data)+' · '+esc(sn(g.last.s))+'</span></span></button>'}).join("")}
+function ofertasCard(){var A=ofAtivas().slice().sort(function(a,b){return a.ate<b.ate?-1:1}),Ls=ofLinks(),tem={};Ls.forEach(function(x){tem[norm(x.n)]=1});
+var meus={};Object.keys(ST).forEach(function(s){var r=raiz(s);if(r)meus[r]=1});
+var sug=OFS.filter(function(o){return!tem[norm(o[0])]}).sort(function(a,b){return(meus[b[2]]?1:0)-(meus[a[2]]?1:0)});
+var h='<div class="card"><h3 style="margin:0">Ofertas</h3>';
+if(A.length){h+='<p class="soft small">Ofertas que você anotou e ainda valem.</p><div class="list">'+A.slice(0,5).map(ofRow).join("")+'</div>'+(A.length>5?'<p class="soft small">E mais '+(A.length-5)+'.</p>':'')}
+else if(!OFE)h+='<p class="soft small">Viu uma oferta no folheto, no WhatsApp ou na prateleira? Anote aqui e o app compara com o que você já pagou.</p>';
+if(OFE)h+=ofForm();
+else h+='<div class="btns"><button type="button" class="btn sm line" data-act="ofnova">Anotar uma oferta</button>'+(!window.APP&&window.claude&&claude.use?'<label class="btn sm line" for="offoto" tabindex="0" role="button">'+CAM+'Fotografar oferta</label>':'')+'</div><input class="vh" type="file" id="offoto" accept="image/*" data-file="oferta" tabindex="-1">';
+h+='<p class="soft small" style="margin-top:4px"><b>Folhetos dos seus mercados</b></p>';
+if(Ls.length)h+='<div class="list">'+Ls.map(function(x,i){return'<div class="irow"><a class="row" href="'+esc(x.u)+'" target="_blank" rel="noopener"><span class="txt"><span class="t">'+esc(x.n)+'</span><span class="soft small">Abrir as ofertas</span></span><span class="r" aria-hidden="true">↗</span></a><button type="button" class="ib x" data-act="oflinkdel" data-i="'+i+'" aria-label="Tirar '+esc(x.n)+'">✕</button></div>'}).join("")+'</div>';
+else h+='<p class="soft small">Guarde aqui o link das ofertas dos mercados onde você compra. Um toque abre o folheto do dia.</p>';
+if(sug.length)h+='<div class="chips">'+sug.map(function(o){return'<button type="button" class="chip" data-act="oflinkadd" data-n="'+esc(o[0])+'" data-u="'+esc(o[1])+'">+ '+esc(o[0])+'</button>'}).join("")+'</div>';
+if(OFLF)h+='<div class="ed"><label class="f">Nome do mercado<input type="text" id="ofln" maxlength="40" autocomplete="off"></label><label class="f">Link das ofertas<input type="url" id="oflu" inputmode="url" autocomplete="off" placeholder="https://"></label><div class="btns"><button type="button" class="btn sm" data-act="oflinksave">Salvar</button><button type="button" class="btn sm line" data-act="oflinkx">Cancelar</button></div></div>';
+else h+='<button type="button" class="link" data-act="oflinkform">+ Outro mercado</button>';
+return h+'</div>'}
+function ofCard(g){var L=ofAtivas().filter(function(o){return ofG(o)===g});if(!L.length)return"";return'<div class="card" style="border-color:var(--acc)"><h3 style="margin:0">Oferta anotada</h3><div class="list">'+L.map(ofRow).join("")+'</div>'+ofCmp(g,L.sort(function(a,b){return a.p-b.p})[0].p)+'</div>'}
+var OFPROMPT='Você lê a foto de um cartaz, etiqueta ou folheto de oferta de supermercado brasileiro. Responda SOMENTE com um objeto JSON, sem texto antes ou depois e sem crases: {"produto":"nome do produto como está escrito, com marca e tamanho","preco":0,"preco_antes":0,"validade":"AAAA-MM-DD ou vazio","mercado":"nome do mercado se aparecer, ou vazio"}. Use números com ponto decimal. Se houver vários produtos, use o principal (o de letra maior). Não invente: deixe 0 ou vazio o que não aparecer.';
+async function ofFoto(inp){var f=inp.files&&inp.files[0];inp.value="";if(!f||OFB)return;var sm=await getSample();if(!sm){toast("A leitura de fotos não está disponível aqui. Anote a oferta digitando.");return}
+OFE=OFE||{};OFB=true;render();
+try{var b=await shrink(f),j=await sm.json(OFPROMPT,{images:[b],cache:false}),pr=num(j&&j.preco),nm=String(j&&j.produto||"").replace(/\s+/g," ").trim().slice(0,120),va=String(j&&j.validade||"");
+OFE={q:nm,p:pr>0?r2(pr):0,a:num(j&&j.preco_antes)>pr?r2(num(j.preco_antes)):0,ate:/^\d{4}-\d{2}-\d{2}$/.test(va)&&va>=hojeISO()?va:hojeISO(),s:String(j&&j.mercado||"").trim().slice(0,40),foto:nm,cands:bcCands(nm)};OFB=false;render();var oc=document.getElementById("ofe");if(oc&&oc.scrollIntoView)oc.scrollIntoView({block:"start"})}
+catch(e){OFB=false;render();toast(FATAL[e&&e.code]||"Não consegui ler essa foto. Anote a oferta digitando.")}}
+function ofLer(){var g=function(id){var e=document.getElementById(id);return e?e.value:""};if(!OFE)return;if(document.getElementById("ofq"))OFE.q=g("ofq");OFE.p=num(g("ofp"));OFE.ate=g("ofa")||OFE.ate;OFE.s=g("ofs").replace(/\s+/g," ").trim()}
 function vl(){var L=CFG.lista,h='<div class="btns"><button type="button" class="btn line" data-act="lbc">'+BARS+'Ler código de barras</button><button type="button" class="btn line" data-act="calcon">Calculadora: qual compensa?</button></div>'+lpHtml()+(CALC.on?calcHtml():'')+rpCard()+'<div class="card"><h2 style="margin:0">Lista de compras</h2><p class="soft small">Adicione produtos que você já comprou para ver em qual mercado cada um saiu mais barato nos últimos 3 meses.</p><input type="search" id="lq" placeholder="Adicionar produto" aria-label="Adicionar produto à lista" value="'+esc(LQ)+'" data-in="lq" autocomplete="off"><div class="list" id="ls">'+lsug()+'</div></div>';
 if(!L.length)return h+'<div class="card"><p class="soft">Sua lista está vazia.</p></div>';
 var tot0=0,falt=0,per={};Object.keys(ST).forEach(function(s){per[s]={t:0,c:0}});
 h+=carrinhoCard()+'<div class="card"><div class="list">';
 L.forEach(function(it,i){var g=lg(it),b=g?cheapest(g):null,q=num(it.q)||1,info;
-if(b){tot0+=q*b.p;var lbs=lbStores(g);lbs.forEach(function(s){var e=per[s]=per[s]||{t:0,c:0};e.t+=q*(g.la||g.lastBy)[s].p;e.c++});info='Mais barato: <b>'+esc(sn(b.s))+'</b> · R$ '+R2(b.p)+' em '+dl(b.d)+(b.f?' (visto pela família)':'')+(b.old?' · <span class="pill gray">preço antigo</span>':'')+(lbs.length<2?(Object.keys(g.la||g.lastBy).length>1&&!b.old?" (único mercado nos últimos 3 meses)":" (único mercado)"):"")}else{falt++;info="Sem preço registrado"}
+if(b){tot0+=q*b.p;var lbs=lbStores(g);lbs.forEach(function(s){var e=per[s]=per[s]||{t:0,c:0};e.t+=q*(g.la||g.lastBy)[s].p;e.c++});info='Mais barato: <b>'+esc(sn(b.s))+'</b> · R$ '+R2(b.p)+' em '+dl(b.d)+(b.f?' (visto pela família)':'')+(b.old?' · <span class="pill gray">preço antigo</span>':'')+(lbs.length<2?(Object.keys(g.la||g.lastBy).length>1&&!b.old?" (único mercado nos últimos 3 meses)":" (único mercado)"):"")}else{falt++;info="Sem preço registrado"}var of0=ofDe(g);if(of0)info+='<br><b class="down">Oferta: R$ '+R2(of0.p)+' no '+esc(of0.s)+' até '+dl(of0.ate)+'</b>';
 h+='<div class="item'+(it.ok?" done":"")+'"><button type="button" class="ck" role="checkbox" aria-checked="'+!!it.ok+'" aria-label="Marcar '+esc(g?(g.nv||g.nm):it.n)+'" data-act="lok" data-i="'+i+'">'+(it.ok?CHK:"")+'</button><span class="txt"><span class="t">'+esc(g?(g.nv||g.nm):it.n)+'</span><span class="soft small">'+info+'</span><span class="qty" style="margin-top:4px"><button type="button" aria-label="Menos" data-act="lq-" data-i="'+i+'">−</button><b>'+qfmt(q)+'</b><button type="button" aria-label="Mais" data-act="lq+" data-i="'+i+'">+</button><span class="soft small">unidade(s)</span></span><label class="small" style="display:flex;align-items:center;gap:6px;margin-top:6px;color:var(--soft)">Na prateleira: R$<input type="text" inputmode="decimal" data-in="lpp" data-i="'+i+'" value="'+(it.pp?R2(it.pp):'')+'" placeholder="'+(b?R2(b.p):'0,00')+'" style="width:96px;padding:6px 8px;min-height:36px"></label></span><button type="button" class="ib x" aria-label="Tirar '+esc(g?(g.nv||g.nm):it.n)+' da lista" data-act="ldel" data-i="'+i+'">✕</button></div>'});
 h+='</div></div>';
 var priced=L.length-falt;
@@ -1163,6 +1220,19 @@ else if(a=="rpdesf"){var u1=RPU.pop();if(!u1)return;var dd1=rpDec();delete dd1[u
 else if(a=="rpq"){var P2=rpPend();if(!P2.length)return;var e2=P2[0];RPQ[e2.g.k]=Math.max(1,Math.min(99,rpQtd(e2)+(+d.d||0)));render()}
 else if(a=="rpfecha"){RPF=true;render()}
 else if(a=="rpabre"){RPF=false;render()}
+else if(a=="ofnova"){OFE={ate:hojeISO()};render();var oq=document.getElementById("ofq");if(oq)oq.focus()}
+else if(a=="ofcancel"){OFE=null;render()}
+else if(a=="ofpick"){ofLer();OFE.k=d.k;var gp0=G[d.k];if(gp0&&!OFE.s)OFE.s="";render();var op=document.getElementById("ofp");if(op&&!op.value)op.focus()}
+else if(a=="oftroca"){ofLer();OFE.k=null;OFE.q2=true;render()}
+else if(a=="ofsave"){ofLer();var e8=OFE,g8=e8.k&&G[e8.k],nm8=g8?g8.nm:String(e8.q||"").replace(/\s+/g," ").trim();
+if(!nm8){toast("Diga qual é o produto.");return}if(!(e8.p>0)){toast("Digite o preço da oferta.");var p8=document.getElementById("ofp");if(p8)p8.focus();return}if(!/^\d{4}-\d{2}-\d{2}$/.test(e8.ate||"")||e8.ate<hojeISO()){toast("A validade não pode ser antes de hoje.");return}if(!e8.s){toast("Diga em qual mercado está a oferta.");var s8=document.getElementById("ofs");if(s8)s8.focus();return}
+var V8=ofVistas(),lim=mesesAtras(1);CFG.ofv.l=V8.filter(function(o){return o&&o.ate>=lim});CFG.ofv.l.push({id:uid(),b:g8?tpBases(g8)[0]:"",n:nm8,p:r2(e8.p),a:e8.a||0,s:e8.s.slice(0,40),ate:e8.ate,em:hojeISO()});saveCfg();OFE=null;render();toast("Oferta salva. Ela aparece na lista e no produto até "+dl(e8.ate)+".")}
+else if(a=="ofrem"){CFG.ofv.l=ofVistas().filter(function(o){return o.id!==d.id});saveCfg();render();toast("Oferta apagada.")}
+else if(a=="oflinkadd"){var u9=ofUrl(d.u);if(!u9)return;ofLinks().push({n:d.n,u:u9});saveCfg();render();toast(d.n+" guardado. Toque nele para abrir as ofertas.")}
+else if(a=="oflinkform"){OFLF=true;render();var n9=document.getElementById("ofln");if(n9)n9.focus()}
+else if(a=="oflinkx"){OFLF=false;render()}
+else if(a=="oflinksave"){var nn9=(document.getElementById("ofln").value||"").replace(/\s+/g," ").trim(),uu9=ofUrl(document.getElementById("oflu").value);if(!nn9||!uu9){toast(!nn9?"Digite o nome do mercado.":"Esse link não parece válido. Copie o endereço da página de ofertas.");return}ofLinks().push({n:nn9.slice(0,40),u:uu9});saveCfg();OFLF=false;render();toast(nn9+" guardado.")}
+else if(a=="oflinkdel"){var L9=ofLinks(),x9=L9[+d.i];if(x9){L9.splice(+d.i,1);saveCfg();render();toast(x9.n+" saiu da lista de folhetos.")}}
 else if(a=="repoall"){REPOALL=!REPOALL;REPOSEL={};render()}
 else if(a=="repsel"){REPOSEL[d.r]=REPOSEL[d.r]===false;render()}
 else if(a=="repadd"){var ad=repoList(true).filter(function(e){return REPOSEL[e.key]!==false});ad.forEach(function(e){addList(e.g.k)});REPOALL=false;REPOSEL={};render();toast(ad.length==1?"Coloquei 1 produto na lista.":"Coloquei "+ad.length+" produtos na lista.")}
@@ -1260,7 +1330,7 @@ else if(a=="edit"){n=byId(d.id);if(n){DR=JSON.parse(JSON.stringify(n));DR._autoD
 });
 function alertEd(){var e=document.querySelector(".ed");if(!e)return;var p=e.querySelector(".status");if(!p){p=document.createElement("div");p.className="status warn";e.insertBefore(p,e.firstChild)}p.textContent="Preencha o nome, uma quantidade e um preço maiores que zero, e um desconto menor que o total."}
 document.addEventListener("change",function(ev){var t=ev.target,f=t.dataset&&t.dataset.file;
-if(f=="foto"){photos(t);return}if(f=="qr"){readQR(t);return}if(f=="pdf"){readPDF(t);return}
+if(f=="foto"){photos(t);return}if(f=="oferta"){ofFoto(t);return}if(f=="qr"){readQR(t);return}if(f=="pdf"){readPDF(t);return}
 var k=t.dataset&&t.dataset.in;if(!k)return;
 if(k=="f1"||k=="f2"){if(k=="f1")F1=t.value;else F2=t.value;render()}
 else if(DR&&(k=="loja"||k=="data"||k=="total")){readForm();if(k=="data")DR._autoDate=false;var e=document.getElementById("bd");if(e)e.innerHTML=bd()}});
@@ -1274,6 +1344,8 @@ else if(k=="lpp"){var li=CFG.lista[+t.dataset.i];if(li){li.pp=num(t.value)||0;LP
 else if(k=="bcq"){BCQ=t.value;var bl=document.getElementById("bcl");if(bl)bl.innerHTML=bcl()}
 else if(k=="bcp"){var br=document.getElementById("bcr");if(br)br.innerHTML=bcCompara(num(t.value))}
 else if(k=="edcalc"){var et=document.getElementById("ed_tot"),g=function(id){var e=document.getElementById(id);return e?e.value:""};if(et)et.innerHTML=edTotTxt(num(g("ed_q")),num(g("ed_p")),num(g("ed_d")),g("ed_dt")||"r")}
+else if(k=="ofq"&&OFE){OFE.q=t.value;OFE.q2=true;var ol=document.getElementById("ofl");if(ol)ol.innerHTML=ofSug()}
+else if(k=="ofp"&&OFE){OFE.p=num(t.value);var orr=document.getElementById("ofr"),og=OFE.k&&G[OFE.k];if(orr)orr.innerHTML=og&&OFE.p?ofCmp(og,OFE.p):""}
 else if(k=="cq"){CQ=t.value;document.getElementById("cml").innerHTML=cml()}
 else if(k=="jq"){JQ=t.value;document.getElementById("jl").innerHTML=jl()}
 else if(k=="lq"){LQ=t.value;document.getElementById("ls").innerHTML=lsug()}
