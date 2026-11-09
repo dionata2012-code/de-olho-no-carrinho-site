@@ -560,9 +560,10 @@ return h+'</div>'+(L.length>3?'<button type="button" class="link" data-act="ecoa
 
 /* ---------- Previsão de reposição ----------
    Pelo ritmo de compra de cada tipo de produto (mediana dos intervalos entre compras, nos últimos 9 meses). */
-function repoList(){var cut=mesesAtras(9),hoje=hojeISO(),grp={};Object.keys(G).forEach(function(k){var g=G[k],key=g.tp&&!g.tp.x&&g.tp.t?"t:"+g.tp.t+"|"+g.tp.b:"g:"+g.k,e=grp[key]=grp[key]||{ds:{},g:null};
+/* Produto que já está na lista de compras sai das sugestões, e a próxima sobe para o lugar dele. */
+function repoList(){var cut=mesesAtras(9),hoje=hojeISO(),grp={},NAL=CFG.lista.map(lg);Object.keys(G).forEach(function(k){var g=G[k],key=g.tp&&!g.tp.x&&g.tp.t?"t:"+g.tp.t+"|"+g.tp.b:"g:"+g.k,e=grp[key]=grp[key]||{ds:{},g:null,gs:[]};e.gs.push(g);
 g.occ.forEach(function(o){if(o.n.data>=cut)e.ds[o.n.data]=1});if(!e.g||g.last.n.data>e.g.last.n.data)e.g=g});
-var out=[];Object.keys(grp).forEach(function(key){var e=grp[key],ds=Object.keys(e.ds).sort();if(ds.length<3)return;var iv=[];for(var i=1;i<ds.length;i++)iv.push(diasEntre(ds[i-1],ds[i]));iv.sort(function(a,b){return a-b});
+var out=[];Object.keys(grp).forEach(function(key){var e=grp[key],ds=Object.keys(e.ds).sort();if(ds.length<3)return;if(e.gs.some(function(g){return NAL.indexOf(g)>=0}))return;var iv=[];for(var i=1;i<ds.length;i++)iv.push(diasEntre(ds[i-1],ds[i]));iv.sort(function(a,b){return a-b});
 var m=iv[Math.floor(iv.length/2)];if(m<3||m>60)return;var ult=ds[ds.length-1],d=diasEntre(ult,hoje),nd=CFG.repo&&CFG.repo[key];
 /* "Ainda tenho": a contagem recomeça no dia em que a pessoa disse que ainda tinha; uma compra nova depois disso volta ao normal. */
 if(nd&&nd.u===ult&&nd.em){var d2=diasEntre(nd.em,hoje);if(d2<m*.75)return;out.push({g:e.g,key:key,lab:tipoLab(e.g),m:m,d:d,ult:ult,tem:nd.em,dt:d2,r:d2/m});return}
@@ -875,7 +876,7 @@ var tot0=0,falt=0,per={};Object.keys(ST).forEach(function(s){per[s]={t:0,c:0}});
 h+=carrinhoCard()+'<div class="card"><div class="list">';
 L.forEach(function(it,i){var g=lg(it),b=g?cheapest(g):null,q=num(it.q)||1,info;
 if(b){tot0+=q*b.p;var lbs=lbStores(g);lbs.forEach(function(s){var e=per[s]=per[s]||{t:0,c:0};e.t+=q*(g.la||g.lastBy)[s].p;e.c++});info='Mais barato: <b>'+esc(sn(b.s))+'</b> · R$ '+R2(b.p)+' em '+dl(b.d)+(b.f?' (visto pela família)':'')+(b.old?' · <span class="pill gray">preço antigo</span>':'')+(lbs.length<2?(Object.keys(g.la||g.lastBy).length>1&&!b.old?" (único mercado nos últimos 3 meses)":" (único mercado)"):"")}else{falt++;info="Sem preço registrado"}
-h+='<div class="item'+(it.ok?" done":"")+'"><button type="button" class="ck" role="checkbox" aria-checked="'+!!it.ok+'" aria-label="Marcar '+esc(it.n)+'" data-act="lok" data-i="'+i+'">'+(it.ok?CHK:"")+'</button><span class="txt"><span class="t">'+esc(g?g.nm:it.n)+'</span><span class="soft small">'+info+'</span><span class="qty" style="margin-top:4px"><button type="button" aria-label="Menos" data-act="lq-" data-i="'+i+'">−</button><b>'+qfmt(q)+'</b><button type="button" aria-label="Mais" data-act="lq+" data-i="'+i+'">+</button><span class="soft small">unidade(s)</span></span><label class="small" style="display:flex;align-items:center;gap:6px;margin-top:6px;color:var(--soft)">Na prateleira: R$<input type="text" inputmode="decimal" data-in="lpp" data-i="'+i+'" value="'+(it.pp?R2(it.pp):'')+'" placeholder="'+(b?R2(b.p):'0,00')+'" style="width:96px;padding:6px 8px;min-height:36px"></label></span><button type="button" class="ib x" aria-label="Tirar '+esc(it.n)+' da lista" data-act="ldel" data-i="'+i+'">✕</button></div>'});
+h+='<div class="item'+(it.ok?" done":"")+'"><button type="button" class="ck" role="checkbox" aria-checked="'+!!it.ok+'" aria-label="Marcar '+esc(g?(g.nv||g.nm):it.n)+'" data-act="lok" data-i="'+i+'">'+(it.ok?CHK:"")+'</button><span class="txt"><span class="t">'+esc(g?(g.nv||g.nm):it.n)+'</span><span class="soft small">'+info+'</span><span class="qty" style="margin-top:4px"><button type="button" aria-label="Menos" data-act="lq-" data-i="'+i+'">−</button><b>'+qfmt(q)+'</b><button type="button" aria-label="Mais" data-act="lq+" data-i="'+i+'">+</button><span class="soft small">unidade(s)</span></span><label class="small" style="display:flex;align-items:center;gap:6px;margin-top:6px;color:var(--soft)">Na prateleira: R$<input type="text" inputmode="decimal" data-in="lpp" data-i="'+i+'" value="'+(it.pp?R2(it.pp):'')+'" placeholder="'+(b?R2(b.p):'0,00')+'" style="width:96px;padding:6px 8px;min-height:36px"></label></span><button type="button" class="ib x" aria-label="Tirar '+esc(g?(g.nv||g.nm):it.n)+' da lista" data-act="ldel" data-i="'+i+'">✕</button></div>'});
 h+='</div></div>';
 var priced=L.length-falt;
 h+='<div class="card"><h3 style="margin:0">Quanto deve custar</h3><div class="row flat"><span class="t">Cada item no mercado mais barato</span><span class="r">R$ '+R2(tot0)+'</span></div>';
@@ -1113,7 +1114,7 @@ else if(a=="orccancel"){ORCE=false;render()}
 else if(a=="orcsave"){var vv=num((document.getElementById("orcv")||{}).value);if(!(vv>0)){toast("Digite um valor maior que zero.");return}CFG.orc={v:r2(vv)};saveCfg();ORCE=false;render();toast("Orçamento salvo.")}
 else if(a=="orcdel"){CFG.orc={};saveCfg();ORCE=false;render()}
 else if(a=="ecoall"){ECOALL=!ECOALL;render()}
-else if(a=="repl"){addList(d.k);render();toast("Coloquei na lista.")}
+else if(a=="repl"){addList(d.k);render();toast("Coloquei na lista. Sai das sugestões enquanto estiver lá.")}
 else if(a=="repnao"){var hj=hojeISO(),ano=mesesAtras(12);CFG.repo=CFG.repo||{};Object.keys(CFG.repo).forEach(function(k){if(!CFG.repo[k]||!(CFG.repo[k].em>=ano))delete CFG.repo[k]});CFG.repo[d.r]={u:d.u,em:hj};saveCfg();render();toast("Certo. Aviso de novo no próximo ciclo.")}
 else if(a=="calcon"){CALC.on=!CALC.on;render();if(CALC.on){var cl=document.getElementById("calc");if(cl)cl.scrollIntoView({block:"start"})}}
 else if(a=="calcx"){CALC.on=false;render()}
