@@ -425,7 +425,7 @@ var TL={"leite lv":"Leite longa vida","leite cond":"Leite condensado","leite po"
 /* Tamanho padrão quando a nota não traz (ex.: "LEI.L.V.ITAL.INT.1"). */
 var TDF={"leite lv":{b:"l",q:1}};
 function r6(x){return Math.round(x*1e6)/1e6}
-function tLab(t){if(TL[t])return TL[t];return t.charAt(0).toUpperCase()+t.slice(1)}
+function tLab(t){if(TL[t])return TL[t];return nomeLegivel(t)}
 function tipoDe(nm){var w=String(nm||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").split(/[^a-z0-9]+/).filter(Boolean),o=[],run=true;
 for(var i=0;i<w.length&&o.length<4;i++){var t=TN[w[i]]||w[i];if(/\d/.test(t))break;
 if(t=="l"&&w[i+1]=="v"){t="lv";i++}/* "LTE L V" = leite longa vida */
@@ -561,18 +561,24 @@ return h+'</div>'+(L.length>3?'<button type="button" class="link" data-act="ecoa
 /* ---------- Previsão de reposição ----------
    Pelo ritmo de compra de cada tipo de produto (mediana dos intervalos entre compras, nos últimos 9 meses). */
 /* Produto que já está na lista de compras sai das sugestões, e a próxima sobe para o lugar dele. */
-function repoList(){var cut=mesesAtras(9),hoje=hojeISO(),grp={},NAL=CFG.lista.map(lg);Object.keys(G).forEach(function(k){var g=G[k],key=g.tp&&!g.tp.x&&g.tp.t?"t:"+g.tp.t+"|"+g.tp.b:"g:"+g.k,e=grp[key]=grp[key]||{ds:{},g:null,gs:[]};e.gs.push(g);
+function repoList(todos){var cut=mesesAtras(9),hoje=hojeISO(),grp={},NAL=CFG.lista.map(lg);Object.keys(G).forEach(function(k){var g=G[k],key=g.tp&&!g.tp.x&&g.tp.t?"t:"+g.tp.t+"|"+g.tp.b:"g:"+g.k,e=grp[key]=grp[key]||{ds:{},g:null,gs:[]};e.gs.push(g);
 g.occ.forEach(function(o){if(o.n.data>=cut)e.ds[o.n.data]=1});if(!e.g||g.last.n.data>e.g.last.n.data)e.g=g});
 var out=[];Object.keys(grp).forEach(function(key){var e=grp[key],ds=Object.keys(e.ds).sort();if(ds.length<3)return;if(e.gs.some(function(g){return NAL.indexOf(g)>=0}))return;var iv=[];for(var i=1;i<ds.length;i++)iv.push(diasEntre(ds[i-1],ds[i]));iv.sort(function(a,b){return a-b});
 var m=iv[Math.floor(iv.length/2)];if(m<3||m>60)return;var ult=ds[ds.length-1],d=diasEntre(ult,hoje),nd=CFG.repo&&CFG.repo[key];
 /* "Ainda tenho": a contagem recomeça no dia em que a pessoa disse que ainda tinha; uma compra nova depois disso volta ao normal. */
 if(nd&&nd.u===ult&&nd.em){var d2=diasEntre(nd.em,hoje);if(d2<m*.75)return;out.push({g:e.g,key:key,lab:tipoLab(e.g),m:m,d:d,ult:ult,tem:nd.em,dt:d2,r:d2/m});return}
-if(d<m*.75||d>m*2)return;out.push({g:e.g,key:key,lab:tipoLab(e.g),m:m,d:d,ult:ult,dt:d,r:d/m})});
-return out.sort(function(a,b){return b.r-a.r}).slice(0,3)}
-function repoCard(){var L=repoList();if(!L.length)return"";var na=function(g){return CFG.lista.some(function(x){return lg(x)===g})};
+/* Some só depois de 3 vezes o ritmo (e no mínimo 45 dias): quem faz compra do mês ainda vê o que compra a cada 10 dias. */
+if(d<m*.75||d>Math.max(m*3,45))return;out.push({g:e.g,key:key,lab:tipoLab(e.g),m:m,d:d,ult:ult,dt:d,r:d/m})});
+out.sort(function(a,b){return b.r-a.r});return todos?out:out.slice(0,3)}
+/* Quadro com as 3 primeiras; "Ver todos" abre a lista completa com caixinhas para pôr várias na lista de uma vez. */
+var REPOALL=false,REPOSEL={};
+function repoCard(){var T=repoList(true);if(!T.length){REPOALL=false;return""}var L=REPOALL?T:T.slice(0,3);var na=function(g){return CFG.lista.some(function(x){return lg(x)===g})};
 var h='<div class="card"><h3 style="margin:0">Pode estar acabando</h3><p class="soft small">Pelo seu ritmo de compra nos últimos meses.</p><div class="list">';
-L.forEach(function(e){var falta=Math.round(e.m-e.dt);h+='<div class="item"><span class="txt"><b>'+esc(e.lab)+'</b><span class="soft small">Você compra a cada ~'+e.m+' dias; a última foi há '+e.d+' dia'+(e.d==1?'':'s')+' ('+dl(e.ult)+'). '+(e.tem?'Em '+dl(e.tem)+' você ainda tinha. ':'')+(falta>0?'Deve acabar em ~'+falta+' dia'+(falta==1?'':'s')+'.':'Já deve ter acabado.')+'</span></span>'+(na(e.g)?'<span class="pill ok">na lista</span>':'<span style="display:flex;flex-direction:column;gap:6px;align-items:stretch"><button type="button" class="cbtn" data-act="repl" data-k="'+esc(e.g.k)+'">Pôr na lista</button><button type="button" class="cbtn" data-act="repnao" data-r="'+esc(e.key)+'" data-u="'+esc(e.ult)+'" aria-label="Ainda tenho '+esc(e.lab)+'">Ainda tenho</button></span>')+'</div>'});
-return h+'</div></div>'}
+L.forEach(function(e){var falta=Math.round(e.m-e.dt),on=REPOSEL[e.key]!==false;h+='<div class="item">'+(REPOALL?'<button type="button" class="ck" role="checkbox" aria-checked="'+on+'" aria-label="Pôr '+esc(e.lab)+' na lista" data-act="repsel" data-r="'+esc(e.key)+'">'+(on?CHK:'')+'</button>':'')+'<span class="txt"><b>'+esc(e.lab)+'</b><span class="soft small">Você compra a cada ~'+e.m+' dias; a última foi há '+e.d+' dia'+(e.d==1?'':'s')+' ('+dl(e.ult)+'). '+(e.tem?'Em '+dl(e.tem)+' você ainda tinha. ':'')+(falta>0?'Deve acabar em ~'+falta+' dia'+(falta==1?'':'s')+'.':'Já deve ter acabado.')+'</span></span>'+(na(e.g)?'<span class="pill ok">na lista</span>':'<span style="display:flex;flex-direction:column;gap:6px;align-items:stretch">'+(REPOALL?'':'<button type="button" class="cbtn" data-act="repl" data-k="'+esc(e.g.k)+'">Pôr na lista</button>')+'<button type="button" class="cbtn" data-act="repnao" data-r="'+esc(e.key)+'" data-u="'+esc(e.ult)+'" aria-label="Ainda tenho '+esc(e.lab)+'">Ainda tenho</button></span>')+'</div>'});
+h+='</div>';
+if(REPOALL){var nm=T.filter(function(e){return REPOSEL[e.key]!==false}).length;h+='<button type="button" class="btn" data-act="repadd"'+(nm?'':' aria-disabled="true"')+'>Pôr os marcados na lista ('+nm+')</button><p class="soft small">Desmarque o que você ainda tem, ou toque em "Ainda tenho" para ele só voltar no próximo ciclo.</p><button type="button" class="link" data-act="repoall">Mostrar menos</button>'}
+else if(T.length>3)h+='<button type="button" class="link" data-act="repoall">Ver todos ('+T.length+')</button>';
+return h+'</div>'}
 
 /* ---------- Sua inflação x inflação oficial ----------
    Mesmos produtos comprados nos últimos 3 meses e de 9 a 15 meses atrás; média ponderada pelo gasto recente. */
@@ -1115,6 +1121,9 @@ else if(a=="orcsave"){var vv=num((document.getElementById("orcv")||{}).value);if
 else if(a=="orcdel"){CFG.orc={};saveCfg();ORCE=false;render()}
 else if(a=="ecoall"){ECOALL=!ECOALL;render()}
 else if(a=="repl"){addList(d.k);render();toast("Coloquei na lista. Sai das sugestões enquanto estiver lá.")}
+else if(a=="repoall"){REPOALL=!REPOALL;REPOSEL={};render()}
+else if(a=="repsel"){REPOSEL[d.r]=REPOSEL[d.r]===false;render()}
+else if(a=="repadd"){var ad=repoList(true).filter(function(e){return REPOSEL[e.key]!==false});ad.forEach(function(e){addList(e.g.k)});REPOALL=false;REPOSEL={};render();toast(ad.length==1?"Coloquei 1 produto na lista.":"Coloquei "+ad.length+" produtos na lista.")}
 else if(a=="repnao"){var hj=hojeISO(),ano=mesesAtras(12);CFG.repo=CFG.repo||{};Object.keys(CFG.repo).forEach(function(k){if(!CFG.repo[k]||!(CFG.repo[k].em>=ano))delete CFG.repo[k]});CFG.repo[d.r]={u:d.u,em:hj};saveCfg();render();toast("Certo. Aviso de novo no próximo ciclo.")}
 else if(a=="calcon"){CALC.on=!CALC.on;render();if(CALC.on){var cl=document.getElementById("calc");if(cl)cl.scrollIntoView({block:"start"})}}
 else if(a=="calcx"){CALC.on=false;render()}
