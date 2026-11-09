@@ -167,7 +167,7 @@
       h += '<h3>Nos produtos que você compra</h3><p class="soft small">Primeiro os que mais pesam no seu bolso.</p>';
       meus.forEach(function (x) {
         h += '<div class="card nt"><div class="row flat"><span class="t">' + esc(x.r.produto) + '</span>' + selo(x.r.tendencia) + '</div>' + corpo(x.r) + '<div class="list">';
-        x.ps.slice(0, 3).forEach(function (g) { h += '<button type="button" class="row" data-act="prod" data-k="' + esc(g.k) + '"><span class="txt"><span class="t">' + esc(g.nm) + '</span><span class="soft small">Você pagou R$ ' + R2(g.last.pu) + ' em ' + dl(g.last.n.data) + ' · ' + esc(sn(g.last.s)) + '</span></span></button>'; });
+        x.ps.slice(0, 3).forEach(function (g) { h += '<button type="button" class="row" data-act="prod" data-k="' + esc(g.k) + '"><span class="txt"><span class="t">' + esc(g.nv || g.nm) + '</span><span class="soft small">Você pagou R$ ' + R2(g.last.pu) + ' em ' + dl(g.last.n.data) + ' · ' + esc(sn(g.last.s)) + '</span></span></button>'; });
         h += '</div></div>';
       });
     }
