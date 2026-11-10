@@ -407,7 +407,9 @@
   vm = function () {
     var h = vm0(), k = '<div class="card"><h3 style="margin:0">Seus dados</h3>', i = h.indexOf(k);
     if (!N.length) return h;
-    return i >= 0 ? h.slice(0, i) + card() + h.slice(i) : h + card();
+    var c = card();
+    if (window.dobra && !FM && !FMSG) c = dobra("fam", c);
+    return i >= 0 ? h.slice(0, i) + c + h.slice(i) : h + c;
   };
   function val(id) { var e = document.getElementById(id); return e ? e.value.replace(/\s+/g, " ").trim() : ""; }
   function rolar() { var c = document.getElementById("fam"); if (c && c.scrollIntoView) c.scrollIntoView({ block: "start" }); }

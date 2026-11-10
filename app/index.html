@@ -153,6 +153,14 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible,
 .camov p{color:#fff;font-weight:600;text-align:center;margin:0}
 .camov .btns{width:min(92vw,420px)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:9;background:var(--ink);color:#fff;font:600 15px var(--body);padding:12px 18px;border-radius:14px;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(13,26,18,.25)}
+.dobra{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:none;border:0;padding:0;margin:0;cursor:pointer;font:700 17px/1.3 var(--display);color:var(--ink);text-align:left;min-height:44px}
+.dobra .seta{display:inline-flex;color:var(--acc);flex:none;transition:transform .15s}
+.dobra .seta svg{width:24px;height:24px}
+.dobra[aria-expanded="true"] .seta{transform:rotate(180deg)}
+.dobra.merc{justify-content:flex-start;font:800 20px/1.2 var(--display);margin-top:4px}
+.dobra.merc .seta{transform:rotate(-90deg)}
+.dobra.merc[aria-expanded="true"] .seta{transform:none}
+@media (prefers-reduced-motion:reduce){.dobra .seta{transition:none}}
 summary::-webkit-details-marker{display:none}
 summary{cursor:pointer;list-style:none}
 </style>
@@ -716,14 +724,22 @@ if(V=="new"&&MODE=="foto")checkAI()}
 function empty(t){return'<div class="card"><h2>'+t+'</h2><p class="soft">Cadastre a primeira nota de compra para começar. Dá para usar '+(window.APP?'o QR code da nota, o PDF da consulta':'a foto do cupom, a chave de acesso')+' ou digitar os itens.</p><button type="button" class="btn" data-act="tab" data-v="new">Cadastrar nota</button>'+(window.APP?'<button type="button" class="btn line" data-act="demo">Ver como funciona, com notas de exemplo</button><p class="soft small">Conta: '+esc(window.APP_EMAIL||'')+'</p><button type="button" class="btn line" data-act="sair">Sair da conta</button><button type="button" class="btn danger" data-act="excluirconta">Excluir minha conta</button>'+(window.appRodape?appRodape():'')+'':'')+'</div>'}
 
 /* ---------- Mercados ---------- */
+/* ---------- Aba Mercados mais limpa ----------
+   Ficam abertos só o mercado mais barato, o orçamento e o gasto por mês. Os outros quadros mostram só o título com uma
+   seta; um toque abre ou fecha. "Seus mercados" abre pela seta na frente do título. Fica guardado neste aparelho. */
+var MCA={};try{MCA=JSON.parse(lsGet("mn_dobra")||"{}")||{}}catch(e){MCA={}}
+var SETA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+function dobra(id,h){if(!h)return"";var m=h.match(/^<div class="card"([^>]*)><h3 style="margin:0">([\s\S]*?)<\/h3>/);if(!m)return h;var ab=!!MCA[id];
+var cab='<button type="button" class="dobra" data-act="dobra" data-c="'+id+'" aria-expanded="'+ab+'"><span>'+m[2]+'</span><span class="seta">'+SETA+'</span></button>';
+return'<div class="card"'+m[1]+'>'+cab+(ab?h.slice(m[0].length):'</div>')}
 function vm(){
 if(!N.length)return empty("Bem-vindo ao De Olho no Carrinho");
 var h="",rk=Object.keys(IX).sort(function(a,b){return IX[a]-IX[b]}),ss=Object.keys(ST);
 if(rk.length>=2){var b=rk[0];h+='<div class="hero"><span class="lbl">Mais barato nos últimos 3 meses</span><span class="big">'+esc(sn(b))+'</span><p>'+Math.abs((IX[b]-1)*100).toFixed(1).replace(".",",")+'% '+(IX[b]<1?'abaixo':'acima')+' da média dos mercados, comparado em '+IXN[b]+' produtos</p></div>'}
 else{rk=[];var cut=cutDate(),rec=uniq(N.filter(function(n){return n.data>=cut}).map(sk));
 h+='<div class="status">'+(!rec.length?'Você não tem notas dos últimos 3 meses. O mercado mais barato é calculado só com preços recentes, porque eles mudam muito.':rec.length==1?'Nos últimos 3 meses, suas notas são todas do <b>'+esc(sn(rec[0]))+'</b>. Para saber qual mercado sai mais barato, cadastre compras de outro mercado com produtos que você também compra lá.':'Ainda não dá para apontar o mercado mais barato com segurança. Nos últimos 3 meses, é preciso ter pelo menos 2 mercados com '+IXMIN+' produtos em comum. Continue cadastrando as notas.')+'</div>'}
-h+=orcCard()+gastoMes()+ecoCard()+alertas()+susCard()+inflCard();
-h+='<h3>Seus mercados</h3><div class="list">';
+h+=orcCard()+gastoMes()+dobra("eco",ecoCard())+dobra("alt",alertas())+dobra("sus",susCard())+dobra("infl",inflCard());
+var mab=!!MCA.merc;h+='<button type="button" class="dobra merc" data-act="dobra" data-c="merc" aria-expanded="'+mab+'"><span class="seta">'+SETA+'</span><span>Seus mercados ('+ss.length+')</span></button>';if(!mab)return h;h+='<div class="list">';
 ss.sort(function(a,b){return(rk.indexOf(a)<0?99:IX[a])-(rk.indexOf(b)<0?99:IX[b])||(IXN[b]||0)-(IXN[a]||0)}).forEach(function(s){var nn=N.filter(function(n){return sk(n)==s}),g=nn.reduce(function(t,n){return t+pago(n)},0),x=rk.indexOf(s)>=0?(IX[s]-1)*100:null,c=storeColor(s);
 h+='<div class="card"><div class="row flat"><span class="main"><span class="dot" style="background:'+c+'"></span><span class="txt"><span class="t">'+esc(sn(s))+'</span><span class="soft small">'+esc(ST[s].n)+'</span></span></span>'+(x!=null?'<span class="r"><span class="'+(x<0?"down":"up")+'">'+pc(IX[s])+'</span>'+(s==rk[0]?'<span class="pill ok">mais barato</span>':'')+'</span>':'<span class="r"><span class="pill gray">poucos dados</span></span>')+'</div>';
 var rec3=nn.some(function(n){return n.data>=cutDate()});
@@ -1163,6 +1179,7 @@ else if(a=="rpdesf"){var u1=RPU.pop();if(!u1)return;var dd1=rpDec();delete dd1[u
 else if(a=="rpq"){var P2=rpPend();if(!P2.length)return;var e2=P2[0];RPQ[e2.g.k]=Math.max(1,Math.min(99,rpQtd(e2)+(+d.d||0)));render()}
 else if(a=="rpfecha"){RPF=true;render()}
 else if(a=="rpabre"){RPF=false;render()}
+else if(a=="dobra"){if(!d.c)return;MCA[d.c]=!MCA[d.c];lsSet("mn_dobra",JSON.stringify(MCA));render()}
 else if(a=="repoall"){REPOALL=!REPOALL;REPOSEL={};render()}
 else if(a=="repsel"){REPOSEL[d.r]=REPOSEL[d.r]===false;render()}
 else if(a=="repadd"){var ad=repoList(true).filter(function(e){return REPOSEL[e.key]!==false});ad.forEach(function(e){addList(e.g.k)});REPOALL=false;REPOSEL={};render();toast(ad.length==1?"Coloquei 1 produto na lista.":"Coloquei "+ad.length+" produtos na lista.")}
