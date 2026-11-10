@@ -326,7 +326,7 @@
 
 /* ---------- Grupo da família ----------
    Cada pessoa continua com a própria conta. O grupo divide só preços e produtos dos últimos 3 meses, sem mostrar quem comprou:
-   o banco (funções familia_*) entrega os itens dos outros sem nome, nota ou total, e o site os usa como "visto pela família"
+   o banco (funções familia_*) entrega os itens dos outros sem nome, nota ou total, e o site os usa como "mais barato do grupo"
    (FAM, em famAttach). Notas, gastos, orçamento e o que cada um compra junto continuam só com cada um. */
 (function () {
   if (!window.appFamilia) return;
@@ -393,7 +393,7 @@
       h += '<div class="row flat"><span class="txt"><span class="t">' + esc(m.apelido) + (m.eu ? ' (você)' : '') + '</span>' + (m.admin ? '<span class="soft small">cuida do grupo</span>' : '') + '</span>' +
         (FI.admin && m.id ? '<button type="button" class="cbtn" data-act="famtira" data-id="' + esc(m.id) + '">Tirar</button>' : '') + '</div>';
     });
-    h += '</div><p class="small">' + (r.precos ? 'A família trouxe <b>' + r.precos + ' preço' + (r.precos == 1 ? '' : 's') + '</b> em ' + r.produtos + ' produto' + (r.produtos == 1 ? '' : 's') + ' que você também compra. Eles aparecem como “visto pela família”.' :
+    h += '</div><p class="small">' + (r.precos ? 'A família trouxe <b>' + r.precos + ' preço' + (r.precos == 1 ? '' : 's') + '</b> em ' + r.produtos + ' produto' + (r.produtos == 1 ? '' : 's') + ' que você também compra. Eles aparecem como “mais barato do grupo”.' :
       M.length < 2 ? 'Convide alguém para começar a comparar.' : 'Ainda não há preços da família nos produtos que você compra. Eles aparecem quando alguém do grupo cadastra notas.') + '</p>';
     if (FI.codigo) {
       var txt = "Entre no meu grupo da família no De Olho no Carrinho: no app, toque no carrinho do topo, vá em Família, toque em Entrar com código e digite " + FI.codigo + " (vale até " + quando(FI.codigo_ate) + "). O grupo vê só os preços dos últimos 3 meses, sem saber quem comprou. Ainda não tem o app? " + "https://dionata2012-code.github.io/de-olho-no-carrinho-site/";
