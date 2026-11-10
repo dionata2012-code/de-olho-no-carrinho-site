@@ -221,7 +221,9 @@
       var a = document.getElementById("app"); if (a) a.innerHTML = vnt();
     } else render0();
     carregarNoticias(V === "nt" ? 30 * 60e3 : 3 * 3600e3);
-    var b = document.getElementById("n_nt"); if (b) b.setAttribute("aria-pressed", String(V === "nt"));
+    var b = document.getElementById("n_nt");
+    if (b) { b.setAttribute("aria-pressed", String(V === "nt")); var sw = semanaAtual(); b.classList.toggle("novo", !!sw && V !== "nt" && lsG(K_NTV) !== sw); }
+    if (V === "nt" && window.cabecalho) cabecalho();
   };
   document.addEventListener("click", function (ev) { var b = ev.target.closest('[data-act="ntrec"]'); if (b) { carregarNoticias(0, true); render(); } });
   setTimeout(function () { carregarNoticias(3 * 3600e3); }, 1500);
