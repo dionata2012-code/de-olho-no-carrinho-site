@@ -27,15 +27,23 @@
   --sombra:0 1px 2px rgba(18,32,22,.05),0 2px 8px rgba(18,32,22,.04);
   color-scheme:light;
 }
+:root[data-theme="dark"]{
+  --bg:#0e1511; --card:#162019; --ink:#e6eee8; --soft:#9fb0a5; --line:#28352d; --mute:#1f2a23;
+  --acc:#4cc38a; --acc-deep:#8fe0b6; --acc-ink:#05170d; --acc-soft:#173a29; --sec:#cfe9dc;
+  --warn:#f2a65a; --warn-soft:#3a2716; --info:#93b4ff; --info-soft:#1a2440; --err:#ff8f80; --err-soft:#3c1b18;
+  --sombra:none; color-scheme:dark;
+}
 html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--card)}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--card);border-bottom:1px solid var(--line);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .top-in{max-width:560px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-block:9px}
+.tile .eng{position:absolute;right:-4px;bottom:-4px;width:17px;height:17px;border-radius:50%;background:var(--card);color:var(--soft);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1px var(--line)}
+.tile .eng svg{width:11px;height:11px}
 .acts{display:flex;align-items:center;gap:8px;flex:none}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
-.tile{width:38px;height:38px;border-radius:11px;background:var(--acc);display:flex;align-items:center;justify-content:center;flex:none}
+.tile{position:relative;cursor:pointer;width:38px;height:38px;border-radius:11px;background:var(--acc);display:flex;align-items:center;justify-content:center;flex:none}
 .wm{display:flex;flex-direction:column;gap:2px;line-height:1.15;margin:0;min-width:0}
 .wm small{font:600 12.5px var(--body);color:var(--acc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wm span{font:700 18px var(--display);letter-spacing:-.3px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -93,7 +101,7 @@ input:focus,textarea:focus{border-color:var(--acc);outline:none}
 .btn.line{background:var(--card);color:var(--acc);border:1.5px solid var(--line)}
 .btn.leve{background:var(--acc-soft);color:var(--acc-deep);border:0}
 .btn.danger{background:var(--warn-soft);color:var(--warn)}
-.btn.danger.solid{background:var(--warn);color:#fff}
+.btn.danger.solid{background:var(--warn);color:var(--acc-ink)}
 .btn.sm{min-height:44px;padding:10px 12px;font-size:14px}
 .btn[aria-disabled="true"]{opacity:.55;pointer-events:none}
 .btn svg{width:22px;height:22px;flex:none}
@@ -107,7 +115,7 @@ input:focus,textarea:focus{border-color:var(--acc);outline:none}
 .filtros{display:flex;flex-direction:column;gap:10px}
 .chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;font:500 14px var(--body);box-shadow:var(--sombra);cursor:pointer;display:inline-flex;align-items:center;gap:7px;min-height:40px}
 .chip.off{color:var(--soft);background:transparent;text-decoration:line-through}
-.chip.tag[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip.tag[aria-pressed="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--mute);border-radius:14px;padding:4px}
 .seg button{border:0;background:none;border-radius:11px;padding:10px 4px;font:700 14px var(--body);color:var(--soft);cursor:pointer;min-height:44px}
 .seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(13,26,18,.12)}
@@ -144,7 +152,7 @@ ol.how{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;fon
 .sw button{width:40px;height:40px;border-radius:50%;border:3px solid var(--card);box-shadow:0 0 0 1.5px var(--line);cursor:pointer}
 .sw button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink)}
 .cbtn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 10px;font:600 13.5px var(--body);color:var(--ink);cursor:pointer;min-height:36px}
-.ck{width:26px;height:26px;border-radius:8px;border:2px solid var(--acc);background:var(--card);cursor:pointer;flex:none;display:inline-flex;align-items:center;justify-content:center;color:#fff}
+.ck{width:26px;height:26px;border-radius:8px;border:2px solid var(--acc);background:var(--card);cursor:pointer;flex:none;display:inline-flex;align-items:center;justify-content:center;color:var(--acc-ink)}
 .ck[aria-checked="true"]{background:var(--acc)}
 .ck svg{width:16px;height:16px}
 .done .t{text-decoration:line-through;color:var(--soft)}
@@ -158,7 +166,7 @@ ol.how{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;fon
 .nav button svg{width:22px;height:22px}
 .nav button[aria-pressed="true"]{color:var(--acc)}
 .nav button[aria-pressed="true"] .ic{background:var(--acc-soft)}
-.nav button.add .ic{width:56px;height:56px;border-radius:50%;background:var(--acc);color:#fff;margin-top:-26px;box-shadow:0 4px 12px rgba(11,122,75,.35);border:4px solid var(--card)}
+.nav button.add .ic{width:56px;height:56px;border-radius:50%;background:var(--acc);color:var(--acc-ink);margin-top:-26px;box-shadow:0 4px 12px rgba(11,122,75,.35);border:4px solid var(--card)}
 .nav button.add svg{width:24px;height:24px}
 .nav button.add[aria-pressed="true"] .ic{background:var(--acc-deep)}
 button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible,label.btn:focus-within{outline:3px solid var(--info);outline-offset:2px}
@@ -170,7 +178,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible,
 .camov .mira.bc{inset:34% 6%}
 .camov p{color:#fff;font-weight:600;text-align:center;margin:0}
 .camov .btns{width:min(92vw,420px)}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:9;background:var(--ink);color:#fff;font:600 15px var(--body);padding:12px 18px;border-radius:14px;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(13,26,18,.25)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:9;background:var(--ink);color:var(--card);font:600 15px var(--body);padding:12px 18px;border-radius:14px;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(13,26,18,.25)}
 .lsec{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--soft);margin:12px 0 0}
 .list .lsec:first-child{margin-top:0}
 .dobra{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:none;border:0;padding:0;margin:0;cursor:pointer;font:700 17px/1.3 var(--display);color:var(--ink);text-align:left;min-height:44px}
@@ -185,7 +193,7 @@ summary::-webkit-details-marker{display:none}
 summary{cursor:pointer;list-style:none}
 </style>
 
-<header class="top"><div class="top-in"><div class="brand"><span class="tile"><svg viewBox="0 0 100 100" width="27" height="27" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 22H20L29 66H75L83 34H24"/><path d="M37 50Q53 37 69 50Q53 63 37 50Z" stroke-width="6"/><circle cx="53" cy="50" r="6" fill="#ffffff" stroke="none"/><circle cx="34" cy="80" r="5.5"/><circle cx="70" cy="80" r="5.5"/></svg></span><h1 class="wm"><small id="saud">Olá</small><span id="ttl">De Olho no Carrinho</span></h1></div><div class="acts"><button type="button" id="n_nt" class="ib ntb" data-act="tab" data-v="nt" aria-label="Notícias" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h13v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M17 9h3v10a2 2 0 0 1-2 2"/><path d="M7.5 9h6M7.5 13h6M7.5 17h4"/></svg><i class="bol" aria-hidden="true"></i></button><span id="sync" class="pill gray" role="status">Neste aparelho</span></div></div></header>
+<header class="top"><div class="top-in"><div class="brand"><span class="tile" data-act="cfg" role="button" tabindex="0" aria-label="Configurações" title="Configurações"><i class="eng" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></i><svg viewBox="0 0 100 100" width="27" height="27" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 22H20L29 66H75L83 34H24"/><path d="M37 50Q53 37 69 50Q53 63 37 50Z" stroke-width="6"/><circle cx="53" cy="50" r="6" fill="#ffffff" stroke="none"/><circle cx="34" cy="80" r="5.5"/><circle cx="70" cy="80" r="5.5"/></svg></span><h1 class="wm"><small id="saud">Olá</small><span id="ttl">De Olho no Carrinho</span></h1></div><div class="acts"><button type="button" id="n_nt" class="ib ntb" data-act="tab" data-v="nt" aria-label="Notícias" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h13v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M17 9h3v10a2 2 0 0 1-2 2"/><path d="M7.5 9h6M7.5 13h6M7.5 17h4"/></svg><i class="bol" aria-hidden="true"></i></button><span id="sync" class="pill gray" role="status">Neste aparelho</span></div></div></header>
 <div class="wrap"><main id="app" aria-live="polite"></main></div>
 <div id="toast" class="toast" role="status" hidden></div>
 <nav class="nav" aria-label="Seções"><div class="nav-in">
@@ -747,13 +755,13 @@ if(v=="new"&&!DR){DR=blank();THUMBS=[];MSG={t:"",k:""};MODE=window.APP?"chave":"
 /* Topo: saudação pela hora do celular, com o nome que a pessoa escolheu, e o nome da aba. */
 function saudacao(){var h=new Date().getHours();return h>=5&&h<12?"Bom dia":h>=12&&h<18?"Boa tarde":"Boa noite"}
 function meuNome(){return String((CFG.perfil&&CFG.perfil.nome)||"").trim()}
-function cabecalho(){var t={m:"De Olho no Carrinho",n:"Notas",nd:"Nota",p:"Produtos",pd:"Produto",cm:"Comparar marcas",cmd:"Comparar marcas",bc:"Código de barras",gm:"Gasto por período",l:"Lista",nt:"Notícias","new":DR&&DR.id?"Editar nota":"Nova nota"}[V]||"De Olho no Carrinho",a=document.getElementById("ttl"),b=document.getElementById("saud"),nm=meuNome();
+function cabecalho(){var t={m:"De Olho no Carrinho",n:"Notas",nd:"Nota",p:"Produtos",pd:"Produto",cm:"Comparar marcas",cmd:"Comparar marcas",bc:"Código de barras",gm:"Gasto por período",l:"Lista",nt:"Notícias",cfg:"Configurações","new":DR&&DR.id?"Editar nota":"Nova nota"}[V]||"De Olho no Carrinho",a=document.getElementById("ttl"),b=document.getElementById("saud"),nm=meuNome();
 if(a)a.textContent=t;if(b)b.textContent=saudacao()+(nm?", "+nm.split(" ")[0]:"")}
 var PFE=false;
 function nomeCard(){if(meuNome()||(CFG.perfil&&CFG.perfil.pulou)||!N.length)return"";return'<div class="card" style="border-color:var(--acc)"><h3 style="margin:0">Como você quer ser chamado?</h3><p class="soft small">Aparece no topo do app: “'+saudacao()+', …”.</p><input type="text" id="pfn" maxlength="30" autocomplete="given-name" placeholder="Seu nome"><div class="btns"><button type="button" class="btn sm" data-act="pfsave">Salvar</button><button type="button" class="btn sm line" data-act="pfno">Agora não</button></div></div>'}
 function render(){comp();cabecalho();
 ["m","n","p","l","new"].forEach(function(x){document.getElementById("n_"+x).setAttribute("aria-pressed",String(V==x||((V=="pd"||V=="cm"||V=="cmd")&&x=="p")||(V=="gm"&&x=="m")||(V=="bc"&&x==(BCFROM=="l"?"l":"p"))||(V=="nd"&&x=="n")))});
-document.getElementById("app").innerHTML=({m:vm,n:vn,nd:vnd,p:vp,pd:vpd,cm:vcm,cmd:vcmd,bc:vbc,gm:vgm,l:vl,new:vnew})[V]();
+document.getElementById("app").innerHTML=({cfg:vcfg,m:vm,n:vn,nd:vnd,p:vp,pd:vpd,cm:vcm,cmd:vcmd,bc:vbc,gm:vgm,l:vl,new:vnew})[V]();
 if(V=="new"&&MODE=="foto")checkAI()}
 function empty(t){return'<div class="card"><h2>'+t+'</h2><p class="soft">Cadastre a primeira nota de compra para começar. Dá para usar '+(window.APP?'o QR code da nota, o PDF da consulta':'a foto do cupom, a chave de acesso')+' ou digitar os itens.</p><button type="button" class="btn" data-act="tab" data-v="new">Cadastrar nota</button>'+(window.APP?'<button type="button" class="btn line" data-act="demo">Ver como funciona, com notas de exemplo</button><p class="soft small">Conta: '+esc(window.APP_EMAIL||'')+'</p><button type="button" class="btn line" data-act="sair">Sair da conta</button><button type="button" class="btn danger" data-act="excluirconta">Excluir minha conta</button>'+(window.appRodape?appRodape():'')+'':'')+'</div>'}
 
@@ -766,6 +774,22 @@ var SETA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-widt
 function dobra(id,h){if(!h)return"";var m=h.match(/^<div class="card"([^>]*)><h3 style="margin:0">([\s\S]*?)<\/h3>/);if(!m)return h;var ab=!!MCA[id];
 var cab='<button type="button" class="dobra" data-act="dobra" data-c="'+id+'" aria-expanded="'+ab+'"><span>'+m[2]+'</span><span class="seta">'+SETA+'</span></button>';
 return'<div class="card"'+m[1]+'>'+cab+(ab?h.slice(m[0].length):'</div>')}
+/* ---------- Configurações (toque no carrinho do topo) ----------
+   Nome, tema, família (no app), seus dados, sair e excluir a conta. */
+var TEMA="auto";try{TEMA=lsGet("mn_tema")||"auto"}catch(e){}
+function temaEfetivo(){if(TEMA==="escuro"||TEMA==="claro")return TEMA;try{return window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"escuro":"claro"}catch(e){return"claro"}}
+function aplicaTema(){var esc0=temaEfetivo()==="escuro";document.documentElement.setAttribute("data-theme",esc0?"dark":"light");var mt=document.querySelector('meta[name="theme-color"]');if(mt)mt.setAttribute("content",esc0?"#162019":"#ffffff");try{if(window.Android&&Android.tema)Android.tema(esc0)}catch(e){}}
+aplicaTema();try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",function(){if(TEMA==="auto")aplicaTema()})}catch(e){}
+function vcfg(){var h='<button type="button" class="link back" data-act="tab" data-v="m">‹ Voltar</button>';
+h+='<div class="card"><h3 style="margin:0">Você</h3>'+(PFE?'<div class="ed"><label class="f">Como você quer ser chamado?<input type="text" id="pfn" maxlength="30" autocomplete="given-name" value="'+esc(meuNome())+'"></label><div class="btns"><button type="button" class="btn sm" data-act="pfsave">Salvar</button><button type="button" class="btn sm line" data-act="pfx">Cancelar</button></div></div>':'<div class="row flat"><span class="small">Seu nome no app: <b>'+(meuNome()?esc(meuNome()):'não informado')+'</b></span><button type="button" class="link" data-act="pfedit">Mudar</button></div>')+(window.APP_EMAIL?'<p class="soft small">Conta: '+esc(window.APP_EMAIL)+'</p>':'')+'</div>';
+h+='<div class="card"><h3 style="margin:0">Aparência</h3><div class="seg" role="group" aria-label="Tema">'+[["claro","Claro"],["escuro","Escuro"],["auto","Automático"]].map(function(x){return'<button type="button" aria-pressed="'+(TEMA===x[0])+'" data-act="tema" data-t="'+x[0]+'">'+x[1]+'</button>'}).join("")+'</div><p class="soft small">Automático segue o tema do celular. Fica guardado neste aparelho.</p></div>';
+h+=window.appFamCard?appFamCard():"";
+h+='<div class="card"><h3 style="margin:0">Seus dados</h3>'+'<p class="soft">'+(DB?(window.APP?'As notas ficam salvas na sua conta ('+esc(window.APP_EMAIL||'')+') e aparecem em qualquer celular em que você entrar com ela.':'As notas ficam salvas na sua conta Claude e aparecem em qualquer aparelho em que você abrir este link.'):GUEST?'Você abriu o site pelo link de outra pessoa: aqui as notas ficam salvas só neste aparelho. Baixe a planilha de vez em quando para não perder.':'As notas ficam salvas só neste aparelho. Baixe a planilha de vez em quando para não perder.')+'</p><button type="button" class="btn line" data-act="csv">Baixar planilha (CSV)</button><p class="soft small" id="cm" role="status"></p>'+(window.APP?'<button type="button" class="btn line" data-act="sair">Sair da conta</button><button type="button" class="btn danger" data-act="excluirconta">Excluir minha conta</button>'+(window.appRodape?appRodape():'')+'':'');
+h+=CONF=="wipe"?'<p><b>Apagar as '+N.length+' notas salvas?</b> Isso não pode ser desfeito.</p><div class="btns"><button type="button" class="btn danger solid" data-act="wipe2">Apagar tudo</button><button type="button" class="btn line" data-act="noconf">Cancelar</button></div>':'<button type="button" class="btn danger" data-act="wipe">Apagar todas as notas</button>';
+
+h+='</div>';
+if(window.APP)h+='<div class="card"><h3 style="margin:0">Ajuda</h3><button type="button" class="btn line" data-act="demo">Ver como funciona, com notas de exemplo</button><a class="link" href="https://dionata2012-code.github.io/de-olho-no-carrinho-site/privacidade.html" target="_blank" rel="noopener">Política de privacidade</a></div>';
+return h}
 function vm(){
 if(!N.length)return empty("Bem-vindo ao De Olho no Carrinho");
 var h=nomeCard(),rk=Object.keys(IX).sort(function(a,b){return IX[a]-IX[b]}),ss=Object.keys(ST);
@@ -818,9 +842,7 @@ if(Object.keys(ST).length>1){h+='<p class="soft small">Mercados</p><div class="c
 var used=uniq([].concat.apply([],N.map(function(n){return n.tags||[]})));
 if(used.length){h+='<p class="soft small">Etiquetas</p><div class="chips">';used.forEach(function(t){h+='<button type="button" class="chip tag" aria-pressed="'+!!FT[t]+'" data-act="ft" data-t="'+esc(t)+'">'+esc(t)+'</button>'});h+='</div>'}
 h+='</div><div class="list" id="ln">'+nl()+'</div>';
-h+='<div class="card"><h3 style="margin:0">Seus dados</h3>'+(PFE?'<div class="ed"><label class="f">Como você quer ser chamado?<input type="text" id="pfn" maxlength="30" autocomplete="given-name" value="'+esc(meuNome())+'"></label><div class="btns"><button type="button" class="btn sm" data-act="pfsave">Salvar</button><button type="button" class="btn sm line" data-act="pfx">Cancelar</button></div></div>':'<div class="row flat"><span class="small">Seu nome no app: <b>'+(meuNome()?esc(meuNome()):'não informado')+'</b></span><button type="button" class="link" data-act="pfedit">Mudar</button></div>')+'<p class="soft">'+(DB?(window.APP?'As notas ficam salvas na sua conta ('+esc(window.APP_EMAIL||'')+') e aparecem em qualquer celular em que você entrar com ela.':'As notas ficam salvas na sua conta Claude e aparecem em qualquer aparelho em que você abrir este link.'):GUEST?'Você abriu o site pelo link de outra pessoa: aqui as notas ficam salvas só neste aparelho. Baixe a planilha de vez em quando para não perder.':'As notas ficam salvas só neste aparelho. Baixe a planilha de vez em quando para não perder.')+'</p><button type="button" class="btn line" data-act="csv">Baixar planilha (CSV)</button><p class="soft small" id="cm" role="status"></p>'+(window.APP?'<button type="button" class="btn line" data-act="sair">Sair da conta</button><button type="button" class="btn danger" data-act="excluirconta">Excluir minha conta</button>'+(window.appRodape?appRodape():'')+'':'');
-h+=CONF=="wipe"?'<p><b>Apagar as '+N.length+' notas salvas?</b> Isso não pode ser desfeito.</p><div class="btns"><button type="button" class="btn danger solid" data-act="wipe2">Apagar tudo</button><button type="button" class="btn line" data-act="noconf">Cancelar</button></div>':'<button type="button" class="btn danger" data-act="wipe">Apagar todas as notas</button>';
-return h+'</div>'}
+return h}
 function nl(){var h="",c=0,ft=Object.keys(FT).filter(function(t){return FT[t]}),ym0=null,abre=false;
 N.slice().sort(function(a,b){var x=a.data+(a.hora||""),y=b.data+(b.hora||"");return x<y?1:x>y?-1:0}).forEach(function(n){if((F1&&n.data<F1)||(F2&&n.data>F2)||FS[sk(n)]===0)return;if(ft.length&&!ft.some(function(t){return(n.tags||[]).indexOf(t)>=0}))return;c++;
 var ym=n.data.slice(0,7);if(ym!==ym0){if(abre)h+='</div>';ym0=ym;abre=true;h+='<p class="grp-t">'+ymNome(ym)+'</p><div class="grp">'}
@@ -1236,6 +1258,8 @@ else if(a=="pfsave"){var pv=((document.getElementById("pfn")||{}).value||"").rep
 else if(a=="pfno"){CFG.perfil={pulou:1};saveCfg();render();toast("Tudo bem. Dá para pôr o nome depois em Notas › Seus dados.")}
 else if(a=="pfedit"){PFE=true;render();var pf=document.getElementById("pfn");if(pf)pf.focus()}
 else if(a=="pfx"){PFE=false;render()}
+else if(a=="cfg"){go("cfg")}
+else if(a=="tema"){if(!d.t)return;TEMA=d.t;lsSet("mn_tema",TEMA);aplicaTema();render()}
 else if(a=="repoall"){REPOALL=!REPOALL;REPOSEL={};render()}
 else if(a=="repsel"){REPOSEL[d.r]=REPOSEL[d.r]===false;render()}
 else if(a=="repadd"){var ad=repoList(true).filter(function(e){return REPOSEL[e.key]!==false});ad.forEach(function(e){addList(e.g.k)});REPOALL=false;REPOSEL={};render();toast(ad.length==1?"Coloquei 1 produto na lista.":"Coloquei "+ad.length+" produtos na lista.")}
@@ -1354,6 +1378,7 @@ else if(k=="ck"&&DR){var dd=dig(t.value).slice(0,44);DR.ck=dd;if(chaveOk(dd)&&!D
 else if(DR&&k=="total"){DR.total=r2(num(t.value));var e2=document.getElementById("bd");if(e2)e2.innerHTML=bd()}
 else if(DR&&k=="loja"){DR.loja=t.value;var ev2=document.getElementById("apv");if(ev2)ev2.innerHTML=apv()}});
 document.addEventListener("keydown",function(ev){var b=ev.target;if((ev.key=="Enter"||ev.key==" ")&&b.tagName=="LABEL"&&b.htmlFor){ev.preventDefault();document.getElementById(b.htmlFor).click()}
+if((ev.key=="Enter"||ev.key==" ")&&b.getAttribute&&b.getAttribute("data-act")=="cfg"){ev.preventDefault();b.click()}
 if(ev.key=="Enter"&&b.id=="pfn"){ev.preventDefault();var ps=document.querySelector("[data-act=pfsave]");if(ps)ps.click()}
 if(ev.key=="Enter"&&b.id=="lq"){ev.preventDefault();var f=document.querySelector("#ls [data-act]");if(f)f.click()}});
 document.documentElement.lang="pt-BR";repair();render();initDb();
@@ -1379,6 +1404,7 @@ input[type=password]:focus{border-color:var(--acc);outline:none}
 .login .tile svg{width:38px;height:38px}
 .login .wm small{font-size:14px}
 .login .wm span{font-size:26px}
+.login .eng{display:none}
 .nt a{color:var(--acc);font-weight:700}
 .nt .vr{font-weight:700}
 </style>

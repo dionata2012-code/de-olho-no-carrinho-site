@@ -356,8 +356,8 @@
       FI = i || null;
       return FI ? appFamilia.precos() : [];
     }).then(function (rows) {
-      FAM = Array.isArray(rows) ? rows : []; T = Date.now(); guardar(); if (V === "m" || V === "pd" || V === "l" || V === "cmd") render();
-    }, function () { if (FI === undefined) { FI = null; if (V === "m") render(); } });
+      FAM = Array.isArray(rows) ? rows : []; T = Date.now(); guardar(); if (V === "m" || V === "pd" || V === "l" || V === "cmd" || V === "cfg") render();
+    }, function () { if (FI === undefined) { FI = null; if (V === "m" || V === "cfg") render(); } });
   }
   function quando(iso) { var d = new Date(iso); if (isNaN(d)) return ""; return ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2) + " às " + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); }
   var PRIV = 'O grupo vê só os preços e produtos dos últimos 3 meses, sem saber quem comprou. Suas notas, seus gastos e o que você compra junto continuam só com você.';
@@ -396,7 +396,7 @@
     h += '</div><p class="small">' + (r.precos ? 'A família trouxe <b>' + r.precos + ' preço' + (r.precos == 1 ? '' : 's') + '</b> em ' + r.produtos + ' produto' + (r.produtos == 1 ? '' : 's') + ' que você também compra. Eles aparecem como “visto pela família”.' :
       M.length < 2 ? 'Convide alguém para começar a comparar.' : 'Ainda não há preços da família nos produtos que você compra. Eles aparecem quando alguém do grupo cadastra notas.') + '</p>';
     if (FI.codigo) {
-      var txt = "Entre no meu grupo da família no De Olho no Carrinho: no app, vá até o fim da aba Mercados, no quadro Família, toque em Entrar com código e digite " + FI.codigo + " (vale até " + quando(FI.codigo_ate) + "). O grupo vê só os preços dos últimos 3 meses, sem saber quem comprou. Ainda não tem o app? " + "https://dionata2012-code.github.io/de-olho-no-carrinho-site/";
+      var txt = "Entre no meu grupo da família no De Olho no Carrinho: no app, toque no carrinho do topo, vá em Família, toque em Entrar com código e digite " + FI.codigo + " (vale até " + quando(FI.codigo_ate) + "). O grupo vê só os preços dos últimos 3 meses, sem saber quem comprou. Ainda não tem o app? " + "https://dionata2012-code.github.io/de-olho-no-carrinho-site/";
       h += '<p>Código de convite: <b style="font-size:20px;letter-spacing:3px">' + esc(FI.codigo) + '</b><br><span class="soft small">vale até ' + esc(quando(FI.codigo_ate)) + '</span></p>' +
         '<a class="btn line" href="https://wa.me/?text=' + encodeURIComponent(txt) + '">Mandar convite pelo WhatsApp</a>';
     }
@@ -405,14 +405,8 @@
     h += '<p class="soft small">' + PRIV + '</p>' + aviso2(M.length) + '<button type="button" class="btn line" data-act="famsair">Sair do grupo</button>';
     return h + msgHtml() + '</div>';
   }
-  var vm0 = vm;
-  vm = function () {
-    var h = vm0(), k = '<div class="card"><h3 style="margin:0">Seus dados</h3>', i = h.indexOf(k);
-    if (!N.length) return h;
-    var c = card();
-    if (window.dobra && !FM && !FMSG) c = dobra("fam", c);
-    return i >= 0 ? h.slice(0, i) + c + h.slice(i) : h + c;
-  };
+  /* O quadro Família fica nas Configurações (toque no carrinho do topo). */
+  window.appFamCard = function () { return card(); };
   function val(id) { var e = document.getElementById(id); return e ? e.value.replace(/\s+/g, " ").trim() : ""; }
   function rolar() { var c = document.getElementById("fam"); if (c && c.scrollIntoView) c.scrollIntoView({ block: "start" }); }
   function feito(i, t) { FI = i || null; FM = ""; CONV = null; FMSG = t ? { t: t, k: "ok" } : null; BUSY = false; T = 0; render(); rolar(); atualizar(true); }
