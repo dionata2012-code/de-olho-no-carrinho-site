@@ -1144,6 +1144,10 @@ var sm=await getSample();if(!sm||String(t).trim().length<40){msg("Não encontrei
 BUSY=true;msg("Lendo o texto com o Claude…","busy");
 try{var j2=await sm.json(PROMPT_TXT+String(t).slice(0,60000),{cache:false});BUSY=false;var r2_=merge(j2);render();msg(resumoLeitura(r2_),"ok")}
 catch(e){BUSY=false;msg(FATAL[e&&e.code]||"Não consegui ler esse texto. Adicione os itens à mão.","warn")}}
+/* Unidade como veio na nota, sem números ou pontos grudados ("un9" → "UN", "KG." → "KG"); vazia vira "UN". */
+function uniN(u){u=String(u||"").replace(/[^A-Za-z²³]+$/,"").replace(/^[^A-Za-z]+/,"").toUpperCase();return u||"UN"}
+/* Valor em reais com vírgula ("1.234,56") ou com ponto ("1234.56"). */
+function din(v){v=String(v||"");return v.indexOf(",")>=0?num(v):Number(v)||0}
 function parsePortal(text){var flat=String(text||"").replace(/ /g," ").replace(/\s+/g," ").trim();if(!flat)return null;
 var j={loja:"",cnpj:"",data:"",hora:"",chave:"",total:0,itens:[]};
 var cs=flat.match(/\d[\d .\/-]{42,100}\d/g)||[];cs.some(function(c){var d=dig(c);for(var i=0;i+44<=d.length;i++)if(chaveOk(d.slice(i,i+44))){j.chave=d.slice(i,i+44);return true}return false});
@@ -1153,18 +1157,23 @@ m=flat.match(/Valor total (?:do servi[çc]o|da nota|da NFC-e)?[\s\S]{0,160}?R\$\
 m=flat.match(/Emitente[\s\S]{0,200}?(\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2})\s+(.+?)\s+(\d{9,14}|ISENTO)\s+([A-Z]{2})\b/i);if(m){j.cnpj=fmtCnpj(m[1]);j.loja=m[2].trim()}
 var body=flat.replace(/NFC-e\s+Emitente\s+Produtos e Servi[çc]os\s+Totais\s+Transporte\s+Cobran[çc]a\s+Informa[çc][õo]es Adicionais/gi," ").replace(/N[úu]mero\s+Descri[çc][ãa]o\s+Quantidade\s+Unidade\s+Comercial\s+Valor\s+Unit[áa]rio\s+Valor\s*\(R\$\)/gi," ").replace(/Vers[ãa]o\s*\d+(?:\.\d+)+/gi," ");
 var at=body.search(/Produtos e Servi[çc]os/i);if(at>=0)body=body.slice(at+19);
-var re=/(?:^|\s)(\d{1,3})\s+((?:(?!R\$)\S)(?:(?!R\$).){0,140}?)\s+(\d+(?:[.,]\d{1,4})?)\s+([A-Za-z]{1,6})\s+R\$\s*([\d.]*\d,\d{2,4})\s+R\$\s*([\d.]*\d,\d{2})(?=\s|$)/g,last=0,x;
-while((x=re.exec(body))){var k=+x[1];if(k<=last||k>last+3)continue;last=k;var q=Number(String(x[3]).replace(",","."))||1,p=num(x[5]),t=num(x[6]);j.itens.push({c:"",n:x[2].replace(/\s+/g," ").trim(),q:q,u:x[4].toUpperCase(),p:r2(p),t:r2(t)})}
+var re=/(?:^|\s)(\d{1,3})\s+((?:(?!R\$)\S)(?:(?!R\$).){0,140}?)\s+(\d+(?:[.,]\d{1,4})?)\s+([A-Za-z][A-Za-z0-9.]{0,7})\s+R\$\s*([\d.]*\d,\d{2,4})\s+R\$\s*([\d.]*\d,\d{2})(?=\s|$)/g,last=0,x;
+while((x=re.exec(body))){var k=+x[1];if(k<=last||k>last+3)continue;last=k;var q=Number(String(x[3]).replace(",","."))||1,p=num(x[5]),t=num(x[6]);j.itens.push({c:"",n:x[2].replace(/\s+/g," ").trim(),q:q,u:uniN(x[4]),p:r2(p),t:r2(t)})}
 /* Outros formatos da consulta: valores sem "R$" na tabela, ou a lista do QR code no estilo "DESCRIÇÃO (Código: 123) Qtde.: 1 UN: UN Vl. Unit.: 6,49 Vl. Total 6,49". */
-if(!j.itens.length){var re2=/(?:^|\s)(\d{1,3})\s+((?:(?!R\$)\S)(?:(?!R\$).){0,140}?)\s+(\d+(?:[.,]\d{1,4})?)\s+([A-Za-z]{1,6})\s+(?:R\$\s*)?([\d.]*\d,\d{2,4})\s+(?:R\$\s*)?([\d.]*\d,\d{2})(?=\s|$)/g;last=0;
-while((x=re2.exec(body))){var k2=+x[1];if(k2<=last||k2>last+3)continue;last=k2;j.itens.push({c:"",n:x[2].replace(/\s+/g," ").trim(),q:Number(String(x[3]).replace(",","."))||1,u:x[4].toUpperCase(),p:r2(num(x[5])),t:r2(num(x[6]))})}}
-if(!j.itens.length){var re3=/([A-Za-zÀ-ú0-9](?:[^()]|\((?!\s*(?:C[óo]d|NFC))[^()]{0,30}\)){1,140}?)\s*\(\s*C[óo]d(?:igo)?\.?:?\s*([0-9A-Za-z]*)\s*\)\s*Qtde\.?\s*(?:total de [íi]tens)?:?\s*([\d.,]+)\s*UN:?\s*([A-Za-z]{1,6})\s*Vl\.?\s*Unit\.?:?\s*(?:R\$\s*)?([\d.]*\d,\d{2,4})\s*Vl\.?\s*Total:?\s*(?:R\$\s*)?([\d.]*\d,\d{2})/gi;
-while((x=re3.exec(flat))){var nm=x[1].replace(/^.*(?:Produtos e Servi[çc]os|Descri[çc][ãa]o|Valor\s*\(R\$\)|Vl\.?\s*Total)\s*/i,"").replace(/\s+/g," ").trim();var cn=nm.replace(/^.*\b(?:CNPJ|CPF|IE|Inscri[çc][ãa]o Estadual)\b:?\s*[\d.\/-]{6,}[^A-Za-zÀ-ú]*/i,"");if(cn!==nm)nm=cn.replace(/^.*,\s*\d+\s+/,"").trim();if(!nm)continue;var qx=String(x[3]);qx=qx.indexOf(",")>=0?Number(qx.replace(/\./g,"").replace(",",".")):Number(qx);j.itens.push({c:dig(x[2]).length>=8?dig(x[2]):"",n:nm,q:qx||1,u:x[4].toUpperCase(),p:r2(num(x[5])),t:r2(num(x[6]))})}}
+if(!j.itens.length){var re2=/(?:^|\s)(\d{1,3})\s+((?:(?!R\$)\S)(?:(?!R\$).){0,140}?)\s+(\d+(?:[.,]\d{1,4})?)\s+([A-Za-z][A-Za-z0-9.]{0,7})\s+(?:R\$\s*)?([\d.]*\d,\d{2,4})\s+(?:R\$\s*)?([\d.]*\d,\d{2})(?=\s|$)/g;last=0;
+while((x=re2.exec(body))){var k2=+x[1];if(k2<=last||k2>last+3)continue;last=k2;j.itens.push({c:"",n:x[2].replace(/\s+/g," ").trim(),q:Number(String(x[3]).replace(",","."))||1,u:uniN(x[4]),p:r2(num(x[5])),t:r2(num(x[6]))})}}
+if(!j.itens.length){var re3=/([A-Za-zÀ-ú0-9](?:[^()]|\((?!\s*(?:C[óo]d|NFC))[^()]{0,30}\)){1,140}?)\s*\(\s*C[óo]d(?:igo)?\.?:?\s*([0-9A-Za-z]*)\s*\)\s*Qtde\.?\s*(?:total de [íi]tens)?:?\s*([\d.,]+)\s*UN:?\s*([A-Za-z0-9.²³]{0,8}?)\s*Vl\.?\s*Unit\.?:?\s*(?:R\$\s*)?([\d.]*\d,\d{2,4})\s*Vl\.?\s*Total:?\s*(?:R\$\s*)?([\d.]*\d,\d{2})/gi;
+while((x=re3.exec(flat))){var nm=x[1].replace(/^.*(?:Produtos e Servi[çc]os|Descri[çc][ãa]o|Valor\s*\(R\$\)|Vl\.?\s*Total)\s*/i,"").replace(/\s+/g," ").trim();var cn=nm.replace(/^.*\b(?:CNPJ|CPF|IE|Inscri[çc][ãa]o Estadual)\b:?\s*[\d.\/-]{6,}[^A-Za-zÀ-ú]*/i,"");if(cn!==nm)nm=cn.replace(/^.*,\s*\d+\s+/,"").trim();if(!nm)continue;var qx=String(x[3]);qx=qx.indexOf(",")>=0?Number(qx.replace(/\./g,"").replace(",",".")):Number(qx);j.itens.push({c:dig(x[2]).length>=8?dig(x[2]):"",n:nm,q:qx||1,u:uniN(x[4]),p:r2(num(x[5])),t:r2(num(x[6]))})}}
 /* Nos dois formatos com "(Código: …)", o nome pode ter parênteses curtos, como "COCA-COLA (PET) 2L" ou "MANTEIGA (C/SAL)". */
 /* Página do QR code de MG: "DESCRIÇÃO (Código: 50723) Qtde total de ítens: 1.0000 UN: UN Valor total R$: R$ 4,48", sem preço unitário; total da nota com ponto (282.40).
    Alguns mercados mandam a unidade com um número grudado ("UN: un9", "UN: kg9"): o número é descartado. */
-if(!j.itens.length){var raw=String(text||"").replace(/ /g," ").replace(/\t/g," "),re4=/^ *((?:[^\n()]|\((?!\s*C[óo]digo)[^()\n]{0,30}\)){1,160}?)\s*\(\s*C[óo]digo:?\s*([^)\n]*?)\s*\)\s*Qtde\.?\s*total de [íi]tens:?\s*([\d.,]+)\s*UN:?\s*([A-Za-z][A-Za-z0-9]{0,6})\s*Valor total\s*R\$:?\s*(?:R\$\s*)?([\d.]*\d,\d{2})/gim;
-while((x=re4.exec(raw))){var q4=String(x[3]);q4=q4.indexOf(",")>=0?Number(q4.replace(/\./g,"").replace(",",".")):Number(q4);if(!(q4>0))q4=1;var t4=r2(num(x[5]));j.itens.push({c:dig(x[2]).slice(0,14),n:x[1].replace(/\s+/g," ").trim(),q:q4,u:(x[4].replace(/\d+$/,"")||x[4]).toUpperCase(),p:r2(t4/q4),t:t4})}
+if(!j.itens.length){var raw=String(text||"").replace(/ /g," ").replace(/\t/g," "),re4=/^ *((?:[^\n()]|\((?!\s*C[óo]digo)[^()\n]{0,30}\)){1,160}?)\s*\(\s*C[óo]digo:?\s*([^)\n]*?)\s*\)\s*Qtde\.?\s*total de [íi]tens:?\s*([\d.,]+)\s*UN:?\s*([A-Za-z0-9.²³]{0,8}?)\s*Valor total\s*R\$:?\s*(?:R\$\s*)?([\d.]*\d[.,]\d{2})(?!\d)/gim;
+while((x=re4.exec(raw))){var q4=String(x[3]);q4=q4.indexOf(",")>=0?Number(q4.replace(/\./g,"").replace(",",".")):Number(q4);if(!(q4>0))q4=1;var t4=r2(din(x[5]));j.itens.push({c:dig(x[2]).slice(0,14),n:x[1].replace(/\s+/g," ").trim(),q:q4,u:uniN(x[4]),p:r2(t4/q4),t:t4})}
+/* Último recurso: qualquer lista com "(Código: …)" em que os rótulos mudaram. Nome = a linha antes do código; quantidade = o número depois de "Qtde"; total = o último valor em reais logo depois. */
+if(!j.itens.length){var ps=raw.split(/\(\s*C[óo]d(?:igo)?\.?:?\s*([^)\n]{0,40})\)/i),fim=function(s0){var L=s0.split("\n").map(function(l){return l.trim()}).filter(Boolean),l=L.length?L[L.length-1]:"",mm=l.match(/^.*\d,\d{2}(?!\d)\s*(.*)$/);return(mm?mm[1]:l).replace(/\s+/g," ").trim()};
+for(var i5=1;i5<ps.length;i5+=2){var n5=fim(ps[i5-1]),cab=String(ps[i5+1]||"").slice(0,170),vs=cab.match(/\d[\d.]*,\d{2}(?!\d)/g)||[],q5m=cab.match(/Q(?:tde|uant)[^\d\n]{0,30}([\d.,]+)/i),u5=cab.match(/\bUN(?:ID)?\.?:?\s*([A-Za-z]{1,6})/i);
+if(!n5||n5.length>160||!vs.length)continue;var q5=q5m?String(q5m[1]):"1";q5=q5.indexOf(",")>=0?Number(q5.replace(/\./g,"").replace(",",".")):Number(q5);if(!(q5>0))q5=1;var t5=r2(num(vs[vs.length-1]));if(!(t5>0))continue;
+j.itens.push({c:dig(ps[i5]).slice(0,14),n:n5,q:q5,u:uniN(u5?u5[1]:""),p:r2(vs.length>1?num(vs[vs.length-2]):t5/q5),t:t5})}}
 if(j.itens.length){var m4=raw.match(/Valor pago\s*R\$:?\s*(\d[\d.,]*\d)/i)||raw.match(/Qtde\.?\s*total de [íi]tens\s*\d+\s*Valor total\s*R\$:?\s*(\d[\d.,]*\d)/i);if(m4){var tv=m4[1];j.total=r2(tv.indexOf(",")>=0?num(tv):Number(tv))}
 if(!j.loja){var m5=flat.match(/\(NFC-e\)\s*(.+?)\s*CNPJ:?\s*(\d[\d.\/-]{12,17}\d)/i);if(m5){j.loja=m5[1].trim();j.cnpj=fmtCnpj(m5[2])}}}}
 return j}
