@@ -63,6 +63,7 @@ p{margin:0}
 .hero p{font-size:15px}
 .row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);color:var(--ink);font:inherit;padding:14px;border-radius:16px;cursor:pointer;min-width:0;box-shadow:var(--sombra)}
 .grp{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--sombra)}
+.row.grp-v{cursor:default}
 .grp>.row{border:0;border-radius:0;box-shadow:none;border-top:1px solid var(--line)}
 .grp>.row:first-child{border-top:0}
 .grp-t{font:600 12px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--soft);margin:10px 4px 6px}
@@ -231,7 +232,7 @@ var PROMPT_TXT="Você lê o texto de uma nota fiscal brasileira de supermercado 
 
 var N=[],CFG=blankCfg(),V="m",SEL=null,PK=null,DR=null,F1="",F2="",FS={},FT={},Q="",CONF=null,BUSY=false,MSG={t:"",k:""},THUMBS=[];
 var MODE="foto",EDIT=null,ASK=null,PICK=null,LQ="",JOIN=false,JQ="",RENAME=false,NEWTAG=false,SUGALL=false,APL=null,SELM=false,SELS={},IAB=false;
-var ST={},G={},OKEY={},SUG=[],IX={},IXN={},IXMIN=5,PAR={},BI={},ALIAS={},DB=null,COL=null,FAM=[],FST={};
+var ST={},G={},OKEY={},SUG=[],IX={},IXN={},IXMIN=5,PAR={},BI={},ALIAS={},DB=null,COL=null,FAM=[],FST={},FX={};
 
 /* ---------- armazenamento ---------- */
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
@@ -406,9 +407,10 @@ var seen={};SUG=SUG.map(function(x){return{a:x.a,b:x.b,ra:fnd(x.a),rb:fnd(x.b),w
 /* ---------- Nome legível ----------
    Só para mostrar na tela: "LEITE LV ITALAC 1L INT" vira "Leite longa vida Italac 1 L integral".
    O nome da nota continua guardado e é ele (com o código de barras) que reconhece o produto nas notas novas. */
-var NLA={crfo:"Carrefour",lv:"longa vida",lte:"leite",lei:"leite",int:"integral",integ:"integral",desn:"desnatado",semid:"semidesnatado",semi:"semidesnatado",refrig:"refrigerante",refr:"refrigerante",bisc:"biscoito",rech:"recheado",mac:"macarrão",espag:"espaguete",det:"detergente",liq:"líquido",pap:"papel",hig:"higiênico",dent:"dental",sab:"sabonete",achoc:"achocolatado",mant:"manteiga",marg:"margarina",req:"requeijão",qj:"queijo",qjo:"queijo",muss:"muçarela",mus:"muçarela",pres:"presunto",fgo:"frango",bov:"bovina",moid:"moída",trad:"tradicional",extraf:"extraforte",feij:"feijão",carioc:"carioca",arr:"arroz",acuc:"açúcar",crist:"cristal",refin:"refinado",soj:"soja",trig:"trigo",mol:"molho",tom:"tomate",extr:"extrato",iog:"iogurte",beb:"bebida",lac:"láctea",amac:"amaciante",conc:"concentrado",desinf:"desinfetante",ling:"linguiça",calab:"calabresa",hamb:"hambúrguer",sh:"xampu",shamp:"xampu",ds:"desodorante",desod:"desodorante",cr:"creme",trat:"de tratamento",pent:"de pentear",cx:"caixa",pct:"pacote",emb:"embalagem",ref:"refinado",sal:"sal",azeit:"azeite",farin:"farinha",far:"farinha",chocol:"chocolate",choc:"chocolate",cer:"cereal",limp:"limpador",multiu:"multiuso",suc:"suco",gelat:"gelatina",mist:"mistura",tp:"tipo",esp:"esponja",fil:"filé",franc:"francês",forn:"forno",tem:"temperado",temp:"tempero",vde:"verde",pip:"pipoca",ovo:"ovo",ovos:"ovos",acucar:"açúcar",abobora:"abóbora",cd:"creme dental",tabl:"em barra",acem:"acém",resf:"resfriado",cong:"congelado",feijao:"feijão",macarrao:"macarrão",pao:"pão",oleo:"óleo",cafe:"café",agua:"água",sabao:"sabão",limao:"limão",mamao:"mamão",melao:"melão",acai:"açaí",higienico:"higiênico",liquido:"líquido",lactea:"láctea",frances:"francês",maca:"maçã",file:"filé",pure:"purê",algodao:"algodão",feculas:"féculas",po:"em pó",un:"un",und:"un",unid:"un"};
+var NLA={crfo:"Carrefour",coracoes3:"Corações",bco:"branco",bcos:"brancos",bca:"branca",bcas:"brancas",lv:"longa vida",lte:"leite",lei:"leite",int:"integral",integ:"integral",desn:"desnatado",semid:"semidesnatado",semi:"semidesnatado",refrig:"refrigerante",refr:"refrigerante",bisc:"biscoito",rech:"recheado",mac:"macarrão",espag:"espaguete",det:"detergente",liq:"líquido",pap:"papel",hig:"higiênico",dent:"dental",sab:"sabonete",achoc:"achocolatado",mant:"manteiga",marg:"margarina",req:"requeijão",qj:"queijo",qjo:"queijo",muss:"muçarela",mus:"muçarela",pres:"presunto",fgo:"frango",bov:"bovina",moid:"moída",trad:"tradicional",extraf:"extraforte",feij:"feijão",carioc:"carioca",arr:"arroz",acuc:"açúcar",crist:"cristal",refin:"refinado",soj:"soja",trig:"trigo",mol:"molho",tom:"tomate",extr:"extrato",iog:"iogurte",beb:"bebida",lac:"láctea",amac:"amaciante",conc:"concentrado",desinf:"desinfetante",ling:"linguiça",calab:"calabresa",hamb:"hambúrguer",sh:"xampu",shamp:"xampu",ds:"desodorante",desod:"desodorante",cr:"creme",trat:"de tratamento",pent:"de pentear",cx:"caixa",pct:"pacote",emb:"embalagem",ref:"refinado",sal:"sal",azeit:"azeite",farin:"farinha",far:"farinha",chocol:"chocolate",choc:"chocolate",cer:"cereal",limp:"limpador",multiu:"multiuso",suc:"suco",gelat:"gelatina",mist:"mistura",tp:"tipo",esp:"esponja",fil:"filé",franc:"francês",forn:"forno",tem:"temperado",temp:"tempero",vde:"verde",pip:"pipoca",ovo:"ovo",ovos:"ovos",acucar:"açúcar",abobora:"abóbora",cd:"creme dental",tabl:"em barra",acem:"acém",resf:"resfriado",cong:"congelado",feijao:"feijão",macarrao:"macarrão",pao:"pão",oleo:"óleo",cafe:"café",agua:"água",sabao:"sabão",limao:"limão",mamao:"mamão",melao:"melão",acai:"açaí",higienico:"higiênico",liquido:"líquido",lactea:"láctea",frances:"francês",maca:"maçã",file:"filé",pure:"purê",algodao:"algodão",feculas:"féculas",po:"em pó",un:"un",und:"un",unid:"un"};
 var NLW={branco:1,branca:1,tipo:1,integral:1,tradicional:1,zero:1,original:1,natural:1,light:1,diet:1,preto:1,carioca:1,cristal:1,refinado:1,leite:1,com:1,sem:1,de:1,da:1,do:1,e:1,sal:1,sabor:1,morango:1,chocolate:1,baunilha:1,uva:1,laranja:1,limao:1,maracuja:1,abacaxi:1,prata:1,nanica:1,verde:1,vermelho:1,amarelo:1,neutro:1,lavanda:1,coco:1,extra:1,virgem:1,fino:1,grosso:1,moido:1,torrado:1,premium:1,kg:1,folhas:1,dupla:1,simples:1,picado:1,inteiro:1,fatiado:1,congelado:1,resfriado:1,lata:1,garrafa:1,pote:1,sache:1,refil:1,caixa:1,pacote:1,espaguete:1,parafuso:1,penne:1,talharim:1,grego:1,desnatado:1,semidesnatado:1,sachet:1,cremoso:1,crocante:1,salgado:1,doce:1,amargo:1,ao:1,mel:1,leve:1,pague:1,gratis:1,promo:1};
 function nomeLegivel(raw){var t=semLoja(String(raw||"").replace(/\s+/g," ").trim());if(!t)return t;
+t=t.replace(/\b3\s*COR(?:ACOES|AÇÕES)?\b/gi,"3 CORACOES3").replace(/^(CAF[EÉ]\b.*?)\bTR\b/i,"$1TRAD");
 t=t.replace(/([A-Za-zÀ-ú])\.(?=[A-Za-zÀ-ú0-9])/g,"$1 ").replace(/([A-Za-zÀ-ú])\.(\s|$)/g,"$1$2")
 .replace(/\bC\/\s*(?=[A-Za-zÀ-ú0-9])/gi,"com ").replace(/\bIL\b/g,"1L")
 .replace(/(\d)\s*(KGS?|GRS?|GR|G|MLS?|ML|LTS?|LT|L|MTS?|M|UN|UND|UNID)(?![A-Za-zÀ-ú])/gi,function(_,d,u){u=u.toLowerCase().replace(/s$/,"");var m={kg:"kg",gr:"g",g:"g",ml:"ml",lt:"L",l:"L",mt:"m",m:"m",un:"un",und:"un",unid:"un"};return d+" "+(m[u]||u)})
@@ -434,13 +436,15 @@ var r=o.join(" ").replace(/\s+/g," ").trim();return r.charAt(0).toUpperCase()+r.
    (FAM vem do banco já assim). Entram no "mais barato", na lista, no Comparar marcas e no índice dos mercados,
    com o aviso "mais barato do grupo". Nunca entram no seu gasto, nas suas notas, alertas, reposição ou inflação.
    Só contam produtos que você também compra; um preço mais que 3 vezes diferente do seu é descartado (outro tamanho ou erro de leitura). */
-function famAttach(){FST={};Object.keys(G).forEach(function(k){var g=G[k];g.fam=null;g.famO=null;g.la=g.lastBy});
+function famAttach(){FST={};FX={};Object.keys(G).forEach(function(k){var g=G[k];g.fam=null;g.famO=null;g.la=g.lastBy});
 if(!FAM||!FAM.length)return;var cut=cutDate();
 FAM.forEach(function(r){if(!r||!r.n||!r.d||String(r.d)<cut)return;var c=dig(r.cnpj),lj=String(r.loja||"Mercado"),s=cnpjOk(c)?c:(ALIAS[norm(lj)]||"l:"+norm(lj));
 var it={n:String(r.n),c:String(r.c||""),u:String(r.u||""),q:r.q,p:r.p,t:r.t};if(+r.cx>=1)it.cx=+r.cx;
 var b=bkey(it,s),root=b&&PAR[b]?fnd(b):null;if(!root){var nb="n:"+norm(semLoja(it.n));if(PAR[nb])root=fnd(nb)}
-var g=root&&G[root];if(!g||!g.last)return;var pu=up(it),ref=g.last.pu;if(!(pu>0))return;if(ref>0&&(pu/ref>3||pu/ref<1/3))return;
-if(!ST[s]&&!FST[s])FST[s]={n:lj};var d=String(r.d).slice(0,10);
+var g=root&&G[root],pu=up(it),d=String(r.d).slice(0,10);if(!(pu>0))return;
+if(!g||!g.last){/* produto que você não comprou: fica para a comparação com os do mesmo tipo */var fk=norm(semLoja(it.n));if(!fk)return;if(!ST[s]&&!FST[s])FST[s]={n:lj};var e=FX[fk]=FX[fk]||{nm:it.n,u:it.u,la:{}};if(!e.la[s]||d>e.la[s].d)e.la[s]={p:pu,d:d,f:1};return}
+var ref=g.last.pu;if(ref>0&&(pu/ref>3||pu/ref<1/3))return;
+if(!ST[s]&&!FST[s])FST[s]={n:lj};
 g.fam=g.fam||{};var x=g.fam[s];if(!x||d>x.d)g.fam[s]={p:pu,d:d,f:1};(g.famO=g.famO||[]).push({s:s,pu:pu,d:d})});
 Object.keys(G).forEach(function(k){var g=G[k];if(!g.fam)return;var m={};Object.keys(g.lastBy).forEach(function(s){m[s]=g.lastBy[s]});Object.keys(g.fam).forEach(function(s){var f=g.fam[s];if(!m[s]||f.d>m[s].d)m[s]=f});g.la=m})}
 function famCard(g){if(!g.fam)return"";var ss=Object.keys(g.fam).sort(function(a,b){return g.fam[a].p-g.fam[b].p}),mine=g.last.pu;
@@ -503,21 +507,25 @@ function szd(c){return c.min==c.max?(c.b=="kg"&&c.min==1&&c.pk?"vendido por kg":
 function cutDate(){var n=new Date(),d=new Date(n.getFullYear(),n.getMonth()-MESES_VELHO,n.getDate());return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
 function buildCmp(){CMP={};CMPL=[];GC={};TYL={};var by={},CUT=cutDate();
 Object.keys(G).forEach(function(k){var g=G[k],tp=tpDe(g);g.tp=tp;if(!tp||tp.x)return;if(!TYL[tp.t])TYL[tp.t]=tp.t.indexOf("u:")==0?tp.l||tp.t.slice(2):tLab(tp.t);(by[tp.t+"|"+tp.b]=by[tp.t+"|"+tp.b]||[]).push(g)});
+/* Produtos do grupo que você não comprou, mas são de um tipo que você compra (outra marca, outro tamanho, outro nome na nota). */
+Object.keys(FX).forEach(function(fk){var e=FX[fk],t=tipoDe(semLoja(e.nm)),z=tamDe(e.nm,e.u);if(!t||!z||!by[t+"|"+z.b])return;by[t+"|"+z.b].push({k:"f:"+fk,v:1,nm:e.nm,nv:nomeLegivel(e.nm),u:e.u,tp:{t:t,b:z.b,q:z.q},la:e.la,lastBy:{},occ:[],last:null})});
 Object.keys(by).forEach(function(kb){var L=by[kb].sort(function(a,b){return a.tp.q-b.tp.q}),parts=[],cur=[];
 L.forEach(function(g){if(cur.length&&g.tp.q/cur[cur.length-1].tp.q>2.2){parts.push(cur);cur=[]}cur.push(g)});if(cur.length)parts.push(cur);
-parts.forEach(function(P){if(P.length<2)return;var t=P[0].tp.t,b=P[0].tp.b,key=t+"|"+b+"|"+P[0].tp.q,cnt={},ref=null;
+parts.forEach(function(P){if(P.length<2||!P.some(function(g){return!g.v}))return;var t=P[0].tp.t,b=P[0].tp.b,key=t+"|"+b+"|"+P[0].tp.q,cnt={},ref=null;
 P.forEach(function(g){cnt[g.tp.q]=(cnt[g.tp.q]||0)+1});Object.keys(cnt).forEach(function(q){if(ref===null||cnt[q]>cnt[ref]||(cnt[q]==cnt[ref]&&+q<+ref))ref=q});
 ref=cnt[ref]*2>=P.length?+ref:b=="m"?100:1;
 var rows=P.map(function(g){var q=g.tp.q,rec=null,la=g.la||g.lastBy;Object.keys(la).forEach(function(s){var x=la[s];if(x.p>0&&x.d>=CUT&&(!rec||x.p<rec.p))rec={s:s,p:x.p,d:x.d,f:x.f}});
-var o=rec||{s:g.last.s,p:g.last.pu,d:g.last.n.data};return{g:g,q:q,s:o.s,p:o.p,d:o.d,f:o.f,pe:o.p/q*ref,old:!rec,kg:b=="kg"&&q==1&&uu(g.last.it)=="kg"}});
+if(g.v&&!rec)return null;var o=rec||{s:g.last.s,p:g.last.pu,d:g.last.n.data};return{g:g,q:q,s:o.s,p:o.p,d:o.d,f:o.f,pe:o.p/q*ref,old:!rec,kg:b=="kg"&&q==1&&(g.v?/^kg$/i.test(String(g.u||"").trim()):uu(g.last.it)=="kg")}}).filter(Boolean);
+/* preço do grupo muito fora do seu (mais de 4 vezes) costuma ser outro tamanho ou erro de leitura: fica de fora */
+var meus=rows.filter(function(r){return!r.g.v}).map(function(r){return r.pe}),lo=Math.min.apply(null,meus),hi=Math.max.apply(null,meus);rows=rows.filter(function(r){return!r.g.v||(r.pe<=hi*4&&r.pe>=lo/4)});if(rows.length<2)return;
 var R=rows.filter(function(r){return!r.old}).sort(function(a,b){return a.pe-b.pe}),O=rows.filter(function(r){return r.old}).sort(function(a,b){return a.pe-b.pe});
-var c={k:key,t:t,b:b,ref:ref,lab:TYL[t],min:P[0].tp.q,max:P[P.length-1].tp.q,R:R,O:O,n:P.length,pk:rows.every(function(r){return r.kg}),f:P.reduce(function(a,g){return a+g.occ.length},0)};
-CMP[key]=c;CMPL.push(c);P.forEach(function(g){GC[g.k]=key})})});
+var c={k:key,t:t,b:b,ref:ref,lab:TYL[t],min:P[0].tp.q,max:P[P.length-1].tp.q,R:R,O:O,n:rows.length,pk:rows.every(function(r){return r.kg}),f:P.reduce(function(a,g){return a+g.occ.length},0)};
+CMP[key]=c;CMPL.push(c);P.forEach(function(g){if(!g.v)GC[g.k]=key})})});
 /* Primeiro o que tem preço recente; depois o que você mais compra. */
 CMPL.sort(function(a,b){return(b.R.length>0)-(a.R.length>0)||b.f-a.f||a.lab.localeCompare(b.lab,"pt")})}
 function tipoKey(lb){var n0=norm(lb),k=Object.keys(TYL).filter(function(t){return norm(TYL[t])==n0||norm(t)==n0})[0];if(k)return k;k=Object.keys(TL).filter(function(t){return norm(TL[t])==n0||norm(t)==n0})[0];return k||"u:"+n0}
 function cmRow(c,r,i,b){var pkg=r.kg?"R$ "+R2(r.p)+" o kg":"R$ "+R2(r.p)+" · "+fq(r.q,c.b),df=b&&i>0?r.pe-b.pe:0;
-return'<button type="button" class="row" data-act="prod" data-k="'+esc(r.g.k)+'"><span class="txt"><span class="t">'+(i>=0?(i+1)+'º · ':'')+esc(r.g.nv||r.g.nm)+'</span><span class="soft small"><span class="dot" style="background:'+storeColor(r.s)+';margin-right:6px;width:9px;height:9px"></span>'+esc(sn(r.s))+' · '+dl(r.d)+(r.f?' · mais barato do grupo':'')+'</span><span class="soft small">'+pkg+'</span></span><span class="r">R$ '+R2(r.pe)+(r.old?'<span class="pill gray">referência</span>':i==0&&c.R.length>1?'<span class="pill ok">mais em conta</span>':df>=.005?'<span class="up small">+R$ '+R2(df)+' '+porTxt(c)+'</span>':i>0?'<span class="soft small">mesmo preço</span>':'')+'</span></button>'}
+return(r.g.v?'<div class="row grp-v">':'<button type="button" class="row" data-act="prod" data-k="'+esc(r.g.k)+'">')+'<span class="txt"><span class="t">'+(i>=0?(i+1)+'º · ':'')+esc(r.g.nv||r.g.nm)+'</span>'+(r.g.v?'<span class="soft small">Na nota: '+esc(r.g.nm)+'</span>':'')+'<span class="soft small"><span class="dot" style="background:'+storeColor(r.s)+';margin-right:6px;width:9px;height:9px"></span>'+esc(sn(r.s))+' · '+dl(r.d)+(r.g.v?' · <b>comprado no grupo</b>':r.f?' · mais barato do grupo':'')+'</span><span class="soft small">'+pkg+'</span></span><span class="r">R$ '+R2(r.pe)+(r.old?'<span class="pill gray">referência</span>':i==0&&c.R.length>1?'<span class="pill ok">mais em conta</span>':df>=.005?'<span class="up small">+R$ '+R2(df)+' '+porTxt(c)+'</span>':i>0?'<span class="soft small">mesmo preço</span>':'')+'</span>'+(r.g.v?'</div>':'</button>')}
 /* ---------- Categorias ----------
    Regras de palavras no nome da nota; a ordem importa ("PAO QJ" é padaria, "IOG ... AMEIXA" é laticínio).
    A pessoa pode trocar a categoria de um produto na página dele (CFG.cats, por produto). */
@@ -1294,7 +1302,7 @@ else if(a=="qrcamfechar"){camFechar()}
 else if(a=="qrcamfoto"){camFechar();var qi=document.getElementById("qrf");if(qi)qi.click()}
 else if(a=="susok"){if(!d.k)return;CFG.saltos[d.k]=1;saveCfg();render();toast("Preço confirmado. Ele volta a contar nos alertas.")}
 else if(a=="note"){SEL=d.id;V="nd";CONF=null;EDIT=null;ASK=null;NEWTAG=false;if(DR&&!DR.id){DR=null}render();window.scrollTo(0,0)}
-else if(a=="prod"){if(!d.k)return;PK=d.k;V="pd";JOIN=false;RENAME=false;TPE=false;render();window.scrollTo(0,0)}
+else if(a=="prod"){if(!d.k||!G[d.k])return;PK=d.k;V="pd";JOIN=false;RENAME=false;TPE=false;render();window.scrollTo(0,0)}
 else if(a=="cmd"){if(!d.c)return;CK=d.c;V="cmd";render();window.scrollTo(0,0)}
 else if(a=="tpon"){TPE=true;render();var e6=document.getElementById("tp_t");if(e6)e6.focus()}
 else if(a=="tpcancel"){TPE=false;render()}
@@ -1396,7 +1404,7 @@ if(ev.key=="Enter"&&b.id=="pfn"){ev.preventDefault();var ps=document.querySelect
 if(ev.key=="Enter"&&b.id=="lq"){ev.preventDefault();var f=document.querySelector("#ls [data-act]");if(f)f.click()}});
 document.documentElement.lang="pt-BR";repair();render();initDb();
 </script>
-<script src="app-post.js?v=ac64d488"></script>
+<script src="app-post.js?v=619912e4"></script>
 
 <style>
 /* Só no app: sem a aba Foto, sem o botão do Claude, e a tela de entrada por cima de tudo. */

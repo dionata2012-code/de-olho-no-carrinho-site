@@ -382,7 +382,7 @@
           (CONV.cheio ? '<div class="status warn">Esse grupo já tem 6 pessoas, o máximo.</div><div class="btns"><button type="button" class="btn line" data-act="famcancel">Voltar</button></div>'
             : '<div class="btns"><button type="button" class="btn" data-act="famentrarok">Entrar no grupo</button><button type="button" class="btn line" data-act="famcancel">Cancelar</button></div>');
       } else {
-        h += '<p class="soft">Compare preços com a família: cada um continua com a própria conta, e o app mostra o que alguém do grupo pagou no mesmo produto e em qual mercado. ' + PRIV + '</p>' +
+        h += '<p class="soft">Compare preços com a família: cada um continua com a própria conta, e o app mostra o que alguém do grupo pagou no mesmo produto, ou em produtos do mesmo tipo, e em qual mercado. ' + PRIV + '</p>' +
           '<div class="btns"><button type="button" class="btn line" data-act="famcriar">Criar grupo</button><button type="button" class="btn line" data-act="famentrar">Entrar com código</button></div>';
       }
       return h + msgHtml() + '</div>';
