@@ -1086,7 +1086,8 @@ function lg(it){return it.b&&PAR[it.b]!==undefined?G[fnd(it.b)]:null}
 /* Lista: vale o último preço de cada mercado nos últimos 3 meses; se o produto não foi comprado nesse período, usa o último que houver (marcado como antigo). */
 function lbStores(g){var la=g.la||g.lastBy,cut=cutDate(),all=Object.keys(la),rec=all.filter(function(s){return la[s].d>=cut});return rec.length?rec:all}
 /* Mais em conta: o último preço pago em cada mercado (3 meses) e os preços anotados que ainda valem. Um preço anotado também vence um preço pago antigo. */
-function cheapest(g){var la=g.la||g.lastBy,best=null;lbStores(g).forEach(function(s){var x=la[s];if(!best||x.p<best.p)best={s:s,p:x.p,d:x.d,f:x.f}});if(best)best.old=best.d<cutDate();
+function cheapestPago(g){var la=g.la||g.lastBy,best=null;lbStores(g).forEach(function(s){var x=la[s];if(!best||x.p<best.p)best={s:s,p:x.p,d:x.d,f:x.f}});if(best)best.old=best.d<cutDate();return best}
+function cheapest(g){var best=cheapestPago(g);
 var vb=null;vistosDe(g).forEach(function(x){if(!vb||x.p<vb.p)vb=x});if(vb&&(!best||best.old||vb.p<best.p-1e-9))best={s:vb.s,p:vb.p,d:vb.d,vi:1,old:false};return best}
 /* ---------- Preços de outro mercado (orçamento) ----------
    A pessoa vai a um mercado só para comparar e anota o preço da prateleira. Cada visita guarda o mercado, a data e os produtos.
@@ -1109,6 +1110,16 @@ return{t:'<span class="'+(d<0?'down':'up')+'">R$ '+R2(Math.abs(d))+' '+(d<0?'mai
 function vNaLista(it){var g=vG(it);return CFG.lista.some(function(x){return g?lg(x)===g:!x.b&&norm(x.n)===norm(it.n)})}
 /* Produto novo (sem nota ainda) na lista: o menor preço anotado que ainda vale, pelo nome. */
 function vPorNome(n){var k=norm(n),best=null;if(!k)return null;vLista().forEach(function(v){if(!vValido(v))return;(v.itens||[]).forEach(function(it){if(+it.p>0&&!vG(it)&&norm(it.n)===k&&(!best||+it.p<best.p))best={s:vSk(v),p:+it.p,d:v.d}})});return best}
+/* Lista: último preço de cada mercado, pago (3 meses quando houver) ou anotado que ainda vale; vale o mais recente de cada mercado. */
+function vPrecosLoja(g){var la=g.la||g.lastBy,m={};lbStores(g).forEach(function(s){m[s]={p:la[s].p,d:la[s].d}});vistosDe(g).forEach(function(x){if(!m[x.s]||x.d>m[x.s].d)m[x.s]={p:x.p,d:x.d,an:1}});return m}
+/* Lista com preço anotado: mostra o mais barato que você pagou, o anotado e quanto economiza levando no mais barato. */
+function vListaInfo(g,q){var A=vistosDe(g);if(!A.length)return null;var va=A.reduce(function(a,x){return x.p<a.p?x:a}),pb=cheapestPago(g),L=[];
+var own=null,cut=cutDate(),lb=g.lastBy,ss0=Object.keys(lb),rec=ss0.filter(function(s){return lb[s].d>=cut});(rec.length?rec:ss0).forEach(function(s){if(!own||lb[s].p<own.p)own={s:s,p:lb[s].p,d:lb[s].d}});if(own)own.old=own.d<cut;
+if(own)L.push((own.old?'Mais barato que você pagou (mais de 3 meses)':'Mais barato que você pagou (3 meses)')+': <b>'+esc(sn(own.s))+'</b> · R$ '+R2(own.p)+' em '+dl(own.d));
+if(pb&&pb.f)L.push('Mais barato do grupo: <b>'+esc(sn(pb.s))+'</b> · R$ '+R2(pb.p)+' em '+dl(pb.d));
+L.push('Anotado: <b>'+esc(sn(va.s))+'</b> · R$ '+R2(va.p)+' em '+dl(va.d));
+if(pb){var d=(va.p-pb.p)*q;L.push(Math.abs(d)<.005?'Mesmo preço nos dois.':'<b class="down">Comprando no '+esc(sn(d>0?pb.s:va.s))+', você economiza R$ '+R2(Math.abs(d))+'</b>'+(q!=1?' ('+qfmt(q)+' unidades)':''))}
+return L.join("<br>")}
 function vResumo(v){var n=0,c=0,e=0;(v.itens||[]).forEach(function(it){n++;var r=vCmp(it);if(r.d<0){c++;e-=r.d}});return{n:n,c:c,e:r2(e)}}
 function vtCard(g){var L=vistosDe(g,true);if(!L.length)return"";var V0=L.filter(function(x){return x.ok}),vel=L.length-V0.length,l=g.last;
 var h='<h3>Preços anotados em outros mercados</h3><div class="card"><p class="soft small">Preços que você anotou na prateleira, sem comprar. Valem '+VDIAS+' dias.</p>';
@@ -1175,13 +1186,13 @@ h+=carrinhoCard()+'<div class="card"><div class="list">';
 /* na ordem de um mercado: hortifrúti, padaria, carnes, laticínios, mercearia, bebidas, limpeza, higiene, outros */
 var ORD=[7,0,6,1,5,2,3,4,-1],lc0=null;L.map(function(it,i){var g0=lg(it);return{it:it,i:i,c:g0?catG(g0):catAuto(it.n)}}).sort(function(a,b){return ORD.indexOf(a.c)-ORD.indexOf(b.c)||a.i-b.i}).forEach(function(o){var it=o.it,i=o.i;if(o.c!==lc0){lc0=o.c;h+='<p class="lsec"><span class="dot" style="background:'+catCor(o.c)+'"></span>'+esc(catNome(o.c))+'</p>'}
 var g=lg(it),b=g?cheapest(g):null,q=num(it.q)||1,info;
-if(b){tot0+=q*b.p;var lbs=lbStores(g);lbs.forEach(function(s){var e=per[s]=per[s]||{t:0,c:0};e.t+=q*(g.la||g.lastBy)[s].p;e.c++});info=(b.f?'Mais barato do grupo: <b>':'Mais barato: <b>')+esc(sn(b.s))+'</b> · R$ '+R2(b.p)+(b.vi?' · anotado em ':' em ')+dl(b.d)+(b.old?' · <span class="pill gray">preço antigo</span>':'')+(lbs.length<2?(Object.keys(g.la||g.lastBy).length>1&&!b.old?" (único mercado nos últimos 3 meses)":" (único mercado)"):"")}else{var va=vPorNome(it.n);if(va){tot0+=q*va.p;info="Preço anotado: <b>"+esc(sn(va.s))+"</b> · R$ "+R2(va.p)+" em "+dl(va.d)}else{falt++;info="Sem preço registrado"}}
+if(b){tot0+=q*b.p;var lbs=lbStores(g),pm=vPrecosLoja(g);Object.keys(pm).forEach(function(s){var e=per[s]=per[s]||{t:0,c:0};e.t+=q*pm[s].p;e.c++;if(pm[s].an)e.an=1});info=vListaInfo(g,q)||(b.f?'Mais barato do grupo: <b>':'Mais barato: <b>')+esc(sn(b.s))+'</b> · R$ '+R2(b.p)+(b.vi?' · anotado em ':' em ')+dl(b.d)+(b.old?' · <span class="pill gray">preço antigo</span>':'')+(lbs.length<2?(Object.keys(g.la||g.lastBy).length>1&&!b.old?" (único mercado nos últimos 3 meses)":" (único mercado)"):"")}else{var va=vPorNome(it.n);if(va){tot0+=q*va.p;var ev0=per[va.s]=per[va.s]||{t:0,c:0};ev0.t+=q*va.p;ev0.c++;ev0.an=1;info="Preço anotado: <b>"+esc(sn(va.s))+"</b> · R$ "+R2(va.p)+" em "+dl(va.d)}else{falt++;info="Sem preço registrado"}}
 h+='<div class="item'+(it.ok?" done":"")+'"><button type="button" class="ck" role="checkbox" aria-checked="'+!!it.ok+'" aria-label="Marcar '+esc(g?(g.nv||g.nm):it.n)+'" data-act="lok" data-i="'+i+'">'+(it.ok?CHK:"")+'</button><span class="txt"><span class="t">'+esc(g?(g.nv||g.nm):it.n)+'</span><span class="soft small">'+info+'</span><span class="qty" style="margin-top:4px"><button type="button" aria-label="Menos" data-act="lq-" data-i="'+i+'">−</button><b>'+qfmt(q)+'</b><button type="button" aria-label="Mais" data-act="lq+" data-i="'+i+'">+</button><span class="soft small">unidade(s)</span></span><label class="small" style="display:flex;align-items:center;gap:6px;margin-top:6px;color:var(--soft)">Na prateleira: R$<input type="text" inputmode="decimal" data-in="lpp" data-i="'+i+'" value="'+(it.pp?R2(it.pp):'')+'" placeholder="'+(b?R2(b.p):va?R2(va.p):'0,00')+'" style="width:96px;padding:6px 8px;min-height:36px"></label></span><button type="button" class="ib x" aria-label="Tirar '+esc(g?(g.nv||g.nm):it.n)+' da lista" data-act="ldel" data-i="'+i+'">✕</button></div>'});
 h+='</div></div>';
 var priced=L.length-falt;
 h+='<div class="card"><h3 style="margin:0">Quanto deve custar</h3><div class="row flat"><span class="t">Cada item no mercado mais barato</span><span class="r">R$ '+R2(tot0)+'</span></div>';
 var ss=Object.keys(per).filter(function(s){return per[s].c}).sort(function(a,b){return per[b].c-per[a].c||per[a].t-per[b].t});
-if(ss.length)h+='<p class="soft small">Comprando tudo num lugar só (último preço em cada mercado, dos últimos 3 meses quando houver):</p>'+ss.map(function(s){return'<div class="row flat"><span class="main"><span class="dot" style="background:'+storeColor(s)+'"></span><span class="small"><b>'+esc(sn(s))+'</b> · '+per[s].c+' de '+priced+' itens</span></span><span class="r">R$ '+R2(per[s].t)+'</span></div>'}).join("");
+if(ss.length)h+='<p class="soft small">Comprando tudo num lugar só (último preço em cada mercado, dos últimos 3 meses quando houver, pago ou anotado):</p>'+ss.map(function(s){return'<div class="row flat"><span class="main"><span class="dot" style="background:'+storeColor(s)+'"></span><span class="small"><b>'+esc(sn(s))+'</b> · '+per[s].c+' de '+priced+' itens'+(per[s].an?' · com preço anotado':'')+'</span></span><span class="r">R$ '+R2(per[s].t)+'</span></div>'}).join("");
 if(falt)h+='<p class="soft small">'+falt+' item(ns) sem preço registrado ficam fora da conta.</p>';
 h+='</div><div class="btns"><button type="button" class="btn line" data-act="lclr1">Tirar os marcados</button><button type="button" class="btn danger" data-act="lclr">Limpar lista</button></div>';
 return h}
