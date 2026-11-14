@@ -192,6 +192,16 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible,
 @media (prefers-reduced-motion:reduce){.dobra .seta{transition:none}}
 summary::-webkit-details-marker{display:none}
 summary{cursor:pointer;list-style:none}
+.conq{padding:12px 14px}.cq3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;flex:1;min-width:0}
+.cq3>span{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}.cq3 b{font:800 17px/1.2 var(--display);white-space:nowrap}.cq3 small{font-size:12px;color:var(--soft);font-weight:600}
+.selos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.selo{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;box-shadow:var(--sombra)}
+.selo .se{font-size:30px;line-height:1.1}.selo b{font-size:14.5px}.selo.off .se{filter:grayscale(1);opacity:.35}.selo.off b{color:var(--soft)}
+.celeb{position:fixed;inset:0;z-index:40;background:rgba(10,20,14,.55);display:flex;align-items:center;justify-content:center;padding:24px}
+.celeb-in{background:var(--card);border-radius:24px;padding:24px 20px;max-width:360px;width:100%;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center;animation:pop .45s cubic-bezier(.2,1.4,.4,1)}
+.celeb-e{font-size:64px;line-height:1.1;animation:gira .9s ease-out}.celeb-k{font:700 13px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}.celeb-in .btns{width:100%;margin-top:6px}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}@keyframes gira{from{transform:scale(.3) rotate(-25deg)}60%{transform:scale(1.2) rotate(8deg)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.celeb-in,.celeb-e{animation:none}}
 </style>
 
 <header class="top"><div class="top-in"><div class="brand"><span class="tile" data-act="cfg" role="button" tabindex="0" aria-label="Configurações" title="Configurações"><i class="eng" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></i><svg viewBox="0 0 100 100" width="27" height="27" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 22H20L29 66H75L83 34H24"/><path d="M37 50Q53 37 69 50Q53 63 37 50Z" stroke-width="6"/><circle cx="53" cy="50" r="6" fill="#ffffff" stroke="none"/><circle cx="34" cy="80" r="5.5"/><circle cx="70" cy="80" r="5.5"/></svg></span><h1 class="wm"><small id="saud">Olá</small><span id="ttl">De Olho no Carrinho</span></h1></div><div class="acts"><button type="button" id="n_nt" class="ib ntb" data-act="tab" data-v="nt" aria-label="Notícias" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h13v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M17 9h3v10a2 2 0 0 1-2 2"/><path d="M7.5 9h6M7.5 13h6M7.5 17h4"/></svg><i class="bol" aria-hidden="true"></i></button><span id="sync" class="pill gray" role="status">Neste aparelho</span></div></div></header>
@@ -205,7 +215,7 @@ summary{cursor:pointer;list-style:none}
 <button type="button" id="n_l" data-act="tab" data-v="l"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg></span>Lista</button>
 </div></nav>
 
-<script src="app-pre.js?v=e3ee4e0a"></script>
+<script src="app-pre.js?v=471bf5db"></script>
 <script>
 var KEY="mn_v3",KEY_CFG="mn_cfg";
 var CO=["#1d4ed8","#c0266a","#c26a00","#0b8585","#6d28d9","#4d7c0f","#0a7347","#b91c1c"];
@@ -238,7 +248,7 @@ var ST={},G={},OKEY={},SUG=[],IX={},IXN={},IXMIN=5,PAR={},BI={},ALIAS={},DB=null
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function sv(){lsSet(KEY,JSON.stringify(N))}
-function blankCfg(){return{cores:{},etiquetas:[],nomes:{},juntar:[],nao:[],lista:[],apelidos:{},sugIA:[],tipos:{},saltos:{},diag:{},cods:{},cats:{},orc:{},repo:{},rp:{},lojas:{},perfil:{},upd:0}}
+function blankCfg(){return{cores:{},etiquetas:[],nomes:{},juntar:[],nao:[],lista:[],apelidos:{},sugIA:[],tipos:{},saltos:{},diag:{},cods:{},cats:{},orc:{},repo:{},rp:{},lojas:{},perfil:{},selos:{},conq:{},upd:0}}
 function loadCfg(o){var c=blankCfg();if(o&&typeof o=="object"){Object.keys(c).forEach(function(k){if(k!=="upd"&&o[k]!=null&&Array.isArray(o[k])===Array.isArray(c[k])&&typeof o[k]==="object")c[k]=o[k]});c.upd=+o.upd||0}return c}
 function valid(n){return n&&typeof n.id=="string"&&n.loja&&/^\d{4}-\d{2}-\d{2}$/.test(n.data||"")&&Array.isArray(n.itens)}
 try{N=JSON.parse(lsGet(KEY)||"[]")}catch(e){N=[]}
@@ -603,6 +613,91 @@ if(!v)return'<button type="button" class="row" data-act="orcset"><span class="tx
 var p=g/v*100,cls=p>100?"warn":p>=80?"warn":"ok",cor=p>100?"var(--warn)":p>=80?"#c26a00":"var(--acc)";
 return'<div class="card"><div class="row flat"><span class="soft small">Orçamento de '+MESF[+ym.slice(5,7)-1]+'</span><button type="button" class="link" data-act="orcset">Mudar</button></div><div class="valor">R$ '+R2(g)+' <span class="soft">de R$ '+R2(v)+'</span></div><div class="bar"><i style="width:'+Math.min(100,p).toFixed(1)+'%;background:'+cor+'"></i></div>'+(p>100?'<div class="status warn">Passou R$ '+R2(g-v)+' do orçamento.</div>':p>=80?'<div class="status warn">Atenção: já foram '+p.toFixed(0)+'% do orçamento. Restam R$ '+R2(v-g)+'.</div>':'<div class="row flat"><span class="small">Restam <b>R$ '+R2(v-g)+'</b> para este mês</span><span class="soft small">'+p.toFixed(0)+'% usado</span></div>')+'</div>'}
 
+/* ---------- Conquistas: economia, sequência de notas e selos ----------
+   Economia: cada compra é comparada com o preço médio do mesmo produto nos seus mercados, em 45 dias para cada lado da compra
+   (média de cada mercado, todos com o mesmo peso). Só entra quando há preço de pelo menos 2 mercados nesse período.
+   Pagou abaixo da média: a diferença soma na economia. Pagou acima: vai para "dava para economizar mais". Nada é descontado.
+   Preço "para conferir", produto de farmácia e diferença maior que o dobro (outro tamanho ou erro de leitura) ficam de fora.
+   Sequência: semanas (ou quinzenas, se a pessoa escolher) seguidas com pelo menos uma nota, pela data da compra.
+   Selos: contam o que a pessoa já fez antes da atualização. Só os ganhos depois disso aparecem com comemoração. */
+function dPar(s){var p=String(s).split("-");return new Date(+p[0],+p[1]-1,+p[2])}
+function isoD(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
+var SEQ0=dPar("2024-01-01");/* uma segunda-feira: as semanas e quinzenas começam na segunda */
+function seqQ(){return CFG.conq&&CFG.conq.seq=="q"?1:0}
+function perDe(data,q){return Math.floor(Math.round((dPar(data)-SEQ0)/864e5)/(q?14:7))}
+function perIni(p,q){return new Date(SEQ0.getFullYear(),SEQ0.getMonth(),SEQ0.getDate()+p*(q?14:7))}
+function seqCalc(q){if(q==null)q=seqQ();var P={};NM().forEach(function(n){P[perDe(n.data,q)]=1});
+var hj=perDe(hojeISO(),q),ks=Object.keys(P).map(Number).sort(function(a,b){return a-b}),best=0,run=0,prev=null;
+ks.forEach(function(k){if(k>hj)return;run=prev!==null&&k==prev+1?run+1:1;if(run>best)best=run;prev=k});
+var cur=0,k=P[hj]?hj:hj-1;while(P[k]){cur++;k--}
+var fim=perIni(hj+1,q);fim.setDate(fim.getDate()-1);return{cur:cur,best:best,feita:!!P[hj],q:q,fim:fim}}
+function seqNome(n,q){return n+" "+(q?(n==1?"quinzena":"quinzenas"):(n==1?"semana":"semanas"))}
+var ECO=null;
+function ecoCalc(){var save=0,miss=0,abx=0,ini="",mes={},lst=[],W=45*864e5;
+Object.keys(G).forEach(function(k){var L=(G[k].ok||[]).filter(function(o){return o.pu>0&&!o.sus&&!farmS(o.s)});if(L.length<2)return;
+L.forEach(function(o){var t=Date.parse(o.n.data),by={};L.forEach(function(x){if(Math.abs(Date.parse(x.n.data)-t)>W)return;var e=by[x.s]=by[x.s]||{t:0,n:0};e.t+=x.pu;e.n++});
+var ss=Object.keys(by);if(ss.length<2)return;var ref=ss.reduce(function(a,s){return a+by[s].t/by[s].n},0)/ss.length,ra=o.pu/ref;if(!(ra>=.5&&ra<=2))return;
+var u=num(o.it.q)*emb(o.it);if(!(u>0))return;var d=(ref-o.pu)*u,m=o.n.data.slice(0,7),e=mes[m]=mes[m]||{s:0,m:0};
+if(d>=.005){save+=d;abx++;e.s+=d;lst.push({d:o.n.data,v:d})}else if(d<=-.005){miss-=d;e.m-=d}
+if(!ini||o.n.data<ini)ini=o.n.data})});
+return{save:r2(save),miss:r2(miss),abx:abx,ini:ini,mes:mes,lst:lst}}
+/* Na última compra de cada tipo (detergente, café...), você levou a opção mais barata por kg, litro ou unidade? */
+function trocaN(){var by={},n=0;Object.keys(G).forEach(function(k){var g=G[k];if(!g.tp||g.tp.x||!g.last||!(g.last.pu>0)||!(g.tp.q>0))return;(by[g.tp.t+"|"+g.tp.b]=by[g.tp.t+"|"+g.tp.b]||[]).push(g)});
+Object.keys(by).forEach(function(k){var L=by[k];if(L.length<2)return;var pr=function(g){return g.last.pu/g.tp.q},ult=L.reduce(function(a,g){return g.last.n.data>a.last.n.data?g:a}),mn=Math.min.apply(null,L.map(pr));if(pr(ult)<=mn*1.0001)n++});return n}
+/* Mês passado dentro do orçamento. Vale só se o orçamento já existia naquele mês (quem cria agora não ganha pelo mês que passou). */
+function mesAzul(){var v=+(CFG.orc&&CFG.orc.v)||0;if(!v)return false;var d=new Date(),a=new Date(d.getFullYear(),d.getMonth()-1,1),ym=isoD(a).slice(0,7),g=0,tem=false;if(CFG.orc.desde&&String(CFG.orc.desde).slice(0,7)>ym)return false;
+NM().forEach(function(n){if(n.data.slice(0,7)==ym){g+=pago(n);tem=true}});return tem&&g<=v}
+var SELOS=[
+{id:"n1",e:"🧾",t:"Primeira nota",d:"Cadastrou a primeira nota."},
+{id:"n10",e:"📚",t:"Colecionador",d:"10 notas cadastradas."},
+{id:"n50",e:"🗂️",t:"Arquivo de respeito",d:"50 notas cadastradas."},
+{id:"n100",e:"🏛️",t:"Arquivo completo",d:"100 notas cadastradas."},
+{id:"m3",e:"👀",t:"De olho",d:"Notas de 3 mercados diferentes."},
+{id:"cac",e:"🎯",t:"Caçador de preço",d:"Comprou 10 vezes abaixo do preço médio dos seus mercados."},
+{id:"troca",e:"🔄",t:"Trocou e ganhou",d:"Na última compra, levou a opção mais barata por kg, litro ou unidade em 3 tipos de produto."},
+{id:"eco50",e:"💰",t:"Primeiros R$ 50",d:"Economizou R$ 50 comprando abaixo do preço médio."},
+{id:"eco200",e:"🤑",t:"R$ 200 no bolso",d:"Economizou R$ 200 comprando abaixo do preço médio."},
+{id:"azul",e:"💙",t:"Mês no azul",d:"Fechou um mês dentro do orçamento."},
+{id:"f4",e:"🔥",t:"Pegando fogo",d:"4 seguidas com nota (semanas ou quinzenas)."},
+{id:"f12",e:"⚡",t:"Imparável",d:"12 seguidas com nota (semanas ou quinzenas)."},
+{id:"f26",e:"🌟",t:"Meio ano de olho",d:"26 seguidas com nota (semanas ou quinzenas)."},
+{id:"lista",e:"📝",t:"Lista feita",d:"Fechou uma compra usando a lista do app."},
+{id:"fam",e:"👨‍👩‍👧",t:"Em família",d:"Entrou num grupo da família."}];
+function selosGanhos(){var nm=NM(),sq=seqCalc(),r={},mk={};nm.forEach(function(n){mk[sk(n)]=1});
+if(nm.length>=1)r.n1=1;if(nm.length>=10)r.n10=1;if(nm.length>=50)r.n50=1;if(nm.length>=100)r.n100=1;if(Object.keys(mk).length>=3)r.m3=1;
+if(ECO.abx>=10)r.cac=1;if(ECO.save>=50)r.eco50=1;if(ECO.save>=200)r.eco200=1;if(trocaN()>=3)r.troca=1;if(mesAzul())r.azul=1;
+if(sq.best>=4)r.f4=1;if(sq.best>=12)r.f12=1;if(sq.best>=26)r.f26=1;if(+(CFG.conq&&CFG.conq.lista)>=1)r.lista=1;
+try{if(window.appNoGrupo&&appNoGrupo())r.fam=1}catch(e){}return r}
+var CELEB=[];
+/* Guarda os selos novos. Espera a conta carregar (num aparelho novo, a configuração ainda não chegou) e não guarda nada no modo demonstração. */
+function conqCheck(){ECO=ecoCalc();if(!N.length||N.some(function(n){return n.demo}))return;if(window.claude&&claude.use&&!DB&&!GUEST)return;
+var c=CFG.conq=CFG.conq&&typeof CFG.conq=="object"?CFG.conq:{},sel=CFG.selos=CFG.selos&&typeof CFG.selos=="object"?CFG.selos:{},gan=selosGanhos(),hj=hojeISO(),novos=[];
+SELOS.forEach(function(s){if(gan[s.id]&&!sel[s.id]){sel[s.id]=c.ini?hj:"antes";novos.push(s)}});/* "antes": selo do que a pessoa já tinha feito antes das conquistas existirem */
+if(!c.ini){c.ini=hj;c.nov=novos.length?1:0;saveCfg();return}
+if(novos.length){novos.forEach(function(s){CELEB.push(s)});saveCfg();setTimeout(celebra,350)}}
+function celebra(){if(document.getElementById("celeb")||!CELEB.length)return;var s=CELEB.shift(),d=document.createElement("div");d.id="celeb";d.className="celeb";d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");d.setAttribute("aria-label","Selo novo");
+d.innerHTML='<div class="celeb-in"><div class="celeb-e" aria-hidden="true">'+s.e+'</div><p class="celeb-k">Selo novo!</p><h2>'+esc(s.t)+'</h2><p class="soft">'+esc(s.d)+'</p><div class="btns"><button type="button" class="btn" data-act="celebok">Legal!</button><button type="button" class="btn line" data-act="celebver">Ver conquistas</button></div></div>';
+document.body.appendChild(d);var b=d.querySelector("button");if(b)b.focus()}
+function celebFecha(){var d=document.getElementById("celeb");if(d)d.remove();if(CELEB.length)setTimeout(celebra,250)}
+function mesAno(d){return MESF[+d.slice(5,7)-1]+" de "+d.slice(0,4)}
+/* Quadro na aba Mercados: economia, sequência e selos numa linha; toque abre a tela de conquistas. */
+function conqCard(){if(!ECO||!NM().length)return"";var sq=seqCalc(),sel=CFG.selos||{},ns=SELOS.filter(function(s){return sel[s.id]}).length,c=CFG.conq||{};
+var h='';if(c.nov)h+='<div class="status ok"><b>Novidade: Conquistas!</b> Com as notas que você já cadastrou, você ganhou '+ns+' selo'+(ns==1?'':'s')+'. <button type="button" class="link" data-act="conq">Ver agora</button></div>';
+return h+'<button type="button" class="row conq" data-act="conq" aria-label="Suas conquistas"><span class="cq3"><span><b>R$ '+R2(ECO.save)+'</b><small>economizados</small></span><span><b>🔥 '+sq.cur+'</b><small>'+(sq.q?(sq.cur==1?'quinzena':'quinzenas'):(sq.cur==1?'semana':'semanas'))+'</small></span><span><b>🏅 '+ns+'</b><small>de '+SELOS.length+' selos</small></span></span><span class="chev" aria-hidden="true">›</span></button>'}
+function vcq(){if(!N.length)return empty("Suas conquistas aparecem aqui");var e=ECO||ecoCalc(),sq=seqCalc(),sel=CFG.selos||{},hj=hojeISO(),ym=hj.slice(0,7),mp=isoD(new Date(new Date().getFullYear(),new Date().getMonth()-1,1)).slice(0,7);
+var h='<button type="button" class="link back" data-act="tab" data-v="m">‹ Voltar</button>';
+h+='<div class="card"><h3 style="margin:0">Você já economizou</h3><div class="valor" style="font-size:36px">R$ '+R2(e.save)+'</div>'+(e.ini?'<p class="soft small">desde '+mesAno(e.ini)+', comprando abaixo do preço médio dos seus mercados.</p>':'<p class="soft small">Aparece quando você tiver o mesmo produto comprado em pelo menos 2 mercados.</p>')+
+'<div class="k3"><div><b>R$ '+R2((e.mes[ym]||{}).s||0)+'</b><span>este mês</span></div><div><b>R$ '+R2((e.mes[mp]||{}).s||0)+'</b><span>mês passado</span></div><div><b>'+e.abx+'</b><span>compras abaixo da média</span></div></div>'+
+(e.miss>0?'<div class="status warn">Dava para economizar mais <b>R$ '+R2(e.miss)+'</b>: são as compras que saíram acima do preço médio. <button type="button" class="link" data-act="tab" data-v="p">Ver os produtos</button></div>':'')+
+'<details><summary class="link">Como esse valor é calculado</summary><p class="soft small">Cada compra é comparada com o preço médio do mesmo produto nos mercados em que você comprou, num período de 45 dias antes e depois. Quando você pagou menos que a média, a diferença conta como economia. Só entram produtos com preço de pelo menos 2 mercados. O valor nunca diminui: o que saiu acima da média aparece à parte, em “dava para economizar mais”.</p></details></div>';
+h+='<div class="card"><h3 style="margin:0">Sequência de notas</h3><div class="valor">🔥 '+seqNome(sq.cur,sq.q)+' <span class="soft">seguidas</span></div><p class="soft small">Seu recorde: '+seqNome(sq.best,sq.q)+'.</p>'+
+(sq.feita?'<div class="status ok">'+(sq.q?'Esta quinzena':'Esta semana')+' já tem nota. Sequência garantida!</div>':'<div class="status">Cadastre uma nota até '+["domingo","segunda","terça","quarta","quinta","sexta","sábado"][sq.fim.getDay()]+', '+dl(isoD(sq.fim)).slice(0,5)+', para '+(sq.cur?'manter':'começar')+' a sequência.</div>')+
+'<p class="soft small" style="margin-top:4px">Você faz compras:</p><div class="seg" style="grid-template-columns:1fr 1fr" role="group" aria-label="Frequência das compras"><button type="button" aria-pressed="'+!sq.q+'" data-act="seqm" data-q="s">Toda semana</button><button type="button" aria-pressed="'+!!sq.q+'" data-act="seqm" data-q="q">A cada 15 dias</button></div><p class="soft small">Vale a data da compra na nota.</p></div>';
+h+=window.appFamDesafio?appFamDesafio():"";
+var ns=SELOS.filter(function(s){return sel[s.id]}).length;
+h+='<h3>Selos <span class="soft" style="font:500 14px var(--body)">'+ns+' de '+SELOS.length+'</span></h3><div class="selos">'+SELOS.map(function(s){var g=sel[s.id];return'<div class="selo'+(g?'':' off')+'"><span class="se" aria-hidden="true">'+s.e+'</span><b>'+esc(s.t)+'</b><span class="soft small">'+esc(s.d)+'</span>'+(g?'<span class="pill ok">'+(/^\d{4}-/.test(g)?'ganho em '+dl(g):'ganho')+'</span>':'<span class="pill gray">a ganhar</span>')+'</div>'}).join("")+'</div>';
+return h}
+
 /* ---------- Onde dá para economizar ----------
    Para cada tipo do Comparar marcas: quanto você gastou em 12 meses, quanto pagou em média pelo mesmo tamanho
    e o mais em conta visto nos últimos 3 meses. A economia possível é o gasto × a diferença. */
@@ -771,13 +866,13 @@ if(v=="new"&&!DR){DR=blank();THUMBS=[];MSG={t:"",k:""};MODE=window.APP?"chave":"
 /* Topo: saudação pela hora do celular, com o nome que a pessoa escolheu, e o nome da aba. */
 function saudacao(){var h=new Date().getHours();return h>=5&&h<12?"Bom dia":h>=12&&h<18?"Boa tarde":"Boa noite"}
 function meuNome(){return String((CFG.perfil&&CFG.perfil.nome)||"").trim()}
-function cabecalho(){var t={m:"De Olho no Carrinho",n:"Notas",nd:"Nota",p:"Produtos",pd:"Produto",cm:"Comparar marcas",cmd:"Comparar marcas",bc:"Código de barras",gm:"Gasto por período",l:"Lista",nt:"Notícias",cfg:"Configurações","new":DR&&DR.id?"Editar nota":"Nova nota"}[V]||"De Olho no Carrinho",a=document.getElementById("ttl"),b=document.getElementById("saud"),nm=meuNome();
+function cabecalho(){var t={m:"De Olho no Carrinho",n:"Notas",nd:"Nota",p:"Produtos",pd:"Produto",cm:"Comparar marcas",cmd:"Comparar marcas",bc:"Código de barras",gm:"Gasto por período",l:"Lista",nt:"Notícias",cfg:"Configurações",cq:"Conquistas","new":DR&&DR.id?"Editar nota":"Nova nota"}[V]||"De Olho no Carrinho",a=document.getElementById("ttl"),b=document.getElementById("saud"),nm=meuNome();
 if(a)a.textContent=t;if(b)b.textContent=saudacao()+(nm?", "+nm.split(" ")[0]:"")}
 var PFE=false;
 function nomeCard(){if(meuNome()||(CFG.perfil&&CFG.perfil.pulou)||!N.length)return"";return'<div class="card" style="border-color:var(--acc)"><h3 style="margin:0">Como você quer ser chamado?</h3><p class="soft small">Aparece no topo do app: “'+saudacao()+', …”.</p><input type="text" id="pfn" maxlength="30" autocomplete="given-name" placeholder="Seu nome"><div class="btns"><button type="button" class="btn sm" data-act="pfsave">Salvar</button><button type="button" class="btn sm line" data-act="pfno">Agora não</button></div></div>'}
-function render(){comp();cabecalho();
-["m","n","p","l","new"].forEach(function(x){document.getElementById("n_"+x).setAttribute("aria-pressed",String(V==x||((V=="pd"||V=="cm"||V=="cmd")&&x=="p")||(V=="gm"&&x=="m")||(V=="bc"&&x==(BCFROM=="l"?"l":"p"))||(V=="nd"&&x=="n")))});
-document.getElementById("app").innerHTML=({cfg:vcfg,m:vm,n:vn,nd:vnd,p:vp,pd:vpd,cm:vcm,cmd:vcmd,bc:vbc,gm:vgm,l:vl,new:vnew})[V]();
+function render(){comp();conqCheck();cabecalho();
+["m","n","p","l","new"].forEach(function(x){document.getElementById("n_"+x).setAttribute("aria-pressed",String(V==x||((V=="pd"||V=="cm"||V=="cmd")&&x=="p")||((V=="gm"||V=="cq")&&x=="m")||(V=="bc"&&x==(BCFROM=="l"?"l":"p"))||(V=="nd"&&x=="n")))});
+document.getElementById("app").innerHTML=({cq:vcq,cfg:vcfg,m:vm,n:vn,nd:vnd,p:vp,pd:vpd,cm:vcm,cmd:vcmd,bc:vbc,gm:vgm,l:vl,new:vnew})[V]();
 if(V=="new"&&MODE=="foto")checkAI()}
 function empty(t){return'<div class="card"><h2>'+t+'</h2><p class="soft">Cadastre a primeira nota de compra para começar. Dá para usar '+(window.APP?'o QR code da nota, o PDF da consulta':'a foto do cupom, a chave de acesso')+' ou digitar os itens.</p><button type="button" class="btn" data-act="tab" data-v="new">Cadastrar nota</button>'+(window.APP?'<button type="button" class="btn line" data-act="demo">Ver como funciona, com notas de exemplo</button><p class="soft small">Conta: '+esc(window.APP_EMAIL||'')+'</p><button type="button" class="btn line" data-act="sair">Sair da conta</button><button type="button" class="btn danger" data-act="excluirconta">Excluir minha conta</button>'+(window.appRodape?appRodape():'')+'':'')+'</div>'}
 
@@ -812,7 +907,7 @@ var h=nomeCard(),rk=Object.keys(IX).sort(function(a,b){return IX[a]-IX[b]}),ss=O
 if(rk.length>=2){var b=rk[0];h+='<div class="hero"><span class="lbl">Mais barato nos últimos 3 meses</span><span class="big">'+esc(sn(b))+'</span><p>'+Math.abs((IX[b]-1)*100).toFixed(1).replace(".",",")+'% '+(IX[b]<1?'abaixo':'acima')+' da média dos mercados, comparado em '+IXN[b]+' produtos</p></div>'}
 else{rk=[];var cut=cutDate(),rec=uniq(N.filter(function(n){return n.data>=cut&&!ehFarm(n)}).map(sk));
 h+='<div class="status">'+(!rec.length?'Você não tem notas dos últimos 3 meses. O mercado mais barato é calculado só com preços recentes, porque eles mudam muito.':rec.length==1?'Nos últimos 3 meses, suas notas são todas do <b>'+esc(sn(rec[0]))+'</b>. Para saber qual mercado sai mais barato, cadastre compras de outro mercado com produtos que você também compra lá.':'Ainda não dá para apontar o mercado mais barato com segurança. Nos últimos 3 meses, é preciso ter pelo menos 2 mercados com '+IXMIN+' produtos em comum. Continue cadastrando as notas.')+'</div>'}
-h+=orcCard()+gastoMes()+dobra("eco",ecoCard())+dobra("alt",alertas())+dobra("sus",susCard())+dobra("infl",inflCard());
+h+=conqCard()+orcCard()+gastoMes()+dobra("eco",ecoCard())+dobra("alt",alertas())+dobra("sus",susCard())+dobra("infl",inflCard());
 var mab=!!MCA.merc;h+='<button type="button" class="dobra merc" data-act="dobra" data-c="merc" aria-expanded="'+mab+'"><span class="seta">'+SETA+'</span><span>Seus mercados ('+ss.length+')</span></button>';if(!mab)return h;h+='<div class="list">';
 ss.sort(function(a,b){return(rk.indexOf(a)<0?99:IX[a])-(rk.indexOf(b)<0?99:IX[b])||(IXN[b]||0)-(IXN[a]||0)}).forEach(function(s){var nn=N.filter(function(n){return sk(n)==s}),g=nn.reduce(function(t,n){return t+pago(n)},0),x=rk.indexOf(s)>=0?(IX[s]-1)*100:null,c=storeColor(s);
 h+='<div class="card"><div class="row flat"><span class="main"><span class="dot" style="background:'+c+'"></span><span class="txt"><span class="t">'+esc(sn(s))+'</span><span class="soft small">'+esc(ST[s].n)+'</span></span></span>'+(x!=null?'<span class="r"><span class="'+(x<0?"down":"up")+'">'+pc(IX[s])+'</span>'+(s==rk[0]?'<span class="pill ok">mais barato</span>':'')+'</span>':'<span class="r"><span class="pill gray">poucos dados</span></span>')+'</div>';
@@ -1264,7 +1359,7 @@ else if(a=="gcat"){var cc=+d.c;GP.cat=GP.cat===cc?null:cc;render()}
 else if(a=="gpshare"){var txs=gpTexto(),wa="https://wa.me/?text="+encodeURIComponent(txs);if(navigator.share&&!window.Android){navigator.share({text:txs}).catch(function(){})}else{window.open(wa,"_blank")}}
 else if(a=="orcset"){ORCE=true;render();var ov2=document.getElementById("orcv");if(ov2)ov2.focus()}
 else if(a=="orccancel"){ORCE=false;render()}
-else if(a=="orcsave"){var vv=num((document.getElementById("orcv")||{}).value);if(!(vv>0)){toast("Digite um valor maior que zero.");return}CFG.orc={v:r2(vv)};saveCfg();ORCE=false;render();toast("Orçamento salvo.")}
+else if(a=="orcsave"){var vv=num((document.getElementById("orcv")||{}).value);if(!(vv>0)){toast("Digite um valor maior que zero.");return}CFG.orc={v:r2(vv),desde:(CFG.orc&&CFG.orc.desde)||hojeISO()};saveCfg();ORCE=false;render();toast("Orçamento salvo.")}
 else if(a=="orcdel"){CFG.orc={};saveCfg();ORCE=false;render()}
 else if(a=="ecoall"){ECOALL=!ECOALL;render()}
 else if(a=="repl"){addList(d.k);render();toast("Coloquei na lista. Sai das sugestões enquanto estiver lá.")}
@@ -1278,13 +1373,17 @@ else if(a=="rpabre"){RPF=false;render()}
 else if(a=="dobra"){if(!d.c)return;MCA[d.c]=!MCA[d.c];lsSet("mn_dobra",JSON.stringify(MCA));render()}
 else if(a=="lojaf"){if(!d.s)return;CFG.lojas=CFG.lojas||{};var ef=farmS(d.s);CFG.lojas[d.s]=ef?"m":"f";saveCfg();render();toast(ef?sn(d.s)+" volta a contar como mercado.":sn(d.s)+" agora conta como farmácia, à parte do mercado.")}
 else if(a=="fcsel"){if(!FECHA)return;FECHA.sel[d.id]=FECHA.sel[d.id]===false;render()}
-else if(a=="fcok"){var nf=byId(FECHA&&FECHA.id);if(!nf)return;var tira={};fechaItens(nf).forEach(function(it){if(FECHA.sel[it.id]!==false)tira[it.id]=1});var nt=Object.keys(tira).length;CFG.lista=CFG.lista.filter(function(it){return!tira[it.id]});saveCfg();FECHA=null;render();toast(nt==1?"Tirei 1 item da lista.":"Tirei "+nt+" itens da lista.")}
+else if(a=="fcok"){var nf=byId(FECHA&&FECHA.id);if(!nf)return;var tira={};fechaItens(nf).forEach(function(it){if(FECHA.sel[it.id]!==false)tira[it.id]=1});var nt=Object.keys(tira).length;CFG.lista=CFG.lista.filter(function(it){return!tira[it.id]});if(nt){CFG.conq=CFG.conq&&typeof CFG.conq=="object"?CFG.conq:{};CFG.conq.lista=(+CFG.conq.lista||0)+1}saveCfg();FECHA=null;render();toast(nt==1?"Tirei 1 item da lista.":"Tirei "+nt+" itens da lista.")}
 else if(a=="fcno"){FECHA=null;render()}
 else if(a=="pfsave"){var pv=((document.getElementById("pfn")||{}).value||"").replace(/\s+/g," ").trim().slice(0,30);if(!pv){toast("Digite o seu nome.");return}CFG.perfil={nome:pv};saveCfg();PFE=false;render();toast(saudacao()+", "+pv.split(" ")[0]+"!")}
 else if(a=="pfno"){CFG.perfil={pulou:1};saveCfg();render();toast("Tudo bem. Dá para pôr o nome depois em Notas › Seus dados.")}
 else if(a=="pfedit"){PFE=true;render();var pf=document.getElementById("pfn");if(pf)pf.focus()}
 else if(a=="pfx"){PFE=false;render()}
 else if(a=="cfg"){go("cfg")}
+else if(a=="conq"){if(CFG.conq&&CFG.conq.nov){CFG.conq.nov=0;saveCfg()}go("cq")}
+else if(a=="seqm"){CFG.conq=CFG.conq&&typeof CFG.conq=="object"?CFG.conq:{};CFG.conq.seq=d.q=="q"?"q":"s";saveCfg();render()}
+else if(a=="celebok"){celebFecha()}
+else if(a=="celebver"){celebFecha();go("cq")}
 else if(a=="tema"){if(!d.t)return;TEMA=d.t;lsSet("mn_tema",TEMA);aplicaTema();render()}
 else if(a=="repoall"){REPOALL=!REPOALL;REPOSEL={};render()}
 else if(a=="repsel"){REPOSEL[d.r]=REPOSEL[d.r]===false;render()}
@@ -1412,7 +1511,7 @@ if(ev.key=="Enter"&&b.id=="pfn"){ev.preventDefault();var ps=document.querySelect
 if(ev.key=="Enter"&&b.id=="lq"){ev.preventDefault();var f=document.querySelector("#ls [data-act]");if(f)f.click()}});
 document.documentElement.lang="pt-BR";repair();render();initDb();
 </script>
-<script src="app-post.js?v=619912e4"></script>
+<script src="app-post.js?v=cc020365"></script>
 
 <style>
 /* Só no app: sem a aba Foto, sem o botão do Claude, e a tela de entrada por cima de tudo. */

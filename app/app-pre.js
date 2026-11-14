@@ -121,7 +121,10 @@ window.APP = true;
     sair: function () { return rpc("familia_sair"); },
     novoConvite: function () { return rpc("familia_novo_convite"); },
     remover: function (id) { return rpc("familia_remover", { p_user: id }); },
-    precos: function () { return rpc("familia_precos"); }
+    precos: function () { return rpc("familia_precos"); },
+    placarEnviar: function (semana, notas, economia) { return rpc("familia_placar_enviar", { p_semana: semana, p_notas: notas, p_economia: economia }); },
+    placar: function (semana) { return rpc("familia_placar", { p_semana: semana }); },
+    ranking: function (sim) { return rpc("familia_ranking", { p_sim: !!sim }); }
   };
   window.appUid = function () { return SES && SES.user ? SES.user.id : ""; };
   window.claude = { use: function (n) { return Promise.resolve({ db: db, user: user, downloads: downloads }[n] || null); } };

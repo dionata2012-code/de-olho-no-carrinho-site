@@ -407,6 +407,56 @@
   }
   /* O quadro Família fica nas Configurações (toque no carrinho do topo). */
   window.appFamCard = function () { return card(); };
+  window.appNoGrupo = function () { return !!FI; };
+  /* Desafio da família (tela Conquistas). O app manda só dois números da semana: notas cadastradas e quanto economizou.
+     Todos veem os totais do grupo; o ranking com nomes aparece só para quem escolheu participar, e mostra só quem também participa. */
+  var PL = null, PLT = 0, PLS = "", PLB = false, PLE = false;
+  function segunda() { var d = new Date(); d = new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7)); return isoD(d); }
+  function minhaSemana(sem) {
+    var fim = isoD(new Date(dPar(sem).getFullYear(), dPar(sem).getMonth(), dPar(sem).getDate() + 6)), dentro = function (d) { return d >= sem && d <= fim; };
+    var nn = NM().filter(function (n) { return dentro(n.data); }).length, ec = ((ECO && ECO.lst) || []).filter(function (x) { return dentro(x.d); }).reduce(function (t, x) { return t + x.v; }, 0);
+    return { notas: nn, economia: r2(ec), fim: fim };
+  }
+  function placar(forcar) {
+    if (!FI || PLB || demo()) return;
+    var sem = segunda();
+    if (!forcar && PL && PLS === sem && Date.now() - PLT < 10 * 60e3) return;
+    PLB = true; var m = minhaSemana(sem);
+    appFamilia.placarEnviar(sem, m.notas, m.economia).then(function () { return appFamilia.placar(sem); }).then(function (r) {
+      PL = r || null; PLS = sem; PLT = Date.now(); PLB = false; PLE = false; if (V === "cq") render();
+    }, function () { PLB = false; PLE = true; if (V === "cq") render(); });
+  }
+  window.appFamDesafio = function () {
+    var h = '<div class="card" id="desafio"><h3 style="margin:0">Desafio da família</h3>';
+    if (demo()) return h + '<p class="soft">Saia do modo demonstração para ver o desafio da família.</p></div>';
+    if (!FI) return h + '<p class="soft">Entre num grupo da família para ter um desafio da semana junto com a família. Toque no carrinho do topo e vá em <b>Família</b>.</p></div>';
+    placar(false);
+    if (!PL) return h + (PLE ? '<p class="soft">Não deu para carregar o desafio agora. Confira a internet.</p><button type="button" class="btn line sm" data-act="plrec">Tentar de novo</button>' : '<p class="soft">Carregando…</p>') + '</div>';
+    var sem = PLS, m = minhaSemana(sem), at = +PL.ativos || 0, mb = +PL.membros || 1;
+    h += '<p class="soft small">Semana de ' + dl(sem).slice(0, 5) + ' a ' + dl(m.fim).slice(0, 5) + ' · ' + esc(FI.nome) + '</p>' +
+      '<div class="k3"><div><b>' + (+PL.notas || 0) + '</b><span>notas do grupo</span></div><div><b>R$ ' + R2(+PL.economia || 0) + '</b><span>economizados juntos</span></div><div><b>' + at + ' de ' + mb + '</b><span>pessoas com nota</span></div></div>' +
+      '<p class="small"><b>Meta da semana:</b> todo mundo do grupo cadastrar pelo menos uma nota.</p><div class="bar"><i style="width:' + Math.min(100, at / mb * 100).toFixed(0) + '%;background:var(--acc)"></i></div>' +
+      (at >= mb && mb > 1 ? '<div class="status ok">Meta batida! Todo mundo do grupo cadastrou nota esta semana. 🎉</div>' : mb < 2 ? '<p class="soft small">Convide alguém para o grupo para o desafio valer.</p>' : '');
+    if (PL.ranking) {
+      var L = PL.lista || [];
+      h += '<h3>Ranking da semana</h3><div class="list">' + L.map(function (x, i) {
+        return '<div class="row flat"><span class="txt"><span class="t">' + (i + 1) + 'º ' + esc(x.apelido) + (x.eu ? ' (você)' : '') + '</span><span class="soft small">' + x.notas + (x.notas == 1 ? ' nota' : ' notas') + '</span></span><span class="r">R$ ' + R2(+x.economia || 0) + '<span class="soft small" style="font-weight:500">economizados</span></span></div>';
+      }).join("") + '</div>' + (L.length < 2 ? '<p class="soft small">Por enquanto só você participa. O ranking aparece quando mais alguém do grupo entrar nele.</p>' : '') +
+        '<p class="soft small">O ranking mostra o nome, as notas e quanto cada um economizou na semana. Ninguém vê quanto você gastou.</p><button type="button" class="link" data-act="rkoff">Sair do ranking</button>';
+    } else {
+      var pt = +PL.participantes || 0;
+      h += '<h3>Ranking da semana</h3><p class="soft small">Quer disputar quem economiza mais? Quem participa aparece com o nome, quantas notas cadastrou e quanto economizou na semana. <b>Ninguém vê quanto você gastou</b>, e o ranking só aparece para quem também participa.' + (pt ? ' ' + pt + (pt == 1 ? ' pessoa do grupo já participa.' : ' pessoas do grupo já participam.') : '') + '</p><button type="button" class="btn line" data-act="rkon">Participar do ranking</button>';
+    }
+    return h + '</div>';
+  };
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-act]"); if (!b) return; var a = b.getAttribute("data-act");
+    if (a === "plrec") { PLE = false; placar(true); render(); }
+    else if (a === "rkon" || a === "rkoff") {
+      if (PLB) return; PLB = true;
+      appFamilia.ranking(a === "rkon").then(function () { PLB = false; placar(true); toast(a === "rkon" ? "Você entrou no ranking da semana." : "Você saiu do ranking. Seu nome não aparece mais nele."); }, function () { PLB = false; toast("Não deu certo agora. Tente de novo."); });
+    }
+  });
   function val(id) { var e = document.getElementById(id); return e ? e.value.replace(/\s+/g, " ").trim() : ""; }
   function rolar() { var c = document.getElementById("fam"); if (c && c.scrollIntoView) c.scrollIntoView({ block: "start" }); }
   function feito(i, t) { FI = i || null; FM = ""; CONV = null; FMSG = t ? { t: t, k: "ok" } : null; BUSY = false; T = 0; render(); rolar(); atualizar(true); }
