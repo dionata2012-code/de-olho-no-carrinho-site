@@ -1444,7 +1444,7 @@ else if(a=="vtvolta"){V="vt";render();window.scrollTo(0,0)}
 else if(a=="vtnovo"){var nv={id:uid(),loja:"",s0:"",d:hojeISO(),itens:[]};vLista().push(nv);VT=nv.id;VTK=null;VTQ="";render();window.scrollTo(0,0);var el0=document.getElementById("vtl");if(el0)el0.focus()}
 else if(a=="vtabre"){VT=d.id;VTK=null;VTQ="";VTC=null;render();window.scrollTo(0,0)}
 else if(a=="vtfim"){var vf=vLista().filter(function(x){return x.id===VT})[0];var el1=document.getElementById("vtl");if(vf&&el1)vtLoja(vf,el1.value);if(vf&&!vf.itens.length){CFG.vistos=vLista().filter(function(x){return x!==vf})}else if(vf&&!vf.loja){toast("Diga o nome do mercado.");if(el1)el1.focus();return}VT=null;VTK=null;VTQ="";saveCfg();render();window.scrollTo(0,0)}
-else if(a=="vtdel"){if(VTC!==d.id){VTC=d.id;render();return}CFG.vistos=vLista().filter(function(x){return x.id!==d.id});VTC=null;saveCfg();render();toast("Orçamento apagado.")}
+else if(a=="vtdel"){if(VTC!==d.id){VTC=d.id;render();return}CFG.vistos=vLista().filter(function(x){return x.id!==d.id});VTC=null;saveCfg();render();toast("Anotação apagada.")}
 else if(a=="vtpick"){var gv=G[d.k];if(!gv)return;VTK={k:gv.k,b:tpBases(gv)[0],n:gv.nm,c:gv.code||""};render();var ep=document.getElementById("vtp");if(ep)ep.focus()}
 else if(a=="vtlivre"){var nl=VTQ.replace(/\s+/g," ").trim();if(!nl)return;VTK={k:null,b:"",n:nl.slice(0,80)};render();var ep2=document.getElementById("vtp");if(ep2)ep2.focus()}
 else if(a=="vtkx"){VTK=null;render()}
