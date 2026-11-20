@@ -199,19 +199,7 @@
     });
     return d.innerHTML;
   };
-  /* Aviso na tela inicial quando chegam notícias novas dos seus produtos. */
-  var vm0 = vm;
-  vm = function () {
-    var h = vm0(), s = semanaAtual(); if (!s || !N.length) return h;
-    var meus = linhas().filter(function (r) { return r.tipo === "produto" && seusProdutos(r).length; });
-    if (!meus.length) return h;
-    var novo = lsG(K_NTV) !== s, desce = meus.filter(function (r) { return r.tendencia === "desce"; }), sobe = meus.filter(function (r) { return r.tendencia === "sobe"; });
-    var txt = (desce.length ? 'Tende a baixar: ' + desce.map(function (r) { return esc(r.produto); }).join(", ") + '. ' : '') + (sobe.length ? 'Tende a subir: ' + sobe.map(function (r) { return esc(r.produto); }).join(", ") + '. ' : '') + (!desce.length && !sobe.length ? 'Veja por que mudaram: ' + meus.slice(0, 4).map(function (r) { return esc(r.produto); }).join(", ") + '.' : '');
-    var card = '<button type="button" class="row" data-act="tab" data-v="nt"' + (novo ? ' style="border-color:var(--acc)"' : '') + '><span class="txt"><span class="t">Notícias dos seus produtos' + (novo ? ' <span class="pill ok">novo</span>' : '') + '</span><span class="soft small">' + txt + '</span></span><span class="r" aria-hidden="true" style="font-size:22px">›</span></button>';
-    var i = h.indexOf("</div>", h.indexOf('class="hero"'));
-    if (h.indexOf('class="hero"') >= 0 && i >= 0) return h.slice(0, i + 6) + card + h.slice(i + 6);
-    return card + h;
-  };
+  /* Novidade nas notícias: só o ponto laranja no ícone de jornal do topo (o quadro na aba Gastos saiu). */
   /* A aba Notícias não existe no site: desenha aqui e marca o botão da barra. */
   var render0 = render;
   render = function () {
