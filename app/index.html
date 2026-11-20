@@ -1288,20 +1288,23 @@ return'<svg viewBox="0 0 104 104" width="104" height="104" aria-hidden="true"><c
 function gChart(){var m={};NM().forEach(function(n){var k=n.data.slice(0,7);m[k]=(m[k]||0)+pago(n)});var hm=hojeISO().slice(0,7),have=Object.keys(m).filter(function(k){return k<=hm}).sort();if(!have.length)return"";
 var ks=[],y=+hm.slice(0,4),mo=+hm.slice(5,7);for(var j=0;j<12;j++){var kk=y+"-"+("0"+mo).slice(-2);if(kk<have[0])break;ks.unshift(kk);mo--;if(!mo){mo=12;y--}}
 var com=ks.filter(function(k){return m[k]>0&&k<hm});if(!com.length)com=ks.filter(function(k){return m[k]>0});var media=com.reduce(function(t,k){return t+m[k]},0)/(com.length||1);
-var n=ks.length,W=340,H=104,pt=8,pb=4,mx=Math.max(media,Math.max.apply(0,ks.map(function(k){return m[k]||0})))||1,bw=Math.min(30,(W-6*(n+1))/n),gap=(W-n*bw)/(n+1);
-var s='<svg class="gchart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Gasto nos últimos '+n+' meses. Média de R$ '+R2(media)+'">';
-ks.forEach(function(k,i){var v=m[k]||0,x=gap+i*(bw+gap),bh=v>0?Math.max(4,v/mx*(H-pt-pb)):3,yy=H-pb-bh,cur=k==hm;
+/* Valor em cima de cada barra e o mês embaixo; mês sem compra vira um traço, sem "0". */
+var n=ks.length,W=340,H=180,pt=22,pb=24,mx=Math.max(media,Math.max.apply(0,ks.map(function(k){return m[k]||0})))||1,bw=Math.min(30,(W-6*(n+1))/n),gap=(W-n*bw)/(n+1),ch=H-pt-pb;
+var s='<svg class="gchart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Gasto nos últimos '+n+' meses. Média de R$ '+R2(media)+'"><line x1="0" x2="'+W+'" y1="'+(H-pb)+'" y2="'+(H-pb)+'" stroke="var(--line)"/>';
+ks.forEach(function(k,i){var v=m[k]||0,x=gap+i*(bw+gap),bh=v>0?Math.max(4,v/mx*ch):3,yy=H-pb-bh,cur=k==hm;
 s+='<rect x="'+x.toFixed(1)+'" y="'+yy.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="'+(v>0?4:1.5)+'" fill="'+(v>0?(cur?'var(--acc)':'var(--gbar)'):'var(--line)')+'"/>';
+if(v>0)s+='<text pointer-events="none" x="'+(x+bw/2).toFixed(1)+'" y="'+(yy-5).toFixed(1)+'" font-size="'+(n>9?9.5:11)+'" font-weight="700" text-anchor="middle" fill="var(--ink)">'+Math.round(v)+'</text>';
+s+='<text pointer-events="none" x="'+(x+bw/2).toFixed(1)+'" y="'+(H-7)+'" font-size="10.5" font-weight="'+(cur?700:600)+'" text-anchor="middle" fill="'+(cur?'var(--acc)':'var(--soft)')+'">'+MESES[+k.slice(5,7)-1]+'</text>';
 s+='<rect x="'+(x-gap/2).toFixed(1)+'" y="0" width="'+(bw+gap).toFixed(1)+'" height="'+H+'" fill="transparent" style="cursor:pointer" data-act="gm" data-m="'+k+'" role="button" aria-label="'+ymNome(k)+': '+(v>0?'R$ '+R2(v):'sem compra')+'"><title>'+ymNome(k)+(v>0?': R$ '+R2(v):': sem compra')+'</title></rect>'});
-var ym0=H-pb-media/mx*(H-pt-pb);if(com.length)s+='<line x1="0" x2="'+W+'" y1="'+ym0.toFixed(1)+'" y2="'+ym0.toFixed(1)+'" stroke="var(--soft)" stroke-width="1.5" stroke-dasharray="5 4" pointer-events="none"/>';
+var ym0=H-pb-media/mx*ch;if(com.length)s+='<line x1="0" x2="'+W+'" y1="'+ym0.toFixed(1)+'" y2="'+ym0.toFixed(1)+'" stroke="var(--soft)" stroke-width="1.2" stroke-dasharray="5 4" opacity=".7" pointer-events="none"/>';
 s+='</svg>';
-return s+'<div class="gch-l"><span>'+MESES[+ks[0].slice(5,7)-1]+'</span>'+(com.length?'<span>- - - média R$ '+Rm(Math.round(media))+'</span>':'<span></span>')+'<span class="cur">'+MESES[+hm.slice(5,7)-1]+'</span></div>'}
+return s+(com.length?'<p class="soft small" style="margin:4px 0 0;text-align:center">- - - média R$ '+Rm(Math.round(media))+' por mês</p>':'')}
 function gCard(){var ym=hojeISO().slice(0,7),g=gastoMesYM(ym),v=orcDe(ym),p=v>0?g/v*100:0,av=orcAvisa(),cor=p>100?"var(--err)":av&&p>=80?"var(--warn)":"var(--acc)";
 var h='<div class="card gcard"><div class="gtop">';
 if(v>0)h+='<button type="button" class="anel" data-act="orcset" aria-label="'+Math.round(p)+'% do orçamento usado. Editar orçamento">'+anel(p,cor)+'<span class="anel-t"><b>'+Math.round(p)+'%</b><small>do orçamento</small></span></button>';
 else h+='<button type="button" class="anel vazio" data-act="orcset"><span>Definir orçamento</span></button>';
 h+='<div class="gtxt"><span class="soft">'+MESF[+ym.slice(5,7)-1].replace(/^./,function(c){return c.toUpperCase()})+' até agora</span><span class="gval">R$ '+Rm(g)+'</span>';
-if(v>0)h+='<span class="small" style="color:'+(p>100?'var(--err)':av&&p>=80?'var(--warn)':'var(--soft)')+';font-weight:600">'+(p>100?'Passou R$ '+Rm(g-v)+' de R$ '+Rm(v):'Faltam R$ '+Rm(v-g)+' de R$ '+Rm(v))+'</span><button type="button" class="link" data-act="orcset">Editar orçamento</button>';
+if(v>0)h+='<span class="small" style="color:'+(p>100?'var(--err)':av&&p>=80?'var(--warn)':'var(--soft)')+';font-weight:600">'+(p>100?'Passou R$ '+Rm(g-v)+' de R$ '+Rm(v):'Faltam R$ '+Rm(v-g)+' de R$ '+Rm(v))+'</span>';
 h+='</div></div>';
 var ch=gChart();if(ch)h+='<div class="gsep"></div>'+ch;
 var fm=N.filter(function(n){return ehFarm(n)&&n.data.slice(0,7)==ym}).reduce(function(t,n){return t+pago(n)},0);
