@@ -299,7 +299,7 @@ var ST={},G={},OKEY={},SUG=[],IX={},IXN={},IXMIN=5,PAR={},BI={},ALIAS={},DB=null
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function sv(){lsSet(KEY,JSON.stringify(N))}
-function blankCfg(){return{cores:{},etiquetas:[],nomes:{},juntar:[],nao:[],lista:[],apelidos:{},sugIA:[],tipos:{},saltos:{},diag:{},cods:{},cats:{},orc:{},repo:{},rp:{},lojas:{},perfil:{},selos:{},conq:{},vistos:[],upd:0}}
+function blankCfg(){return{cores:{},etiquetas:[],nomes:{},juntar:[],nao:[],lista:[],apelidos:{},sugIA:[],tipos:{},saltos:{},diag:{},cods:{},cats:{},ucats:[],orc:{},repo:{},rp:{},lojas:{},perfil:{},selos:{},conq:{},vistos:[],upd:0}}
 function loadCfg(o){var c=blankCfg();if(o&&typeof o=="object"){Object.keys(c).forEach(function(k){if(k!=="upd"&&o[k]!=null&&Array.isArray(o[k])===Array.isArray(c[k])&&typeof o[k]==="object")c[k]=o[k]});c.upd=+o.upd||0}return c}
 function valid(n){return n&&typeof n.id=="string"&&n.loja&&/^\d{4}-\d{2}-\d{2}$/.test(n.data||"")&&Array.isArray(n.itens)}
 try{N=JSON.parse(lsGet(KEY)||"[]")}catch(e){N=[]}
@@ -610,17 +610,23 @@ var CATS=[["Padaria, doces e biscoitos","#c0266a",/\b(pao|bisc|biscoito|bisnagui
 ["Hortifrúti","#2e9e5b",/\b(banana|tomate|batata|cebola|cenoura|alho|maca|pera|manga|mamao|laranja|limao|abacate|abacaxi|uva|morango|melancia|melao|mexerica|tangerina|kiwi|alface|couve|repolho|brocolis|abobora|abobrinha|chuchu|beterraba|pepino|pimentao|inhame|mandioca|baroa|mandioquinha|jilo|quiabo|vagem|maracuja|goiaba|caqui|ameixa|moranga|cheiro verde)\b/]];
 var CAT_OUT="#8a958d";
 function nsp(s){return" "+String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g," ").trim()+" "}
-function catAuto(nm){var x=nsp(nm);if(/\b(c bov|bov|bovina|bovino|suino|suina)\b/.test(x)){for(var c0=0;c0<CATS.length;c0++)if(/^Carnes/.test(CATS[c0][0]))return c0}for(var i=0;i<CATS.length;i++)if(CATS[i][2].test(x))return i;return-1}
-function catG(g){if(!g)return-1;var ov=(CFG.cats||{})[tpBases(g)[0]];if(ov!=null&&ov!=="")return+ov;if(g._cat===undefined)g._cat=catAuto(g.nm);return g._cat}
-function catNome(i){return i<0?"Outros":CATS[i][0]}
-function catCor(i){return i<0?CAT_OUT:CATS[i][1]}
+/* Categorias criadas pela pessoa (CFG.ucats): {id (100 em diante), n nome, c cor, w palavras}. As palavras vêm antes das regras do app. */
+var CAT_CORES=["#7c3aed","#db2777","#0891b2","#ca8a04","#ea580c","#4f46e5","#65a30d","#78716c"],UCE=null;
+function ucat(i){return(CFG.ucats||[]).filter(function(u){return u.id==i})[0]||null}
+function ucWords(t){return String(t||"").split(/[,;]+/).map(function(w){return nsp(w).trim()}).filter(function(w){return w.length>=2})}
+function ucMatch(u,x){return(u.w||[]).some(function(w){return x.indexOf(" "+w+" ")>=0})}
+function catReset(){Object.keys(G).forEach(function(k){delete G[k]._cat})}
+function catAuto(nm){var x=nsp(nm),U=CFG.ucats||[];for(var j=0;j<U.length;j++)if(ucMatch(U[j],x))return U[j].id;if(/\b(c bov|bov|bovina|bovino|suino|suina)\b/.test(x)){for(var c0=0;c0<CATS.length;c0++)if(/^Carnes/.test(CATS[c0][0]))return c0}for(var i=0;i<CATS.length;i++)if(CATS[i][2].test(x))return i;return-1}
+function catG(g){if(!g)return-1;var ov=(CFG.cats||{})[tpBases(g)[0]];if(ov!=null&&ov!==""&&(+ov<100||ucat(+ov)))return+ov;if(g._cat===undefined)g._cat=catAuto(g.nm);return g._cat}
+function catNome(i){if(i>=100){var u=ucat(i);return u?u.n:"Outros"}return i<0||!CATS[i]?"Outros":CATS[i][0]}
+function catCor(i){if(i>=100){var u=ucat(i);return u?u.c:CAT_OUT}return i<0||!CATS[i]?CAT_OUT:CATS[i][1]}
 /* Tipo do produto, para agrupar marcas: "Leite longa vida", "Tomate". */
 function tipoLab(g){if(g.tp&&!g.tp.x&&g.tp.t)return TYL[g.tp.t]||tLab(g.tp.t);var t=tipoDe(g.nm);return t?tLab(t):g.nm}
 var CATE=null;
 function catSel(g){var c=catG(g),aut=catAuto(g.nm),ov=c!==aut;
 if(CATE!==g.k)return'<div class="card"><div class="row flat"><span class="small">Categoria: <b>'+esc(catNome(c))+'</b>'+(ov?' <span class="soft">(escolhida por você)</span>':'')+'</span><button type="button" class="link" data-act="catedit">Mudar</button></div>'+(ov?'<p class="soft small">Pelo nome, o app colocaria em '+esc(catNome(aut))+'. <button type="button" class="link" data-act="catauto">Voltar para '+esc(catNome(aut))+'</button></p>':'')+'</div>';
 var h='<div class="card"><label class="f">Categoria deste produto<select data-in="catsel" data-k="'+esc(g.k)+'">';
-CATS.forEach(function(x,i){h+='<option value="'+i+'"'+(c==i?' selected':'')+'>'+x[0]+'</option>'});h+='<option value="-1"'+(c<0?' selected':'')+'>Outros</option></select></label><p class="soft small">Usada no gasto por categoria.</p><div class="btns"><button type="button" class="btn sm line" data-act="catok">Pronto</button></div></div>';return h}
+CATS.forEach(function(x,i){h+='<option value="'+i+'"'+(c==i?' selected':'')+'>'+x[0]+'</option>'});(CFG.ucats||[]).forEach(function(u){h+='<option value="'+u.id+'"'+(c==u.id?' selected':'')+'>'+esc(u.n)+'</option>'});h+='<option value="-1"'+(c<0?' selected':'')+'>Outros</option></select></label><p class="soft small">Usada no gasto por categoria.</p><div class="btns"><button type="button" class="btn sm line" data-act="catok">Pronto</button><button type="button" class="btn sm line" data-act="ucnova" data-de="pd">+ Criar categoria</button></div></div>';return h}
 
 /* ---------- Datas ---------- */
 /* Data da compra: precisa existir, não pode estar no futuro e, com chave de acesso, tem de cair no mês e ano que a chave traz. */
@@ -1438,7 +1444,7 @@ var MERC_CAT={0:1,1:1,2:1,3:1,4:1,5:1};
 function medTxt(b){return b=="kg"?"kg":b=="l"?"L":b=="m"?"metro":"un"}
 function porMed(p,tp){return tp&&tp.q>0?p/tp.q:0}
 function familia(g){var W=jWords(g.nm).slice().sort().join(" ");if(!W||!g.tp)return[];return Object.keys(G).map(function(k){return G[k]}).filter(function(o){return o!==g&&!o.v&&o.tp&&o.tp.b===g.tp.b&&o.tp.q>0&&o.last&&jWords(o.nm).slice().sort().join(" ")===W})}
-function mercCard(g){if(!MERC_CAT[catG(g)]||!g.tp||!(g.tp.q>0)||g.v)return"";var tp=g.tp,porKg=tp.b=="kg"&&tp.q==1&&/kg/i.test(g.u||"");if(porKg)return"";
+function mercCard(g){var cg0=catG(g);if(!(MERC_CAT[cg0]||cg0>=100)||!g.tp||!(g.tp.q>0)||g.v)return"";var tp=g.tp,porKg=tp.b=="kg"&&tp.q==1&&/kg/i.test(g.u||"");if(porKg)return"";
 var med=medTxt(tp.b),pl=g.last.pu,pm=porMed(pl,tp),h="",F=familia(g);
 if(tp.b!="un"||tp.q>1)h+='<p class="small" style="margin:0">'+fq(tp.q,tp.b)+' · <b>R$ '+R2(pm)+'/'+med+'</b> na sua última compra</p>';
 /* embalagem diminuiu: mesmo produto, tamanho maior antes, e agora menor pelo mesmo preço ou mais */
@@ -1483,7 +1489,7 @@ var w=ss.reduce(function(t,s){return t+p3[s].n},0);ss.forEach(function(s){(ac[s]
 Object.keys(ac).forEach(function(s){IXN[s]=ac[s].length;if(ac[s].length>=IXMIN){var sw=0,sr=0;ac[s].forEach(function(x){sr+=x[0]*x[1];sw+=x[1]});IX[s]=sr/sw}})}
 
 /* ---------- navegação ---------- */
-function go(v){V=v;SEL=null;PK=null;CONF=null;EDIT=null;ASK=null;PICK=null;JOIN=false;RENAME=false;NEWTAG=false;APL=null;SELM=false;SELS={};TPE=false;
+function go(v){V=v;SEL=null;PK=null;CONF=null;UCE=null;EDIT=null;ASK=null;PICK=null;JOIN=false;RENAME=false;NEWTAG=false;APL=null;SELM=false;SELS={};TPE=false;
 if(v=="new"&&!DR){DR=blank();THUMBS=[];MSG={t:"",k:""};MODE=window.APP?"chave":"foto"}render();window.scrollTo(0,0)}
 /* Topo: saudação pela hora do celular, com o nome que a pessoa escolheu, e o nome da aba. */
 function saudacao(){var h=new Date().getHours();return h>=5&&h<12?"Bom dia":h>=12&&h<18?"Boa tarde":"Boa noite"}
@@ -1517,6 +1523,7 @@ aplicaTema();try{matchMedia("(prefers-color-scheme: dark)").addEventListener("ch
 function vcfg(){var h='<button type="button" class="link back" data-act="tab" data-v="m">‹ Voltar</button>';
 h+='<div class="card"><h3 style="margin:0">Você</h3>'+(PFE?'<div class="ed"><label class="f">Como você quer ser chamado?<input type="text" id="pfn" maxlength="30" autocomplete="given-name" value="'+esc(meuNome())+'"></label><div class="btns"><button type="button" class="btn sm" data-act="pfsave">Salvar</button><button type="button" class="btn sm line" data-act="pfx">Cancelar</button></div></div>':'<div class="row flat"><span class="small">Seu nome no app: <b>'+(meuNome()?esc(meuNome()):'não informado')+'</b></span><button type="button" class="link" data-act="pfedit">Mudar</button></div>')+(window.APP_EMAIL?'<p class="soft small">Conta: '+esc(window.APP_EMAIL)+'</p>':'')+'</div>';
 h+='<div class="card"><h3 style="margin:0">Aparência</h3><div class="seg" role="group" aria-label="Tema">'+[["claro","Claro"],["escuro","Escuro"],["auto","Automático"]].map(function(x){return'<button type="button" aria-pressed="'+(TEMA===x[0])+'" data-act="tema" data-t="'+x[0]+'">'+x[1]+'</button>'}).join("")+'</div><p class="soft small">Automático segue o tema do celular. Fica guardado neste aparelho.</p></div>';
+h+=ucCard();
 h+=window.appFamCard?appFamCard():"";
 h+='<div class="card"><h3 style="margin:0">Seus dados</h3>'+'<p class="soft">'+(DB?(window.APP?'As notas ficam salvas na sua conta ('+esc(window.APP_EMAIL||'')+') e aparecem em qualquer celular em que você entrar com ela.':'As notas ficam salvas na sua conta Claude e aparecem em qualquer aparelho em que você abrir este link.'):GUEST?'Você abriu o site pelo link de outra pessoa: aqui as notas ficam salvas só neste aparelho. Baixe a planilha de vez em quando para não perder.':'As notas ficam salvas só neste aparelho. Baixe a planilha de vez em quando para não perder.')+'</p><button type="button" class="btn line" data-act="csv">Baixar planilha (CSV)</button><p class="soft small" id="cm" role="status"></p>'+(window.APP?'<button type="button" class="btn line" data-act="sair">Sair da conta</button><button type="button" class="btn danger" data-act="excluirconta">Excluir minha conta</button>'+(window.appRodape?appRodape():'')+'':'');
 h+=CONF=="wipe"?'<p><b>Apagar as '+N.length+' notas salvas?</b> Isso não pode ser desfeito.</p><div class="btns"><button type="button" class="btn danger solid" data-act="wipe2">Apagar tudo</button><button type="button" class="btn line" data-act="noconf">Cancelar</button></div>':'<button type="button" class="btn danger" data-act="wipe">Apagar todas as notas</button>';
@@ -1524,6 +1531,31 @@ h+=CONF=="wipe"?'<p><b>Apagar as '+N.length+' notas salvas?</b> Isso não pode s
 h+='</div>';
 if(window.APP)h+='<div class="card"><h3 style="margin:0">Ajuda</h3><button type="button" class="btn line" data-act="demo">Ver como funciona, com notas de exemplo</button><a class="link" href="https://dionata2012-code.github.io/de-olho-no-carrinho-site/privacidade.html" target="_blank" rel="noopener">Política de privacidade</a></div>';
 return h}
+/* Suas categorias (Configurações). */
+function ucConta(id){return Object.keys(G).filter(function(k){return catG(G[k])==id}).length}
+function ucPrev(){if(!UCE)return"";var W=ucWords(UCE.w);if(!W.length)return"";var u={w:W},L=Object.keys(G).map(function(k){return G[k]}).filter(function(g){var ov=(CFG.cats||{})[tpBases(g)[0]];return(ov==null||ov==="")&&ucMatch(u,nsp(g.nm))});
+if(!L.length)return'<p class="soft small">Nenhum produto das suas notas tem essas palavras.</p>';
+return'<p class="small">Vai levar <b>'+L.length+' produto'+(L.length>1?'s':'')+'</b>: '+L.slice(0,6).map(function(g){return esc(g.nv||g.nm)}).join(", ")+(L.length>6?' e mais '+(L.length-6):'')+'.</p>'}
+function ucForm(){var e=UCE,novo=!e.id;return'<div class="ed"><p class="small" style="margin:8px 0 0"><b>'+(novo?'Nova categoria':'Editar categoria')+'</b></p>'+
+'<label class="f">Nome<input type="text" id="ucn" data-in="ucn" maxlength="24" autocomplete="off" value="'+esc(e.n)+'" placeholder="Ex.: Pet"></label>'+
+'<p class="small" style="margin:8px 0 4px">Cor</p><div class="sw" role="group" aria-label="Cor da categoria">'+CAT_CORES.map(function(c,i){return'<button type="button" style="background:'+c+'" aria-label="Cor '+(i+1)+'" aria-pressed="'+(e.c==c)+'" data-act="uccor" data-c="'+c+'"></button>'}).join("")+'</div>'+
+'<label class="f">Pôr sozinho os produtos com estas palavras<input type="text" id="ucw" data-in="ucw" autocomplete="off" value="'+esc(e.w)+'" placeholder="Ex.: RACAO, PETISCO"></label><p class="soft small">Separe com vírgula. Produtos em que você já escolheu a categoria não mudam.</p><div id="ucprev">'+ucPrev()+'</div>'+
+(e.err?'<p class="status warn">'+esc(e.err)+'</p>':'')+
+'<div class="btns"><button type="button" class="btn sm" data-act="ucsave">Salvar</button><button type="button" class="btn sm line" data-act="ucx">Cancelar</button></div>'+
+(novo?'':CONF=="ucdel"?'<p class="small"><b>Apagar a categoria '+esc(e.n)+'?</b> Os produtos dela voltam para a categoria que o app escolhe pelo nome.</p><div class="btns"><button type="button" class="btn sm danger solid" data-act="ucdel2">Apagar</button><button type="button" class="btn sm line" data-act="noconf">Cancelar</button></div>':'<button type="button" class="link" data-act="ucdel">Apagar esta categoria</button>')+'</div>'}
+function ucCard(){var U=CFG.ucats||[],h='<div class="card" id="uccard"><h3 style="margin:0">Suas categorias</h3>';
+if(UCE)return h+ucForm()+'</div>';
+if(!U.length)h+='<p class="soft small">Crie categorias suas, como Pet ou Bebê. As 8 do app continuam.</p>';
+else h+='<div class="list">'+U.map(function(u){var n=ucConta(u.id);return'<div class="row flat"><span class="small"><span class="dot" style="background:'+u.c+'"></span> <b>'+esc(u.n)+'</b> · '+n+' produto'+(n==1?'':'s')+'</span><button type="button" class="link" data-act="ucedit" data-id="'+u.id+'">Editar</button></div>'}).join("")+'</div>';
+return h+'<button type="button" class="btn sm line" data-act="ucnova">+ Nova categoria</button></div>'}
+function ucSalva(){var e=UCE,n=String(e.n||"").trim().replace(/\s+/g," "),U=CFG.ucats=CFG.ucats||[];
+if(!n){e.err="Escreva o nome da categoria.";return false}
+var igual=function(a){return nsp(a)==nsp(n)};
+if(CATS.some(function(x){return igual(x[0])})||igual("Outros")||U.some(function(u){return u.id!=e.id&&igual(u.n)})){e.err="Já existe uma categoria com esse nome.";return false}
+var w=ucWords(e.w);
+if(e.id){var u=ucat(e.id);u.n=n;u.c=e.c;u.w=w}else{var id=U.reduce(function(m,u){return Math.max(m,u.id)},99)+1;U.push({id:id,n:n,c:e.c,w:w})}
+catReset();saveCfg();return true}
+function ucApaga(id){CFG.ucats=(CFG.ucats||[]).filter(function(u){return u.id!=id});var C=CFG.cats||{};Object.keys(C).forEach(function(b){if(+C[b]==id)delete C[b]});catReset();saveCfg()}
 /* ---------- Aba Gastos ----------
    Um quadro principal (orçamento do mês + gasto dos últimos 12 meses), o quadro Preços (Subiram / Economizar)
    e, embaixo, a comparação entre mercados. Os outros quadros abrem ao tocar. */
@@ -1900,7 +1932,7 @@ if(!L.length)return h.replace('%%LTOT%%','')+'<div class="card"><p class="soft">
 var tot0=0,falt=0,per={};Object.keys(ST).forEach(function(s){per[s]={t:0,c:0}});
 h+=carrinhoCard()+'<div class="card"><div class="list">';
 /* na ordem de um mercado: hortifrúti, padaria, carnes, laticínios, mercearia, bebidas, limpeza, higiene, outros */
-var ORD=[7,0,6,1,5,2,3,4,-1],lc0=null;L.map(function(it,i){var g0=lg(it);return{it:it,i:i,c:g0?catG(g0):catAuto(it.n)}}).sort(function(a,b){return ORD.indexOf(a.c)-ORD.indexOf(b.c)||a.i-b.i}).forEach(function(o){var it=o.it,i=o.i;if(o.c!==lc0){lc0=o.c;h+='<p class="lsec"><span class="dot" style="background:'+catCor(o.c)+'"></span>'+esc(catNome(o.c))+'</p>'}
+var ORD=[7,0,6,1,5,2,3,4,-1],lc0=null;L.map(function(it,i){var g0=lg(it);return{it:it,i:i,c:g0?catG(g0):catAuto(it.n)}}).sort(function(a,b){var oa=a.c>=100?7.5:ORD.indexOf(a.c),ob=b.c>=100?7.5:ORD.indexOf(b.c);return oa-ob||a.i-b.i}).forEach(function(o){var it=o.it,i=o.i;if(o.c!==lc0){lc0=o.c;h+='<p class="lsec"><span class="dot" style="background:'+catCor(o.c)+'"></span>'+esc(catNome(o.c))+'</p>'}
 var g=lg(it),b=g?cheapest(g):null,q=num(it.q)||1,info;
 if(b){tot0+=q*b.p;var lbs=lbStores(g),pm=vPrecosLoja(g);Object.keys(pm).forEach(function(s){var e=per[s]=per[s]||{t:0,c:0};e.t+=q*pm[s].p;e.c++;if(pm[s].an)e.an=1});var vi0=vListaInfo(g,q);info=vi0?'<span class="soft small">'+vi0+'</span>':'<span class="mbchip">'+(lbs.length<2&&!b.vi?'Último preço':b.f?'Mais barato do grupo':b.vi?'Mais barato (anotado)':'Mais barato')+': R$ '+R2(b.p)+' no '+esc(sn(b.s))+(b.old?' · antigo':'')+'</span>'}else{var va=vPorNome(it.n);if(va){tot0+=q*va.p;var ev0=per[va.s]=per[va.s]||{t:0,c:0};ev0.t+=q*va.p;ev0.c++;ev0.an=1;info='<span class="mbchip">Anotado: R$ '+R2(va.p)+' no '+esc(sn(va.s))+'</span>'}else{falt++;info='<span class="soft small">Sem preço registrado</span>'}}
 var nm0=esc(g?(g.nv||g.nm):it.n),lid=it.id||("i"+i),ab=LEX===lid;
@@ -1930,7 +1962,7 @@ var CAM='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width
 var GAL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-8 8"/></svg>';
 function fbtn(id,label,icon,line){return'<label class="btn'+(line?" line":"")+'"'+(BUSY?' aria-disabled="true"':'')+' for="'+id+'" tabindex="0" role="button">'+icon+label+'</label>'}
 function vnew(){var d=DR,ed=!!d.id;
-var h='<div class="card"><div class="step"><i>1</i><h3 style="margin:0">Como você quer cadastrar?</h3></div><div class="seg" role="group" aria-label="Forma de cadastro">'+(window.APP?'':'<button type="button" aria-pressed="'+(MODE=="foto")+'" data-act="mode" data-m="foto">Foto</button>')+'<button type="button" aria-pressed="'+(MODE=="chave")+'" data-act="mode" data-m="chave">Chave ou PDF</button><button type="button" aria-pressed="'+(MODE=="manual")+'" data-act="mode" data-m="manual">Digitar</button></div>';
+var h='<div class="card"><div class="step"><i>1</i><h3 style="margin:0">Como você quer cadastrar?</h3></div><div class="seg seg-modo" role="group" aria-label="Forma de cadastro">'+(window.APP?'':'<button type="button" aria-pressed="'+(MODE=="foto")+'" data-act="mode" data-m="foto">Foto</button>')+'<button type="button" aria-pressed="'+(MODE=="chave")+'" data-act="mode" data-m="chave">Chave ou PDF</button><button type="button" aria-pressed="'+(MODE=="manual")+'" data-act="mode" data-m="manual">Digitar</button></div>';
 if(MODE=="foto"){h+='<p class="soft">Enquadre a nota inteira, com boa luz. Se ela for comprida, tire várias fotos: os itens repetidos não entram duas vezes. Também serve um print da nota no portal da Fazenda.</p><div class="btns">'+fbtn("cam",d.itens.length?"Tirar outra foto":"Tirar foto",CAM)+fbtn("gal","Escolher da galeria",GAL,1)+'</div><input class="vh" type="file" id="cam" accept="image/*" capture="environment" data-file="foto" tabindex="-1"><input class="vh" type="file" id="gal" accept="image/*" multiple data-file="foto" tabindex="-1"><div id="thumbs" class="thumbs">'+thumbs()+'</div><p class="soft small" id="aist">Verificando a leitura automática…</p>'}
 else if(MODE=="chave")h+=chaveBox();
 else h+='<p class="soft">Preencha os dados e adicione os itens no passo 3.</p>';
@@ -2242,6 +2274,13 @@ else if(a=="susok"){if(!d.k)return;CFG.saltos[d.k]=1;saveCfg();render();toast("P
 else if(a=="note"){SEL=d.id;V="nd";CONF=null;EDIT=null;ASK=null;NEWTAG=false;if(DR&&!DR.id){DR=null}render();window.scrollTo(0,0)}
 else if(a=="catedit"){CATE=PK;render()}
 else if(a=="catok"){CATE=null;render()}
+else if(a=="ucnova"){var uU=CFG.ucats||[];UCE={id:0,n:"",c:CAT_CORES[uU.length%CAT_CORES.length],w:""};CONF=null;if(d.de=="pd"){CATE=null;go("cfg");UCE={id:0,n:"",c:CAT_CORES[uU.length%CAT_CORES.length],w:""}}render();setTimeout(function(){var c0=document.getElementById("uccard");if(c0)window.scrollTo(0,c0.getBoundingClientRect().top+window.scrollY-90);var i0=document.getElementById("ucn");if(i0)i0.focus()},50)}
+else if(a=="ucedit"){var ue=ucat(+d.id);if(ue){UCE={id:ue.id,n:ue.n,c:ue.c,w:(ue.w||[]).join(", ").toUpperCase()};CONF=null;render()}}
+else if(a=="uccor"){if(UCE){UCE.c=d.c;render()}}
+else if(a=="ucx"){UCE=null;CONF=null;render()}
+else if(a=="ucsave"){if(UCE){UCE.err="";var nn=UCE.n;if(ucSalva()){UCE=null;render();toast("Categoria "+nn.trim()+" salva")}else render()}}
+else if(a=="ucdel"){CONF="ucdel";render()}
+else if(a=="ucdel2"){if(UCE&&UCE.id){var nd0=UCE.n;ucApaga(UCE.id);UCE=null;CONF=null;render();toast("Categoria "+nd0+" apagada")}}
 else if(a=="catauto"){var gca=G[PK];if(gca){CFG.cats=CFG.cats||{};tpBases(gca).forEach(function(b0){delete CFG.cats[b0]});saveCfg();CATE=null;render();toast("Categoria: "+catNome(catG(gca)))}}
 else if(a=="prod"){if(!d.k||!G[d.k])return;CATE=null;PK=d.k;V="pd";JOIN=false;RENAME=false;TPE=false;render();window.scrollTo(0,0)}
 else if(a=="cmd"){if(!d.c)return;CK=d.c;V="cmd";render();window.scrollTo(0,0)}
@@ -2327,6 +2366,8 @@ else if(DR&&(k=="loja"||k=="data"||k=="total")){readForm();if(k=="data")DR._auto
 var LPPD=false;document.addEventListener("change",function(ev){var t=ev.target;if(t&&t.dataset&&t.dataset.in=="lpp"&&LPPD){LPPD=false;saveCfg()}});
 document.addEventListener("input",function(ev){var t=ev.target,k=t.dataset&&t.dataset.in;
 if(k=="q"){Q=t.value;document.getElementById("pl").innerHTML=pl()}
+else if(k=="ucn"){if(UCE)UCE.n=t.value}
+else if(k=="ucw"){if(UCE){UCE.w=t.value;var up0=document.getElementById("ucprev");if(up0)up0.innerHTML=ucPrev()}}
 else if(k=="catsel"){var gk=G[t.dataset.k];if(gk){CFG.cats=CFG.cats||{};var vb=t.value;var bse=tpBases(gk)[0];if(+vb===catAuto(gk.nm))delete CFG.cats[bse];else CFG.cats[bse]=+vb;saveCfg();toast("Categoria: "+catNome(+vb))}}
 else if(k=="calc"){var ri=+t.dataset.i,rf=t.dataset.f;if(CALC.rows[ri]){CALC.rows[ri][rf]=t.value;var cr=document.getElementById("calcr");if(cr)cr.innerHTML=calcRes()}}
 else if(k=="lpv"){if(LP){LP.v=num(t.value);var lr=document.getElementById("lpr");if(lr)lr.innerHTML=LP.v?bcCompara(LP.v,G[LP.k]):""}}
@@ -2352,7 +2393,7 @@ document.documentElement.lang="pt-BR";repair();render();initDb();
 
 <style>
 /* Só no app: sem a aba Foto, sem o botão do Claude, e a tela de entrada por cima de tudo. */
-.seg{grid-template-columns:repeat(2,1fr)}
+.seg-modo{grid-template-columns:repeat(2,1fr)}
 [data-act="ia"]{display:none!important}
 input[type=password]{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:500 16px var(--body)}
 input[type=password]:focus{border-color:var(--acc);outline:none}
