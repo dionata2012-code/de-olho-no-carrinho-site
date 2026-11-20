@@ -211,7 +211,7 @@ summary{cursor:pointer;list-style:none}
 .gsep{height:1px;background:var(--line);margin:16px 0 12px}
 .gchart{display:block;width:100%;height:auto}
 .gch-l{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--soft);margin-top:6px}.gch-l .cur{color:var(--acc);font-weight:700}
-.seg2{grid-template-columns:repeat(2,1fr);margin-top:10px}
+.seg2{grid-template-columns:repeat(2,1fr);margin-top:10px}.seg3{grid-template-columns:repeat(3,1fr);margin-top:10px}
 .pr-l{margin-top:4px}.pr{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;padding:12px 2px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);font:500 15px var(--body);text-align:left;cursor:pointer;min-height:48px}
 .pr:last-of-type{border-bottom:0}.pr-n{min-width:0}.pr-v{font-weight:700;white-space:nowrap}
 .pr.dois{flex-direction:column;align-items:stretch;gap:2px}.pr-a{display:flex;justify-content:space-between;gap:12px}
@@ -240,7 +240,7 @@ summary{cursor:pointer;list-style:none}
 .eco-tot{background:var(--acc-soft);border-color:var(--acc);gap:2px}.eco-tot .gval{color:var(--acc)}.pr-card{padding-top:4px;padding-bottom:4px}.ink{color:var(--ink)}.nw{white-space:nowrap}.eco-h{display:flex;align-items:center;gap:8px}.ecof .chip[aria-pressed="true"]{background:var(--acc-soft);border-color:var(--acc);color:var(--acc);font-weight:700}
 #sync[hidden]{display:none}
 .dcb{width:40px;min-height:40px;border-radius:12px;border:1px solid var(--line)}.dcb[aria-pressed="true"]{background:var(--acc);color:#fff;border-color:var(--acc)}.dcb svg,.ntb svg{width:21px;height:21px}
-.dc{border-bottom:1px solid var(--line)}.dc:last-child{border-bottom:0}.dc summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 2px;cursor:pointer;font-weight:600}.dc summary::-webkit-details-marker{display:none}.dc summary::after{content:"›";margin-left:auto;color:var(--soft);font-size:20px;transition:transform .15s}.dc[open] summary::after{transform:rotate(90deg)}.dc-e{font-size:24px;line-height:1}.dc-b{padding:0 2px 12px}.dc-b p{margin:8px 0 0}.dc-svg{display:block;width:100%;max-width:340px;height:auto;margin:4px auto 0;font-family:var(--head,inherit)}.dc-card{padding-top:4px;padding-bottom:4px}.dc-prod{border-color:var(--acc)}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.dc{border-bottom:1px solid var(--line)}.dc:last-child{border-bottom:0}.dc summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 2px;cursor:pointer;font-weight:600}.dc summary::-webkit-details-marker{display:none}.dc summary::after{content:"›";margin-left:auto;color:var(--soft);font-size:20px;transition:transform .15s}.dc[open] summary::after{transform:rotate(90deg)}.dc-ico{width:48px;height:48px;flex:none;border-radius:12px;background:var(--bg);border:1px solid var(--line);padding:3px;box-sizing:border-box}.dc-ico text,.dc-ico line,.dc-ico [stroke-dasharray]{display:none}.dc-ico2{padding:9px;box-sizing:border-box;color:var(--acc)}.dc-hd{display:flex;gap:10px;align-items:center}.dc-h{margin:16px 0 0;font-size:15px;font-weight:700;color:var(--acc)}.dc-mac{margin:8px 0 0;padding-left:22px}.dc-mac li{margin:4px 0}.dc-f{margin:4px 0 0!important;font-size:12px;color:var(--soft)}.dc-fil{margin:10px 0 2px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.dc-fil .chip{padding:8px 4px;justify-content:center;font-size:13.5px}.dc-fil .chip[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}.dc-b{padding:0 2px 12px}.dc-b p{margin:8px 0 0}.dc-svg{display:block;width:100%;max-width:340px;height:auto;margin:4px auto 0;font-family:var(--head,inherit)}.dc-card{padding-top:4px;padding-bottom:4px}.dc-prod{border-color:var(--acc)}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .selo-svg{display:block;flex:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18))}.serie.off .selo-svg{filter:none;opacity:.55}
 .desaf{display:flex;gap:10px;align-items:flex-start;padding-block:10px;border-top:1px solid var(--line)}.desaf:first-child{border-top:0;padding-top:0}.desaf .se,.serie .se{font-size:28px;line-height:1.15;flex:none;width:36px;text-align:center}.desaf .txt{gap:4px;flex:1}.desaf .btn{width:auto;margin-top:4px}
 .serie{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:var(--sombra)}.serie .txt{flex:1;gap:4px;align-items:stretch}.serie .pill{align-self:flex-start}.serie.off .se{filter:grayscale(1);opacity:.4}
@@ -532,6 +532,8 @@ function gOf(n,i){return G[OKEY[n.id+"#"+i]]}
 function avg(g,s){return g.s[s].t/g.s[s].n}
 function gAvg(g){var ss=Object.keys(g.s);return ss.reduce(function(t,s){return t+avg(g,s)},0)/ss.length}
 function upTag(ch){return ch>1.1?'<span class="pill warn">↑ subiu '+pct(ch)+'</span>':""}
+/* Selo do período escolhido em Gastos: diz com o que compara, para não contradizer os outros números da tela. */
+function perTag(g){var r=precoPer(g);if(!r||Math.abs(r.ch-1)<.05)return"";var up=r.ch>1;return'<span class="pill '+(up?'warn':'ok')+'">'+(up?'↑ subiu ':'↓ caiu ')+Math.abs((r.ch-1)*100).toFixed(0)+'% vs. '+dl(r.base.n.data)+(r.desde?' (compra mais antiga)':'')+'</span>'}
 /* ---------- Comparar marcas ---------- */
 /* Tipo do produto = começo do nome na nota ("LEITE LV", "LEITE COND", "FILTRO PAP"); tamanho = 1L, 395G, 30UN...
    Produtos do mesmo tipo e de tamanho parecido são comparados pelo preço convertido para o mesmo tamanho.
@@ -886,54 +888,254 @@ function lcLido(e2){var g=bcProd(e2);if(g){toast("Esse código já está ligado 
 /* ---------- Dicas para escolher frutas, legumes e verduras ----------
    Texto curto, conferido na fonte. O que é só costume popular aparece marcado como "dica popular".
    k: primeira palavra do nome na nota que liga a dica ao produto; sem: palavras que mostram que é outro produto (batata palha, suco de laranja). */
-var DCG={f:"Frutas",l:"Legumes",v:"Verduras"},DCQ="",DCA={};
+var DCG={f:"Frutas",l:"Legumes",v:"Verduras",m:"Mercado"},DCQ="",DCF="",DCOPEN="";
 /* Fontes: Embrapa Hortaliças, "Hortaliça não é só salada: como comprar, conservar e consumir" (2020);
    Embrapa (Ceagesp e Embrapa Instrumentação), "Recomendações para compras, armazenamento e consumo de frutas e hortaliças" (2020);
    Embrapa, "Colheita, pós-colheita e comercialização da melancia" (2019); Ministério da Saúde e UFMG, "Na cozinha com as frutas, legumes e verduras" (2016). */
-var DEMB="Embrapa",DEC="Embrapa e Ceagesp",DMS="Ministério da Saúde",DMSE="Ministério da Saúde e Embrapa",DMSC="Ministério da Saúde, Embrapa e Ceagesp";
+/* Cada dica tem até 5 partes, cada uma com a sua fonte:
+   b: 3 macetes na banca (começando com "~" = dica popular, sem fonte oficial); bf: fonte dos macetes
+   e: evite; q: qual escolher (nas dicas de mercado: "bom saber"); c: em casa. ef, qf, cf: fontes (vazio = dica popular).
+   A safra vem das notas da pessoa (dcSafra), nunca de um calendário inventado. */
+var FCC="Embrapa Hortaliças, série “Como comprar, conservar e consumir” (2020)",FGEL="Embrapa Hortaliças, “Hortaliças na geladeira” (2020)",FREC="Embrapa e Ceagesp, “Recomendações para compras, armazenamento e consumo de frutas e hortaliças” (2020)",
+FMS="Ministério da Saúde e UFMG, “Na cozinha com as frutas, legumes e verduras” (2016)",FMSC="Ministério da Saúde (2016), Embrapa e Ceagesp (2020)",FMSE="Ministério da Saúde (2016) e Embrapa (2020)",FMEL="Embrapa, “Colheita, pós-colheita e comercialização da melancia” (2019), e Ministério da Saúde (2016)",
+FEMB="Embrapa Hortaliças (2020)",FPROC="Procon-SP, “Como fazer uma boa compra: supermercados” (2019)",FANV="Anvisa, dicas de segurança alimentar (2025)",FPMG="Procon-MG e Ministério Público de MG, cartilha “Segurança alimentar”",FPOP="";
 var DICAS=[
-{id:"melancia",g:"f",e:"🍉",t:"Melancia",k:["melancia"],x:"Vire a fruta: a mancha de baixo deve ser <b>amarela ou creme</b>, não branca. Prefira casca <b>fosca</b>, talo seco e, entre duas do mesmo tamanho, a <b>mais pesada</b>. Ela <b>não amadurece em casa</b>: compre já no ponto.",f:"Embrapa e Ministério da Saúde",svg:"melancia"},
-{id:"melao",g:"f",e:"🍈",t:"Melão",k:["melao"],x:"Aperte de leve a <b>ponta oposta ao talo</b>: deve ceder um pouco. Prefira o mais pesado, com cheiro agradável e casca sem manchas; cheiro forte demais é sinal de que passou. <b>Não amadurece em casa.</b>",f:DMSC,svg:"melao"},
-{id:"abacaxi",g:"f",e:"🍍",t:"Abacaxi",k:["abacaxi"],x:"Prefira o de <b>cheiro doce</b>, firme, com coroa pequena de folhas fortes. Maduro, a folha do meio <b>sai com facilidade</b>. Cor e tamanho não mostram se está maduro, e ele <b>não amadurece em casa</b>.",f:DMSC,svg:"abacaxi"},
-{id:"banana",g:"f",e:"🍌",t:"Banana",k:["banana"],x:"<b>Amadurece em casa.</b> Para a semana, leve mais verde; para hoje, amarela. Pintas marrons mostram que está macia. Toda escura, passou para comer crua, mas ainda serve para bolo e doce.",f:DMSC,svg:"banana"},
-{id:"abacate",g:"f",e:"🥑",t:"Abacate",k:["abacate"],x:"Prefira os <b>firmes</b> e não aperte para testar: machuca a fruta. Ele <b>amadurece em casa</b> em alguns dias e estraga rápido depois de maduro.",f:DMSC,svg:"abacate"},
-{id:"manga",g:"f",e:"🥭",t:"Manga",k:["manga"],x:"<b>A cor não mostra</b> se está madura. Cheire perto do cabo: deve ter perfume. Madura, cede um pouco a uma pressão suave. Evite murchas, machucadas ou manchadas. Amadurece em casa.",f:DMSC,svg:"manga"},
-{id:"mamao",g:"f",e:"🧡",t:"Mamão",k:["mamao"],x:"Prefira o <b>pesado</b>, de casca lisa, sem furos ou rachaduras. <b>Amadurece em casa</b>: mais verde dura mais.",f:DMSC,svg:"mamao"},
-{id:"laranja",g:"f",e:"🍊",t:"Laranja",k:["laranja"],x:"Casca lisa e brilhante, fruta <b>pesada para o tamanho</b> e com cheiro agradável. Evite as secas, mofadas ou com marcas marrons. <b>Não amadurece em casa.</b>",f:DMSC,svg:"laranja"},
-{id:"mexerica",g:"f",e:"🍊",t:"Mexerica e tangerina",k:["mexerica","tangerina","ponkan","bergamota","murcote"],x:"Pesada, firme e perfumada, sem pontos moles. <b>Casca esverdeada não quer dizer</b> que a fruta esteja verde.",f:DMS,svg:"mexerica"},
-{id:"maca",g:"f",e:"🍎",t:"Maçã",k:["maca"],x:"Casca firme, <b>sem rugas</b> e sem machucados. É uma das frutas que mais duram em casa.",f:DMSC,svg:"maca"},
-{id:"uva",g:"f",e:"🍇",t:"Uva",k:["uva"],x:"Uva branca boa tem <b>tom âmbar</b>; a verde muito brilhante é mais ácida; a preta não deve ter partes verdes. Evite cachos murchos ou com manchas marrons. Não amadurece em casa.",f:DMSC,svg:"uva"},
-{id:"maracuja",g:"f",e:"💛",t:"Maracujá",k:["maracuja"],x:"Casca brilhante, lisa e firme, sem rachaduras ou manchas.",f:DMS,svg:"maracuja"},
-{id:"goiaba",g:"f",e:"🍐",t:"Goiaba",k:["goiaba"],x:"Madura e firme, sem machucados. Amadurece em casa: mais verde dura mais.",f:DMSC,svg:"goiaba"},
-{id:"morango",g:"f",e:"🍓",t:"Morango",k:["morango"],x:"É a fruta que <b>estraga mais rápido</b>: compre perto do dia de comer. Olhe o fundo da caixinha e evite frutos amassados ou com mofo.",f:DEC,svg:"morango"},
-{id:"acerola",g:"f",e:"🍒",t:"Acerola",k:["acerola"],x:"Madura, avermelhada e firme, sem marcas de inseto.",f:DMS,svg:"acerola"},
-{id:"jabuticaba",g:"f",e:"🫐",t:"Jabuticaba",k:["jabuticaba"],x:"Prefira as graúdas, sem rachaduras ou picadas de inseto.",f:DMS,svg:"jabuticaba"},
-{id:"tomate",g:"l",e:"🍅",t:"Tomate",k:["tomate"],sem:["pelado","seco","cereja"],x:"Olhe <b>cor, firmeza</b> e se não há furos, manchas ou machucados. Para durar, leve <b>de vez</b>; vermelho é para hoje ou para molho. Totalmente verde pode não amadurecer. Não aperte.",f:DMSE,svg:"tomate"},
-{id:"batata",g:"l",e:"🥔",t:"Batata",k:["batata"],sem:["doce","palha","chips","frita","pre","congelada","smiles","rustica"],x:"Evite batata <b>brotada</b>. Pequenas falhas na casca não fazem mal, saem ao descascar. Compre para 1 ou 2 semanas e guarde longe da luz: <b>a parte verde pode ter solanina</b>, uma substância tóxica.",f:DEMB,svg:"batata"},
-{id:"batatadoce",g:"l",e:"🍠",t:"Batata-doce",k:["batata"],com:["doce"],x:"Evite raízes <b>com brotos</b>. Furinhos na casca não fazem mal, saem ao descascar. As de polpa laranja, roxa ou amarela têm mais vitamina A.",f:DEMB,svg:"batatadoce"},
-{id:"cenoura",g:"l",e:"🥕",t:"Cenoura",k:["cenoura"],x:"Firme e de <b>cor forte</b>, sem partes moles ou escuras. Evite a de <b>parte de cima verde ou roxa</b>. As menores são mais macias; as muito grossas, mais fibrosas.",f:DMSE,svg:"cenoura"},
-{id:"cebola",g:"l",e:"🧅",t:"Cebola",k:["cebola"],sem:["frita","crispy","flocos"],x:"Firme, com <b>casca e pescoço secos</b>. Entre duas do mesmo tamanho, leve a mais pesada. Evite brotadas, moles ou com mofo.",f:DEMB,svg:"cebola"},
-{id:"alho",g:"l",e:"🧄",t:"Alho",k:["alho"],sem:["poro","triturado","pasta","frito","granulado","desidratado"],x:"Cabeça firme e <b>bem seca</b>: a casca solta com facilidade. Evite alho murcho, brotado, úmido ou com mofo.",f:DEMB,svg:"alho"},
-{id:"pimentao",g:"l",e:"🫑",t:"Pimentão",k:["pimentao"],x:"Firme, limpo e de <b>casca brilhante</b>, com o talo cortado rente. Evite o verde muito claro: foi colhido cedo e murcha rápido.",f:DEMB,svg:"pimentao"},
-{id:"abobrinha",g:"l",e:"🥒",t:"Abobrinha",k:["abobrinha"],x:"Prefira as <b>novas e pequenas</b> (15 a 20 cm), firmes e brilhantes, sem rachaduras.",f:DMS,svg:"abobrinha"},
-{id:"abobora",g:"l",e:"🎃",t:"Abóbora e moranga",k:["abobora","moranga","cabotia","cabotian"],x:"Evite casca suja ou manchada e, se for em pedaço, polpa mole ou com mofo.",f:DMS,svg:"abobora"},
-{id:"beterraba",g:"l",e:"🟣",t:"Beterraba",k:["beterraba"],x:"Casca lisa e firme, sem rachaduras. Prefira de <b>cor forte</b> e tamanho médio.",f:DMS,svg:"beterraba"},
-{id:"chuchu",g:"l",e:"🍐",t:"Chuchu",k:["chuchu"],x:"Prefira os <b>pequenos, firmes e pesados</b>, sem cortes nem partes moles ou manchadas.",f:DMS,svg:"chuchu"},
-{id:"quiabo",g:"l",e:"🌶️",t:"Quiabo",k:["quiabo"],x:"Prefira os <b>pequenos</b> (7 a 10 cm), bem verdes e firmes. Os muito grandes passaram do ponto.",f:DMSE,svg:"quiabo"},
-{id:"pepino",g:"l",e:"🥒",t:"Pepino",k:["pepino"],sem:["conserva"],x:"Firme e sem partes moles. Evite os <b>muito grandes</b>: passaram do ponto.",f:DEMB,svg:"pepino"},
-{id:"vagem",g:"l",e:"🫛",t:"Vagem",k:["vagem","feijao"],com:["vagem"],x:"Evite vagens com os <b>grãos muito grandes</b> por dentro: ficam fibrosas.",f:DEMB,svg:"vagem"},
-{id:"jilo",g:"l",e:"🍆",t:"Jiló",k:["jilo"],x:"Deve estar firme. A cor clara ou escura depende do tipo.",f:DMS,svg:"jilo"},
-{id:"alface",g:"v",e:"🥬",t:"Alface",k:["alface"],x:"Folhas limpas, brilhantes e firmes, sem ser muito grandes, e <b>talo firme</b>, nem murcho nem mole. Murcha rápido: compre perto do dia de usar.",f:DMSC,svg:"alface"},
-{id:"couve",g:"v",e:"🥬",t:"Couve",k:["couve"],sem:["flor"],x:"Folhas bem frescas, sem partes amareladas ou escuras, e <b>talo com cara de recém-cortado</b>. Dura pouco: compre perto do dia de usar.",f:DMSE,svg:"couve"},
-{id:"folhas",g:"v",e:"🌿",t:"Rúcula, agrião e cheiro-verde",k:["rucula","agriao","salsa","salsinha","cebolinha","coentro","cheiro","espinafre","almeirao","chicoria"],x:"Folhas firmes e verdes, sem partes amareladas ou murchas. <b>Murcham muito rápido</b>: compre perto do dia de usar.",f:DMSC,svg:"folhas"},
-{id:"brocolis",g:"v",e:"🥦",t:"Brócolis",k:["brocolis","brocolo"],sem:["congelado"],x:"Cabeça firme, compacta e <b>verde-escura</b>, com os botões fechados. Botões amarelos ou abrindo em flor mostram que passou.",f:DEMB,svg:"brocolis"},
-{id:"repolho",g:"v",e:"🥬",t:"Repolho",k:["repolho"],x:"Cabeça firme, compacta e sem rachaduras; entre duas do mesmo tamanho, a <b>mais pesada</b>. Folhas sem manchas escuras ou furos.",f:DEMB,svg:"repolho"}];
+{id:"melancia",g:"f",t:"Melancia",k:["melancia"],svg:"melancia",
+ b:["Vire a fruta: a mancha de baixo deve ser <b>amarela ou creme</b>, não branca.","Prefira casca <b>fosca</b> e talo seco.","Entre duas do mesmo tamanho, leve a <b>mais pesada</b>."],bf:FMEL,
+ e:"Casca muito brilhante, mancha de baixo branca, partes moles ou rachadas. Ela <b>não amadurece depois de colhida</b>: compre já no ponto.",ef:FMEL,
+ c:"Inteira, fora da geladeira. Cortada, sempre na geladeira, coberta ou em vasilha com tampa.",cf:FGEL},
+{id:"melao",g:"f",t:"Melão",k:["melao"],svg:"melao",
+ b:["Aperte de leve a <b>ponta oposta ao talo</b>: deve ceder um pouco.","Cheire: deve ter <b>perfume agradável</b>.","Entre dois do mesmo tamanho, leve o <b>mais pesado</b>."],bf:FMSC,
+ e:"Casca manchada, partes moles ou cheiro forte demais, que é sinal de que passou. <b>Não amadurece em casa.</b>",ef:FMSC,
+ c:"Inteiro, fora da geladeira; na geladeira só se for comer em até 2 dias. Cortado, sempre na geladeira em vasilha com tampa.",cf:FGEL},
+{id:"abacaxi",g:"f",t:"Abacaxi",k:["abacaxi"],svg:"abacaxi",
+ b:["Cheire: deve ter <b>cheiro doce</b>.","Puxe uma folha do meio: madura, <b>sai com facilidade</b>.","Prefira firme, com coroa pequena de folhas fortes."],bf:FMSC,
+ e:"Partes moles ou escuras. Cor e tamanho não mostram se está maduro, e ele <b>não amadurece em casa</b>.",ef:FMSC,
+ c:"Inteiro, fora da geladeira. Descascado, na geladeira em vasilha com tampa.",cf:FREC},
+{id:"banana",g:"f",t:"Banana",k:["banana"],svg:"banana",
+ b:["Para a semana, leve <b>mais verde</b>; para hoje, amarela.","<b>Pintas marrons</b> mostram que está macia e doce.","Toda escura passou para comer crua, mas ainda serve para bolo e doce."],bf:FMSC,
+ e:"Banana machucada estraga mais rápido a partir do machucado.",ef:FPOP,
+ q:"Prata: mais firme, boa para comer crua. Nanica (d'água): mais doce e macia, boa para vitamina e bolo. Da terra: para cozinhar, assar ou fritar.",qf:FPOP,
+ c:"Fora da geladeira: ela <b>amadurece em casa</b>. Deixe longe da batata e das folhas, porque solta um gás que acelera o amadurecimento dos outros.",cf:FREC},
+{id:"abacate",g:"f",t:"Abacate",k:["abacate","avocado"],svg:"abacate",
+ b:["Prefira os <b>firmes</b>: amadurecem em casa em alguns dias.","Não aperte para testar: <b>machuca a fruta</b>.","~Tire o cabinho: verde por baixo está bom, marrom já passou."],bf:FMSC,
+ e:"Depois de maduro, estraga rápido: compre só o que vai usar na semana.",ef:FMSC,
+ q:"Manteiga e fortuna: grandes, para vitamina e doce. Avocado: pequeno, de casca escura quando maduro, para salgados e guacamole.",qf:FPOP,
+ c:"Na fruteira até amadurecer. Cortado, na geladeira em vasilha com tampa.",cf:FREC},
+{id:"manga",g:"f",t:"Manga",k:["manga"],svg:"manga",
+ b:["<b>A cor não mostra</b> se está madura.","Cheire perto do cabo: deve ter <b>perfume</b>.","Madura, cede um pouco a uma pressão suave."],bf:FMSC,
+ e:"Murcha, machucada ou manchada.",ef:FMSC,
+ q:"Palmer e Tommy: pouca fibra, boas para comer em pedaços. Espada e Ubá: mais fibrosas, boas para suco.",qf:FPOP,
+ c:"Fora da geladeira: ela <b>amadurece em casa</b>. Cortada, na geladeira em vasilha com tampa.",cf:FREC},
+{id:"mamao",g:"f",t:"Mamão",k:["mamao","papaia","papaya"],svg:"mamao",
+ b:["Prefira o <b>pesado</b>.","Casca lisa, <b>sem furos ou rachaduras</b>.","Mais verde dura mais: ele <b>amadurece em casa</b>."],bf:FMSC,
+ e:"Furos, rachaduras ou partes moles.",ef:FMSC,
+ q:"Papaia (havaí): pequeno, para uma ou duas pessoas. Formosa: grande, vendido inteiro ou em pedaço.",qf:FPOP,
+ c:"Fora da geladeira até amadurecer. Cortado, na geladeira em vasilha com tampa.",cf:FREC},
+{id:"laranja",g:"f",t:"Laranja",k:["laranja"],svg:"laranja",
+ b:["Prefira a <b>pesada para o tamanho</b>.","Casca lisa e brilhante, com <b>cheiro agradável</b>.","Compre no ponto: <b>não amadurece em casa</b>."],bf:FMSC,
+ e:"Secas, mofadas ou com marcas marrons.",ef:FMSC,
+ q:"Pera: a mais usada para suco. Lima: pouco ácida. Bahia (de umbigo): sem caroço, para comer em gomos.",qf:FPOP,
+ c:"Na geladeira dura mais.",cf:FREC},
+{id:"mexerica",g:"f",t:"Mexerica e tangerina",k:["mexerica","tangerina","ponkan","bergamota","murcote","mixirica"],svg:"mexerica",
+ b:["Pesada e <b>firme</b>, sem pontos moles.","<b>Perfumada.</b>","Casca esverdeada <b>não quer dizer</b> que a fruta esteja verde."],bf:FMS,
+ e:"Pontos moles, casca murcha ou mofo.",ef:FPOP,
+ q:"Ponkan: grande, a casca solta fácil. Murcote: casca fina e grudada, muito doce.",qf:FPOP,
+ c:"Como a laranja, dura mais na geladeira.",cf:FPOP},
+{id:"maca",g:"f",t:"Maçã",k:["maca"],svg:"maca",
+ b:["Casca firme, <b>sem rugas</b>.","Sem machucados nem partes moles.","É uma das frutas que <b>mais duram</b> em casa."],bf:FMSC,
+ e:"Casca enrugada (está velha), partes moles ou escuras.",ef:FMSC,
+ q:"Fuji: firme e crocante, dura mais. Gala: mais doce e macia, fica farinhenta mais rápido.",qf:FPOP,
+ c:"Na geladeira, em saco plástico. Longe das folhas, porque solta um gás que amadurece os outros.",cf:FREC},
+{id:"uva",g:"f",t:"Uva",k:["uva"],svg:"uva",
+ b:["Uva branca boa tem <b>tom âmbar</b>; a verde muito brilhante é mais ácida.","A preta <b>não deve ter partes verdes</b>.","Cacho sem bagos murchos e sem manchas marrons."],bf:FMSC,
+ e:"Cachos murchos ou com manchas marrons. <b>Não amadurece em casa.</b>",ef:FMSC,
+ c:"Na geladeira, sem lavar; lave só na hora de comer.",cf:FPOP},
+{id:"maracuja",g:"f",t:"Maracujá",k:["maracuja"],svg:"maracuja",
+ b:["Casca <b>brilhante e lisa</b>.","Firme, <b>sem rachaduras</b> ou manchas.","~Pesado para o tamanho: tem mais polpa."],bf:FMS,
+ e:"Rachaduras, manchas ou partes moles.",ef:FMS,
+ c:"Maduro, pode ir para a geladeira. Verde, em lugar fresco e seco.",cf:FREC},
+{id:"goiaba",g:"f",t:"Goiaba",k:["goiaba"],svg:"goiaba",
+ b:["Madura e <b>firme</b>.","<b>Sem machucados.</b>","Mais verde dura mais: <b>amadurece em casa</b>."],bf:FMSC,
+ e:"Machucada, mole ou com furinhos de bicho.",ef:FPOP,
+ c:"Verde, fora da geladeira até amadurecer; madura, na geladeira.",cf:FPOP},
+{id:"morango",g:"f",t:"Morango",k:["morango"],svg:"morango",
+ b:["Bem <b>vermelho e brilhante</b>, mas firme: colhido verde não pega sabor.","As folhinhas de cima <b>verdes e com cara de frescas</b>.","Olhe o <b>fundo da caixinha</b>: sem amassados ou mofo."],bf:FCC,
+ e:"Frutos com feridas ou batidos, partes brancas ou verdes, mofo. Não deixe a caixinha no sol no caminho.",ef:FCC,
+ q:"Os menores costumam ter <b>sabor e aroma mais fortes</b>.",qf:FCC,
+ c:"Na geladeira, em vasilha com tampa: <b>3 a 4 dias</b>. Fora: 1 a 2 dias. Lave só na hora de comer. Limpo, seco e em porções, dura até 6 meses no congelador.",cf:FCC},
+{id:"acerola",g:"f",t:"Acerola",k:["acerola"],svg:"acerola",
+ b:["Madura, <b>avermelhada</b>.","<b>Firme.</b>","Sem marcas de inseto."],bf:FMS,
+ e:"Mole ou amassada: estraga muito rápido.",ef:FPOP,
+ c:"Na geladeira e use logo; para suco, dá para congelar.",cf:FPOP},
+{id:"jabuticaba",g:"f",t:"Jabuticaba",k:["jabuticaba"],svg:"jabuticaba",
+ b:["Prefira as <b>graúdas</b>.","<b>Sem rachaduras.</b>","Sem picadas de inseto."],bf:FMS,
+ e:"Cheiro azedo: começou a fermentar.",ef:FPOP,
+ c:"Lave só na hora de comer.",cf:FREC},
+{id:"tomate",g:"l",t:"Tomate",k:["tomate"],sem:["pelado","seco","cereja"],svg:"tomate",
+ b:["Olhe <b>cor e firmeza</b>, sem apertar.","Sem furos, manchas ou machucados.","Para durar, leve <b>de vez</b>; vermelho é para hoje ou para molho."],bf:FMSE,
+ e:"Totalmente verde pode não amadurecer. Furos, rachaduras ou partes moles.",ef:FMSE,
+ q:"Italiano: mais polpa e menos água, bom para molho. Salada (débora, carmem): para salada e uso geral.",qf:FPOP,
+ c:"De vez, fora da geladeira para amadurecer. Maduro, na geladeira se for usar em até 2 dias, e não mais que 4 a 7 dias.",cf:FGEL},
+{id:"batata",g:"l",t:"Batata",k:["batata"],sem:["doce","palha","chips","frita","pre","congelada","smiles","rustica"],svg:"batata",
+ b:["<b>Sem brotos</b>: brotada estraga mais rápido.","<b>Sem partes verdes</b>: podem ter solanina, uma substância tóxica.","Falhas pequenas na casca não fazem mal: saem ao descascar."],bf:FCC,
+ e:"Brotada ou esverdeada. Compre só para 1 ou 2 semanas.",ef:FCC,
+ q:"Asterix (casca rosada): firme, boa para fritar e assar. Lavada comum: para cozinhar e purê.",qf:FPOP,
+ c:"Fora da geladeira, em lugar fresco, seco, escuro e arejado: <b>até 2 semanas</b>. Na geladeira fica adocicada e escurece ao fritar.",cf:FCC},
+{id:"batatadoce",g:"l",t:"Batata-doce",k:["batata"],com:["doce"],svg:"batatadoce",
+ b:["<b>Sem brotos.</b>","Furinhos na casca não fazem mal: saem ao descascar.","~Firme, sem partes moles ou murchas."],bf:FEMB,
+ e:"Raízes com brotos ou partes moles.",ef:FEMB,
+ q:"As de polpa <b>laranja, roxa ou amarela</b> têm mais vitamina A.",qf:FEMB,
+ c:"Fora da geladeira, em lugar fresco e arejado: no frio ela estraga ou brota mais fácil.",cf:FGEL},
+{id:"cenoura",g:"l",t:"Cenoura",k:["cenoura"],svg:"cenoura",
+ b:["Firme e de <b>cor forte</b>.","Sem partes moles ou escuras.","Evite a de <b>parte de cima verde ou roxa</b>."],bf:FMSE,
+ e:"Partes moles, escuras ou rachadas.",ef:FMSE,
+ q:"As menores são <b>mais macias</b>; as muito grossas, mais fibrosas.",qf:FMSE,
+ c:"Na geladeira logo que chegar, em saco plástico: <b>dura vários dias</b>. Se lavar, seque antes.",cf:FGEL},
+{id:"cebola",g:"l",t:"Cebola",k:["cebola"],sem:["frita","crispy","flocos"],svg:"cebola",
+ b:["Firme, com <b>casca e pescoço secos</b>.","Entre duas do mesmo tamanho, a <b>mais pesada</b>.","<b>Sem brotos.</b>"],bf:FEMB,
+ e:"Brotada, mole ou com mofo.",ef:FEMB,
+ q:"Roxa: mais suave, boa crua na salada. Branca ou amarela: para refogar.",qf:FPOP,
+ c:"Fora da geladeira, em lugar fresco e arejado. Cortada, na geladeira em vasilha com tampa.",cf:FGEL},
+{id:"alho",g:"l",t:"Alho",k:["alho"],sem:["poro","triturado","pasta","frito","granulado","desidratado"],svg:"alho",
+ b:["Cabeça <b>firme</b>.","<b>Bem seca</b>: a casca solta com facilidade.","<b>Sem brotos.</b>"],bf:FEMB,
+ e:"Murcho, brotado, úmido ou com mofo.",ef:FEMB,
+ q:"Roxo: dentes menores e sabor mais forte. Branco graúdo: dentes grandes, mais fácil de descascar.",qf:FPOP,
+ c:"Fora da geladeira, em lugar fresco e arejado.",cf:FGEL},
+{id:"pimentao",g:"l",t:"Pimentão",k:["pimentao"],svg:"pimentao",
+ b:["Firme, limpo e de <b>casca brilhante</b>.","Com o <b>talo cortado rente</b>.","Escolha sem apertar nem quebrar."],bf:FCC,
+ e:"Verde muito claro: foi colhido novo e <b>murcha rápido</b>.",ef:FCC,
+ q:"Verde: colhido antes de amadurecer. Vermelho e amarelo: maduros. Todos servem crus, assados, recheados ou em molho.",qf:FCC,
+ c:"Na geladeira, em saco plástico furado na gaveta: <b>mais de uma semana</b>. Fora, em lugar fresco: 2 a 4 dias.",cf:FCC},
+{id:"abobrinha",g:"l",t:"Abobrinha",k:["abobrinha"],svg:"abobrinha",
+ b:["Firme, de <b>casca brilhante</b>.","Até <b>20 cm</b>: mais tenra e saborosa.","Prefira <b>com o cabinho</b>: dura mais."],bf:FCC,
+ e:"Partes machucadas, escuras ou moles, que apodrecem rápido. Não aperte nem marque com a unha.",ef:FCC,
+ q:"Menina (com pescoço) e italiana (comprida). Bem nova, vai crua na salada; maior, para refogar e rechear.",qf:FCC,
+ c:"Fora, em lugar fresco: até 2 dias. Na geladeira, sem lavar, em saquinho na gaveta: <b>cerca de 5 dias</b>.",cf:FCC},
+{id:"abobjap",g:"l",t:"Abóbora japonesa (cabotiá)",k:["abobora","cabotia","cabotian","kabocha","cabotiã"],alg:["japonesa","jap","cabotia","cabotian","kabocha"],svg:"abobora",
+ b:["Casca <b>sem brilho</b>: brilhante foi colhida cedo e tem menos sabor.","Sem machucados, mofo ou podridão.","Leve <b>com o cabinho</b>: ajuda a durar."],bf:FCC,
+ e:"Casca brilhante, machucados ou mofo. Em pedaço, tem de estar na geladeira do mercado.",ef:FCC,
+ q:"Tem polpa <b>mais enxuta</b>: é a mais indicada para pratos salgados, como purê, sopa e refogado.",qf:FCC,
+ c:"Inteira, em lugar fresco e seco: <b>cerca de 3 meses</b>. Em pedaço, na geladeira em saco plástico: até 1 semana. Para congelar, dê 3 minutos em água fervendo antes.",cf:FCC},
+{id:"moranga",g:"l",t:"Moranga",k:["moranga","abobora"],alg:["moranga"],svg:"abobora",
+ b:["Achatada e redonda, com <b>gomos bem salientes</b>.","Com cabinho, <b>casca dura e sem brilho</b>, sem machucados.","Entre duas do mesmo tamanho, a <b>mais pesada</b>."],bf:FCC,
+ e:"Machucados: ela estraga mais rápido a partir deles. Não se come crua.",ef:FCC,
+ q:"Polpa menos enxuta e mais fibrosa: mais indicada para <b>doces</b>, sopa e para assar ou rechear. Para nhoque e bolinho, amasse fria e bem escorrida.",qf:FCC,
+ c:"Inteira, em lugar fresco, escuro e seco: <b>até 3 meses</b>. Cortada, na geladeira: poucos dias.",cf:FCC},
+{id:"abobora",g:"l",t:"Abóbora",k:["abobora"],ok:["seca"],svg:"abobora",
+ b:["Casca <b>sem brilho</b>: brilhante foi colhida cedo e tem menos sabor.","Sem machucados, mofo ou podridão.","Leve <b>com o cabinho</b>: ajuda a durar."],bf:FCC,
+ e:"Casca brilhante, machucados ou mofo. Em pedaço, tem de estar na geladeira do mercado.",ef:FCC,
+ q:"Seca: grande, a melhor para doce em pasta, em calda ou cristalizado. Japonesa (cabotiá): para salgados. Moranga: para doces e recheios.",qf:FCC,
+ c:"Inteira, em lugar fresco e seco: <b>cerca de 3 meses</b>. Em pedaço, na geladeira em saco plástico: até 1 semana.",cf:FCC},
+{id:"beterraba",g:"l",t:"Beterraba",k:["beterraba"],svg:"beterraba",
+ b:["Casca <b>lisa e firme</b>.","<b>Sem rachaduras.</b>","Prefira de <b>cor forte</b> e tamanho médio."],bf:FMS,
+ e:"Mole, murcha ou rachada.",ef:FMS,
+ c:"Na geladeira logo que chegar: <b>dura vários dias</b>.",cf:FGEL},
+{id:"chuchu",g:"l",t:"Chuchu",k:["chuchu"],svg:"chuchu",
+ b:["Prefira os <b>pequenos</b>.","<b>Firme e pesado.</b>","Sem cortes nem partes moles ou manchadas."],bf:FMS,
+ e:"Partes moles, manchas ou cortes.",ef:FMS,
+ c:"Na geladeira só se for usar em até 2 dias: no frio, perde sabor e textura depois de poucos dias.",cf:FGEL},
+{id:"quiabo",g:"l",t:"Quiabo",k:["quiabo"],svg:"quiabo",
+ b:["Prefira os <b>pequenos</b> (7 a 10 cm).","Bem verde e <b>firme</b>.","Não quebre a ponta para testar: <b>estraga o quiabo</b> e ele dura menos."],bf:FMSE,
+ e:"Muito grande: passou do ponto.",ef:FMSE,
+ c:"Na geladeira só se for usar em até 2 dias. Lave só na hora de usar.",cf:FGEL},
+{id:"pepino",g:"l",t:"Pepino",k:["pepino"],sem:["conserva"],svg:"pepino",
+ b:["Firme e de <b>casca brilhante</b>.","Sem ferimentos ou amassados.","Nem muito grande (passou) nem muito pequeno (murcha rápido)."],bf:FCC,
+ e:"Muito grande e já amarelando: só serve para refogar.",ef:FCC,
+ q:"Japonês: fino, verde-escuro e brilhante. Aodai: verde-escuro e liso. Caipira: verde-claro com listras brancas.",qf:FCC,
+ c:"Fora da geladeira estraga rápido. Na geladeira, em saco plástico furado na gaveta: <b>até 1 semana</b>.",cf:FCC},
+{id:"vagem",g:"l",t:"Vagem",k:["vagem","feijao"],com:["vagem"],svg:"vagem",
+ b:["Grãos <b>pequenos</b> por dentro.","Não quebre a ponta para testar: <b>estraga a vagem</b>.","~Verde e firme, sem partes murchas."],bf:FEMB,
+ e:"Grãos muito grandes por dentro: fica <b>fibrosa</b>.",ef:FEMB,
+ c:"Na geladeira só até 2 dias: mantém a aparência, mas perde sabor e textura depois de poucos dias.",cf:FGEL},
+{id:"jilo",g:"l",t:"Jiló",k:["jilo"],svg:"jilo",
+ b:["Deve estar <b>firme</b>.","A cor clara ou escura <b>depende do tipo</b>.","~Sem partes amareladas: amarelado passou do ponto e fica mais amargo."],bf:FMS,
+ e:"Mole ou amarelado.",ef:FPOP,
+ c:"Na geladeira só se for usar em até 2 dias. Se lavar, seque antes de guardar.",cf:FGEL},
+{id:"alface",g:"v",t:"Alface",k:["alface"],svg:"alface",
+ b:["Folhas com <b>cara de frescas</b>, brilhantes e firmes, sem partes escuras.","<b>Talo firme</b>, nem murcho nem mole.","Escolha sem amassar e sem mexer em todas da banca."],bf:FCC,
+ e:"Folhas escuras, amassadas ou quebradas. A picada pronta tem de estar na geladeira do mercado.",ef:FCC,
+ q:"Lisa e crespa: para salada. Americana e romana: folhas crocantes; a romana, mais grossa, aguenta ir ao fogo.",qf:FCC,
+ c:"Fora da geladeira: até 1 dia, com o pé na água. Na geladeira, em saco ou vasilha com tampa: <b>3 a 4 dias</b>. Não congela. A hidropônica dura mais guardada com a raiz.",cf:FCC},
+{id:"couve",g:"v",t:"Couve",k:["couve"],sem:["flor"],svg:"couve",
+ b:["Folhas <b>bem frescas</b>.","Sem partes amareladas ou escuras.","Talo com <b>cara de recém-cortado</b>."],bf:FMSE,
+ e:"Folhas amareladas, murchas ou escuras.",ef:FMSE,
+ c:"Na geladeira logo que chegar, em saco plástico. Dura pouco: compre perto do dia de usar.",cf:FGEL},
+{id:"folhas",g:"v",t:"Rúcula, agrião e cheiro-verde",k:["rucula","agriao","salsa","salsinha","cebolinha","coentro","cheiro","espinafre","almeirao","chicoria"],svg:"folhas",
+ b:["Folhas <b>firmes e verdes</b>.","Sem partes amareladas ou murchas.","Escolha sem pegar e devolver vários maços."],bf:FMSC,
+ e:"Folhas amareladas, murchas ou melando.",ef:FMSC,
+ c:"Na geladeira, embaladas. <b>Murcham muito rápido</b>. Não deixe encostar no fundo da geladeira: o frio forte queima as folhas.",cf:FREC},
+{id:"brocolis",g:"v",t:"Brócolis",k:["brocolis","brocolo"],sem:["congelado"],svg:"brocolis",
+ b:["Cabeça <b>verde-escura</b>, firme e compacta.","Botões <b>totalmente fechados</b>.","Talos firmes e folhas com cara de frescas."],bf:FCC,
+ e:"Botões abertos, <b>amarelos ou brancos</b>; pontos escuros ou mela; murcho.",ef:FCC,
+ q:"Ramoso: vendido em maço, com talos e folhas. De cabeça (ninja): vendido por unidade, o melhor para congelar.",qf:FCC,
+ c:"Na geladeira, em saco ou vasilha: <b>até 4 dias</b>, porque amarela e murcha rápido. Para congelar, separe os buquês, 2 minutos em água fervendo e depois água com gelo.",cf:FCC},
+{id:"repolho",g:"v",t:"Repolho",k:["repolho"],svg:"repolho",
+ b:["Cabeça <b>firme e compacta</b>.","<b>Sem rachaduras.</b>","Entre dois do mesmo tamanho, o <b>mais pesado</b>."],bf:FEMB,
+ e:"Folhas com manchas escuras ou furos.",ef:FEMB,
+ c:"Na geladeira: <b>dura vários dias</b> sem perder qualidade.",cf:FGEL},
+/* Mercado: uma dica por categoria (o "q" aparece como "Bom saber"). */
+{id:"carnes",g:"m",t:"Carnes",k:[],ico:"carne",
+ b:["Procure o <b>carimbo do SIF</b> (ou do serviço estadual) na embalagem.","Desconfie de <b>luz vermelha</b> ou azulejo rosado no açougue: escondem a cor real da carne.","~<b>Muito líquido na bandeja</b> é mau sinal: a carne perdeu água ou ficou fora do frio."],bf:FPROC,
+ e:"Embalagem furada, rasgada ou estufada, e produto vencido.",ef:FANV,
+ q:"Carne moída só pode ser vendida se for moída <b>na sua frente</b>, a seu pedido. A etiqueta tem de dizer se é fresca, resfriada ou congelada.",qf:FPROC,
+ c:"Pegue por último e vá direto para casa. Guarde logo na parte mais fria da geladeira ou no congelador.",cf:FPOP},
+{id:"laticinios",g:"m",t:"Laticínios",k:[],ico:"leite",
+ b:["<b>Caixa de leite estufada não serve</b>: é sinal de que pode estar contaminada.","Iogurte, queijo e requeijão têm de estar <b>na geladeira do mercado</b>.","Confira a <b>validade</b>: vencido pode estar contaminado mesmo com cara boa."],bf:FANV,
+ e:"Caixa amassada, estufada ou vazando, e tampa de iogurte estufada.",ef:FANV,
+ q:"~Os de validade mais longa costumam ficar no fundo da prateleira.",qf:FPOP,
+ c:"Siga a conservação escrita no rótulo: o leite de caixinha fica fora da geladeira só até abrir.",cf:FPMG},
+{id:"congelados",g:"m",t:"Congelados",k:[],ico:"gelo",
+ b:["O freezer tem de estar <b>seco</b>, com um <b>vapor frio</b> sobre os produtos.","<b>Poça d'água</b> perto do freezer mostra que ele não está na temperatura certa.","Os pacotes não podem passar da <b>linha de carga máxima</b> do freezer."],bf:FPROC,
+ e:"~<b>Gelo dentro do pacote</b> ou produto empedrado: descongelou e congelou de novo.",ef:FPOP,
+ q:"~Deixe os congelados para o fim da compra e leve em sacola térmica.",qf:FPOP,
+ c:"Direto para o congelador ao chegar. O que descongelou não volta para o congelador.",cf:FPOP},
+{id:"enlatados",g:"m",t:"Enlatados",k:[],ico:"lata",
+ b:["<b>Não leve lata estufada</b>: pode ter bactéria perigosa.","Evite lata <b>amassada ou furada</b>.","Confira a validade."],bf:FANV,
+ e:"Lata que espirra ou solta gás ao abrir, ou com cheiro estranho: jogue fora.",ef:FPOP,
+ c:"Depois de aberto, passe para um pote com tampa e guarde na geladeira.",cf:FPOP},
+{id:"graos",g:"m",t:"Grãos",k:[],ico:"grao",
+ b:["~Feijão bom tem <b>grãos inteiros</b>, da mesma cor e sem pedrinhas.","~Prefira o de <b>empacotamento recente</b>: feijão velho demora mais a cozinhar.","Pacote <b>sem furos ou rasgos</b>."],bf:FANV,
+ e:"~Carunchos (bichinhos), grãos furados ou muito pó no fundo do pacote.",ef:FPOP,
+ c:"Depois de aberto, em pote fechado, em lugar seco e fresco.",cf:FPOP},
+{id:"limpeza",g:"m",t:"Limpeza e higiene",k:[],ico:"frasco",
+ b:["Compare pelo <b>preço por litro, quilo ou lavagem</b>: embalagem menor nem sempre baixa o preço na mesma proporção.","O rótulo tem de trazer, em português, <b>validade, lote, fabricante</b> e modo de usar.","Leia as <b>precauções</b> antes de usar."],bf:FPROC,
+ e:"Nunca reaproveite a embalagem de produto de limpeza para outra coisa.",ef:FPROC,
+ c:"Guarde longe dos alimentos e fora do alcance de crianças.",cf:FPOP}];
 /* Produtos industrializados que começam com o nome da fruta (suco, doce, polpa) não ganham dica. */
 var DSEM=["congelado","congelada","conserva","suco","polpa","doce","geleia","molho","extrato","catchup","ketchup","creme","po","refresco","nectar","bebida","iogurte","biscoito","bisc","sorvete","picole","bala","chips","desidratada","seca","passa"];
 function dcWords(t){return String(t||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").split(/[^a-z0-9]+/).filter(Boolean)}
 function dicaDe(g){var W=dcWords(g.nm);if(!W.length)return null;
-return DICAS.filter(function(d){return d.k.indexOf(W[0])>=0&&!(d.sem||[]).some(function(s){return W.indexOf(s)>=0})&&(d.com||[]).every(function(c){return W.indexOf(c)>=0})&&!W.some(function(w){return DSEM.indexOf(w)>=0&&(d.com||[]).indexOf(w)<0})})[0]||null}
-function dcBusca(d,q){if(!q)return true;var Q=dcWords(q),W=dcWords(d.t+" "+d.k.join(" "));return Q.every(function(x){return W.some(function(w){return w.indexOf(x)===0})})}
+return DICAS.filter(function(d){return d.g!="m"&&d.k.indexOf(W[0])>=0&&!(d.sem||[]).some(function(s){return W.indexOf(s)>=0})&&(d.com||[]).every(function(c){return W.indexOf(c)>=0})&&(!d.alg||d.alg.some(function(c){return W.indexOf(c)>=0}))&&!W.some(function(w){return DSEM.indexOf(w)>=0&&(d.com||[]).concat(d.ok||[]).indexOf(w)<0})})[0]||null}
+function dcBusca(d,q){if(!q)return true;var Q=dcWords(q),W=dcWords(d.t+" "+d.k.join(" ")+" "+(DCW[d.id]||""));return Q.every(function(x){return W.some(function(w){return w.indexOf(x)===0})})}
+/* Dicas de mercado: escolhidas pela categoria e por palavras do nome (feijão é Mercearia, mas ganha a dica de grãos). */
+var DCW={carnes:"carne frango peixe frios linguica acougue bandeja ovo",laticinios:"leite iogurte queijo requeijao manteiga",congelados:"congelado freezer gelo",enlatados:"lata sardinha atum milho ervilha extrato",graos:"feijao arroz lentilha grao",limpeza:"sabao detergente amaciante desinfetante higiene sabonete shampoo papel"};
+function dicaCat(g){var x=nsp(g.nm),c=catG(g),id="";
+if(/\b(congelad[oa]s?|cong|cgl|empanad[oa]s?|nuggets?|lasanha)\b/.test(x))id="congelados";
+else if(((c==5||c==6||c==7||c<0)&&/\b(lata|lt|sardinha|atum|ervilha|seleta|extrato|palmito|conserva|pelado)\b/.test(x))||(/\bmilho verde\b/.test(x)&&!/\b(espiga|bandeja|bdj|kg)\b/.test(x)))id="enlatados";
+else if(/\b(arroz|feijao|lentilha|grao|graos|canjica)\b/.test(x)&&!/\bvagem\b/.test(x))id="graos";
+else if(c==1||/\b(queijo|qj|muss|mussarela|requeijao)\b/.test(x))id="laticinios";
+else if(c==6)id="carnes";
+else if(c==3||c==4)id="limpeza";
+return id?DICAS.filter(function(d){return d.id==id})[0]:null}
+function dcFor(g){return dicaDe(g)||dicaCat(g)}
+/* Quantos produtos das notas usam cada dica, para a seção "Você compra". */
+function dcCompra(){var C={};Object.keys(G).forEach(function(k){var d=dcFor(G[k]);if(d)C[d.id]=(C[d.id]||0)+1});return C}
+var MESL=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+/* Safra: só com o que a pessoa pagou. Média por mês do ano; aparece com 2 meses ou mais e diferença de preço. */
+function dcSafra(d){if(d.g=="m")return"";var M={},U={kg:0,un:0};Object.keys(G).forEach(function(k){var g=G[k];if(dicaDe(g)!==d)return;var u=/kg/i.test(g.u||"")?"kg":"un";
+(g.ok||[]).forEach(function(o){if(!(o.pu>0)||o.sus||!o.n||!o.n.data)return;var key=u+(+o.n.data.slice(5,7)-1);(M[key]=M[key]||[]).push(o.pu);U[u]++})});
+var u=U.kg>=U.un?"kg":"un";if(!U[u])return"";var L=[];for(var m=0;m<12;m++){var a=M[u+m];if(a)L.push({m:m,p:a.reduce(function(s,x){return s+x},0)/a.length})}
+if(L.length<2)return"";L.sort(function(a,b){return a.p-b.p});var lo=L[0],hi=L[L.length-1];if(hi.p-lo.p<.01)return"";var uu=u=="kg"?"/kg":" a unidade";
+return'<p>Nas suas compras, o mais barato foi em <b>'+MESL[lo.m]+'</b> (R$ '+R2(lo.p)+uu+') e o mais caro em <b>'+MESL[hi.m]+'</b> (R$ '+R2(hi.p)+uu+').</p><p class="dc-f">Média do que você pagou em cada mês, com compras em '+L.length+' meses diferentes.</p>'}
+/* Ícones das dicas de mercado (as de hortifrúti usam o próprio desenho). */
+var DICO={carne:'<path d="M5 14c0-5 4-9 9-9 3 0 5 2 5 5 0 6-6 9-10 9-2 0-4-2-4-5z"/><circle cx="14" cy="10" r="2"/>',leite:'<path d="M8 3h8v3l2 3v12H6V9l2-3z"/><path d="M6 12h12"/>',gelo:'<path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7"/><path d="M9 4l3 2 3-2M9 20l3-2 3 2"/>',lata:'<ellipse cx="12" cy="5" rx="7" ry="2.5"/><path d="M5 5v14c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V5"/><path d="M5 10h14M5 15h14"/>',grao:'<ellipse cx="9" cy="12" rx="4" ry="6" transform="rotate(-20 9 12)"/><ellipse cx="16" cy="12" rx="4" ry="6" transform="rotate(20 16 12)"/>',frasco:'<path d="M10 2h4v4l3 3v13H7V9l3-3z"/><path d="M7 13h10"/>'};
+function dcIco(d){if(d.svg&&DSVG[d.svg])return DSVG[d.svg].replace('<svg class="dc-svg"','<svg class="dc-ico" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"').replace(/ role="img" aria-label="[^"]*"/,"");
+return'<svg class="dc-ico dc-ico2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(DICO[d.ico]||"")+'</svg>'}
+function dcPop(){return'<span class="pill gray">dica popular</span>'}
+function dcFonte(f){return'<p class="dc-f">'+(f?'Fonte: '+esc(f):dcPop()+' costume conhecido, sem fonte oficial')+'</p>'}
+function dcTx(x){return String(x||"").replace(/^~/,"")}
+function dcMac(d){return'<ol class="dc-mac">'+d.b.map(function(x){return'<li>'+(x.charAt(0)=="~"?x.slice(1)+' '+dcPop():x)+'</li>'}).join("")+'</ol>'}
 /* Desenhos: só onde o visual ajuda (mostram o sinal, não uma foto). */
 /* Desenhos: só onde o visual ajuda (mostram o sinal, não uma foto). As setas usam o marcador #dcs das definições em DDEFS. */
 var DSVG={};
@@ -994,8 +1196,11 @@ dseta(262,200,182,190)+'<text x="334" y="196" text-anchor="end">Talo firme,</tex
 /* Mais largo (380) e com o desenho deslocado 20 para a direita, para as legendas não ficarem por cima do alimento. */
 function dsvgW(lbl,vb,corpo){return dsvg(lbl,vb,'<g transform="translate(20,0)">'+corpo+'</g>')}
 /* Peças comuns dos desenhos: legenda com seta (à esquerda ou à direita), rodapé e comparação certo × errado. */
-function dlab(lado,y,t,sub,ax,ay,cor){var x=lado=="l"?-8:354,an=lado=="l"?"start":"end",sx=lado=="l"?70:290;
-return dseta(sx,y+(sub?18:6),ax,ay)+'<text x="'+x+'" y="'+y+'" text-anchor="'+an+'"'+(cor?' fill="'+cor+'"':'')+'>'+t+'</text>'+(sub?'<text x="'+x+'" y="'+(y+14)+'" text-anchor="'+an+'" font-weight="400" fill="var(--soft)">'+sub+'</text>':'')}
+/* A seta sai do lado do texto (largura estimada pelo número de letras), para nunca passar por cima da legenda. */
+function dlab(lado,y,t,sub,ax,ay,cor){var x=lado=="l"?-8:354,an=lado=="l"?"start":"end",w=Math.max(String(t).length,String(sub||"").length)*6.3,x0=lado=="l"?x:x-w,x1=lado=="l"?x+w:x,top=y-13,bot=y+(sub?19:5),sx,sy;
+/* alvo ao lado do texto: a seta sai da lateral; alvo acima ou abaixo da faixa do texto: sai da borda de cima ou de baixo */
+if(ax>x1+4||ax<x0-4){sx=ax>x1?x1+4:x0-4;sy=Math.max(top,Math.min(bot,ay))}else{sx=Math.max(x0+6,Math.min(x1-6,ax));sy=ay<y?top-2:bot+4}
+return dseta(sx,sy,ax,ay)+'<text x="'+x+'" y="'+y+'" text-anchor="'+an+'"'+(cor?' fill="'+cor+'"':'')+'>'+t+'</text>'+(sub?'<text x="'+x+'" y="'+(y+14)+'" text-anchor="'+an+'" font-weight="400" fill="var(--soft)">'+sub+'</text>':'')}
 function dpe(t,y){return'<text x="170" y="'+(y||224)+'" text-anchor="middle" font-weight="400" fill="var(--soft)">'+t+'</text>'}
 function dcmp(ok,bad,cOk,sOk,cBad,sBad,H){H=H||230;return'<text x="90" y="16" text-anchor="middle" font-size="14" font-weight="700" fill="var(--acc)">✓ '+cOk+'</text><text x="250" y="16" text-anchor="middle" font-size="14" font-weight="700" fill="var(--warn,#b45309)">✗ '+cBad+'</text><line x1="170" y1="4" x2="170" y2="'+(H-6)+'" stroke="var(--line)"/>'+ok+bad+'<text x="90" y="'+(H-10)+'" text-anchor="middle" font-weight="400" fill="var(--soft)">'+sOk+'</text><text x="250" y="'+(H-10)+'" text-anchor="middle" font-weight="400" fill="var(--soft)">'+sBad+'</text>'}
 function dcirc(cx,cy,r,f,s){return'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+f+'" stroke="'+s+'" stroke-width="1.5"/>'}
@@ -1075,7 +1280,7 @@ DSVG.jilo=dsvgW("Jiló: deve estar firme; a cor clara ou escura depende do tipo"
 /* Verduras */
 DSVG.couve=dsvgW("Couve: folhas frescas, sem partes amareladas ou escuras, e talo com cara de recém-cortado","380 230",
 '<path d="M170 200 q-90 -40 -80 -120 q30 -50 80 -50 q50 0 80 50 q10 80 -80 120 z" fill="#2f7a3a" stroke="#174a1e" stroke-width="1.5"/><path d="M170 200 v-160 M170 90 l-40 -24 M170 120 l-50 -20 M170 150 l-46 -14 M170 90 l40 -24 M170 120 l50 -20 M170 150 l46 -14" stroke="#9ac08a" stroke-width="2.5" fill="none"/><rect x="164" y="196" width="12" height="20" fill="#cfe0b8" stroke="#7a9a5a"/>'+
-dlab("l",40,"Sem partes","amareladas ou escuras",112,80)+dlab("r",190,"Talo de","recém-cortado",178,208)+dpe("Dura pouco: compre perto de usar"));
+dlab("l",14,"Sem partes","amareladas ou escuras",118,84)+dlab("r",190,"Talo de","recém-cortado",178,208)+dpe("Dura pouco: compre perto de usar"));
 DSVG.folhas=dsvgW("Rúcula, agrião e cheiro-verde: folhas firmes e verdes, sem partes amareladas; murcham muito rápido","380 230",
 '<g stroke="#2f6a2a" stroke-width="1.3" fill="#4a9a3a">'+[[-40,-70],[-20,-90],[0,-96],[20,-88],[40,-72],[-30,-50],[30,-52]].map(function(p){return'<path d="M170 190 Q'+(170+p[0]*0.6)+' '+(190+p[1]*0.5)+' '+(170+p[0])+' '+(190+p[1])+' q10 -10 0 -20 q-12 6 -8 20 z"/><ellipse cx="'+(170+p[0])+'" cy="'+(178+p[1])+'" rx="12" ry="9"/>'}).join("")+'</g><path d="M158 186 h24 v8 h-24 z" fill="#c9a86a"/>'+
 dlab("l",40,"Folhas firmes","e verdes",122,98)+dlab("r",160,"Murcham","muito rápido",206,120,"var(--warn,#b45309)")+dpe("Compre perto do dia de usar"));
@@ -1093,13 +1298,25 @@ DSVG.melancia=('<svg class="dc-svg" viewBox="0 0 340 290" role="img" aria-label=
 '<line x1="264" y1="195" x2="264" y2="166" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#dcs)"/><text x="264" y="210" text-anchor="middle">Mancha branca</text><text x="264" y="224" text-anchor="middle">ou quase sem mancha</text><line x1="200" y1="48" x2="184" y2="78" stroke="var(--ink)" stroke-width="1.3" marker-end="url(#dcs)"/><text x="203" y="42">Talo verde</text><text x="258" y="250" text-anchor="middle">Casca brilhante</text><text x="258" y="264" text-anchor="middle" font-weight="400" fill="var(--soft)">som “metálico”</text></g></svg>');
 /* Desenhos ficam dentro de dicas fechadas; o Chrome não acha padrões definidos num trecho escondido, então as definições ficam num SVG à parte, sempre visível (tamanho zero). */
 var DDEFS='<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><pattern id="dcl" width="22" height="200" patternUnits="userSpaceOnUse" patternTransform="rotate(8)"><rect width="22" height="200" fill="#3f8f3a"/><path d="M4 0 q5 25 0 50 q-5 25 0 50 q5 25 0 50 q-5 25 0 50" stroke="#1f5a22" stroke-width="7" fill="none"/></pattern><radialGradient id="dcf" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></radialGradient><radialGradient id="dcb" cx="32%" cy="28%" r="70%"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".25" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></radialGradient><clipPath id="dc1"><ellipse cx="82" cy="108" rx="70" ry="50"/></clipPath><clipPath id="dc2"><ellipse cx="258" cy="108" rx="70" ry="50"/></clipPath><marker id="dcs" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink)"/></marker></defs></svg>';
-function dcCorpo(d){return(d.svg&&DSVG[d.svg]?DSVG[d.svg]:'')+'<p>'+d.x+'</p>'+(d.pop?'<p class="small"><span class="pill gray">dica popular</span> '+esc(d.pop)+'</p>':'')+'<p class="soft small">Fonte: '+esc(d.f)+'</p>'}
-function dcItem(d,aberta){return'<details class="dc"'+(aberta?' open':'')+' data-dc="'+d.id+'"><summary><span class="dc-e" aria-hidden="true">'+d.e+'</span><span class="dc-t">'+esc(d.t)+'</span>'+(d.svg?'<span class="pill ok">com desenho</span>':'')+'</summary><div class="dc-b">'+dcCorpo(d)+'</div></details>'}
-function dcLista(){var q=DCQ.trim(),h="",n=0;Object.keys(DCG).forEach(function(gr){var L=DICAS.filter(function(d){return d.g==gr&&dcBusca(d,q)});if(!L.length)return;n+=L.length;h+='<h3>'+DCG[gr]+'</h3><div class="card dc-card">'+L.map(function(d){return dcItem(d,q.length>=2&&L.length==1)}).join("")+'</div>'});
-return n?h:'<p class="soft">Ainda não temos dica para “'+esc(q)+'”.</p>'}
-function vdc(){return DDEFS+'<div class="card"><h2 style="margin:0">Como escolher</h2><p class="soft small">Dicas curtas para levar frutas, legumes e verduras no ponto certo, conferidas na Embrapa e no Ministério da Saúde.</p><label class="f"><span class="sr">Buscar</span><input type="search" id="dcq" data-in="dcq" value="'+esc(DCQ)+'" autocomplete="off" placeholder="Buscar fruta, legume ou verdura"></label></div><div id="dclista">'+dcLista()+'</div>'}
-/* Na página do produto: a dica dele, já aberta. */
-function dcCard(g){var d=dicaDe(g);if(!d)return"";return DDEFS+'<div class="card dc-prod"><h3 style="margin:0">'+d.e+' Como escolher '+esc(d.t.toLowerCase())+'</h3>'+dcCorpo(d)+'<button type="button" class="link" data-act="tab" data-v="dc">Ver todas as dicas</button></div>'}
+function dcCorpo(d){var m=d.g=="m",h=(d.svg&&DSVG[d.svg]?DSVG[d.svg]:'');
+h+='<h4 class="dc-h">'+(m?'Macetes na hora de comprar':'Macetes na banca')+'</h4>'+dcMac(d)+(d.b.some(function(x){return x.charAt(0)!="~"})?dcFonte(d.bf):'');
+if(d.e)h+='<h4 class="dc-h">Evite</h4><p>'+dcTx(d.e)+'</p>'+dcFonte(d.ef);
+if(d.q)h+='<h4 class="dc-h">'+(m?'Bom saber':'Qual escolher')+'</h4><p>'+dcTx(d.q)+'</p>'+dcFonte(d.qf);
+if(d.c)h+='<h4 class="dc-h">Em casa</h4><p>'+dcTx(d.c)+'</p>'+dcFonte(d.cf);
+var sf=dcSafra(d);if(sf)h+='<h4 class="dc-h">Safra nas suas notas</h4>'+sf;
+return h}
+function dcItem(d,aberta){return'<details class="dc"'+(aberta||d.id==DCOPEN?' open':'')+' data-dc="'+d.id+'"><summary>'+dcIco(d)+'<span class="dc-t">'+esc(d.t)+'</span></summary><div class="dc-b">'+dcCorpo(d)+'</div></details>'}
+function dcBloco(t,L,um){return'<h3>'+t+'</h3><div class="card dc-card">'+L.map(function(d){return dcItem(d,um)}).join("")+'</div>'}
+function dcLista(){var q=DCQ.trim(),L=DICAS.filter(function(d){return(!DCF||d.g==DCF)&&dcBusca(d,q)}),h="";
+if(!L.length)return'<p class="soft">Ainda não temos dica para “'+esc(q)+'”.</p>';
+var C=dcCompra(),um=q.length>=2&&L.length==1,Vc=L.filter(function(d){return C[d.id]}).sort(function(a,b){return C[b.id]-C[a.id]});
+if(Vc.length)h+=dcBloco("Você compra",Vc,um);
+Object.keys(DCG).forEach(function(gr){var X=L.filter(function(d){return d.g==gr&&!C[d.id]});if(X.length)h+=dcBloco(DCG[gr],X,um)});
+return h}
+function dcFil(){return'<div class="chips dc-fil" role="group" aria-label="Filtrar dicas">'+Object.keys(DCG).map(function(k){return'<button type="button" class="chip" data-act="dcf" data-g="'+k+'" aria-pressed="'+(DCF==k)+'">'+DCG[k]+'</button>'}).join("")+'</div>'}
+function vdc(){return DDEFS+'<div class="card"><h2 style="margin:0">Como escolher</h2><p class="soft small">Macetes conferidos na Embrapa, no Ministério da Saúde, na Anvisa e no Procon. O que é só costume aparece como dica popular.</p>'+dcFil()+'<label class="f"><span class="sr">Buscar</span><input type="search" id="dcq" data-in="dcq" value="'+esc(DCQ)+'" autocomplete="off" placeholder="Buscar fruta, legume ou produto"></label></div><div id="dclista">'+dcLista()+'</div>'}
+/* Na página do produto: só os 3 macetes; o resto abre na aba Dicas. */
+function dcCard(g){var d=dcFor(g);if(!d)return"";return DDEFS+'<div class="card dc-prod"><div class="dc-hd">'+dcIco(d)+'<h3 style="margin:0">'+(d.g=="m"?'Na hora de comprar '+esc(d.t.toLowerCase()):'Como escolher '+esc(d.t.toLowerCase()))+'</h3></div>'+dcMac(d)+'<button type="button" class="link" data-act="dcabre" data-id="'+d.id+'">Ver todas as dicas →</button></div>'}
 /* ---------- Modo mercado (aba Lista): consulta pelo código ---------- */
 var LP=null,BCFROM="";
 function lpHtml(){var g=LP&&G[LP.k];if(!g)return"";var l=g.last,b=cheapest(g),ja=CFG.lista.filter(function(x){return lg(x)===g})[0];
@@ -1195,6 +1412,25 @@ h+='</div>'+marcasChart(c);
 if(c.R.length)h+='<div class="list">'+c.R.map(function(r,i){return cmRow(c,r,i,b)}).join("")+'</div>';
 if(c.O.length)h+='<h3>Preços antigos (mais de 3 meses)</h3><p class="soft small">Só para referência: o preço pode ter mudado desde então.</p><div class="list">'+c.O.map(function(r){return cmRow(c,r,-1,null)}).join("")+'</div>';
 return h+'<p class="soft small">Algum produto não é do mesmo tipo ou está com o tamanho errado? Abra o produto e toque em “Ajustar comparação de marcas”.</p>'}
+/* ---------- Produtos de mercado (mercearia, limpeza, higiene e outros embalados): contas automáticas com as notas ----------
+   Preço por kg, litro ou metro; "a embalagem diminuiu"; qual tamanho compensa; custo por uso quando o rendimento está no nome. */
+var MERC_CAT={0:1,1:1,2:1,3:1,4:1,5:1};
+function medTxt(b){return b=="kg"?"kg":b=="l"?"L":b=="m"?"metro":"un"}
+function porMed(p,tp){return tp&&tp.q>0?p/tp.q:0}
+function familia(g){var W=jWords(g.nm).slice().sort().join(" ");if(!W||!g.tp)return[];return Object.keys(G).map(function(k){return G[k]}).filter(function(o){return o!==g&&!o.v&&o.tp&&o.tp.b===g.tp.b&&o.tp.q>0&&o.last&&jWords(o.nm).slice().sort().join(" ")===W})}
+function mercCard(g){if(!MERC_CAT[catG(g)]||!g.tp||!(g.tp.q>0)||g.v)return"";var tp=g.tp,porKg=tp.b=="kg"&&tp.q==1&&/kg/i.test(g.u||"");if(porKg)return"";
+var med=medTxt(tp.b),pl=g.last.pu,pm=porMed(pl,tp),h="",F=familia(g);
+if(tp.b!="un"||tp.q>1)h+='<p class="small" style="margin:0">'+fq(tp.q,tp.b)+' · <b>R$ '+R2(pm)+'/'+med+'</b> na sua última compra</p>';
+/* embalagem diminuiu: mesmo produto, tamanho maior antes, e agora menor pelo mesmo preço ou mais */
+var ini=g.occ.reduce(function(a,o){return!a||o.n.data<a?o.n.data:a},"");
+F.filter(function(o){return o.tp.q>tp.q&&o.last.n.data<=ini&&pl>=o.last.pu-.005}).slice(0,1).forEach(function(o){var po=porMed(o.last.pu,o.tp),up=pm/po-1;
+h+='<div class="status warn"><b>A embalagem diminuiu:</b> era '+fq(o.tp.q,tp.b)+' por R$ '+R2(o.last.pu)+' ('+dl(o.last.n.data)+'), agora '+fq(tp.q,tp.b)+' por R$ '+R2(pl)+'. No preço por '+med+', subiu '+(up*100).toFixed(0)+'%.</div>'});
+/* qual tamanho compensa */
+var T=[g].concat(F).map(function(o){return{o:o,q:o.tp.q,p:o.last.pu,pm:porMed(o.last.pu,o.tp),d:o.last.n.data}}),qs={};T=T.filter(function(x){if(qs[x.q])return false;qs[x.q]=1;return true});
+if(T.length>=2){T.sort(function(a,b){return a.pm-b.pm});h+='<p class="small" style="margin:8px 0 0"><b>Qual tamanho compensa?</b></p><table>'+T.map(function(x,i){return'<tr><td>'+fq(x.q,tp.b)+(x.o===g?' <span class="soft small">(este)</span>':'')+'<br><span class="soft small">R$ '+R2(x.p)+' em '+dl(x.d)+'</span></td><td style="text-align:right;white-space:nowrap"><b>R$ '+R2(x.pm)+'/'+med+'</b>'+(i==0?'<br><span class="pill ok">mais em conta</span>':'')+'</td></tr>'}).join("")+'</table>'}
+/* custo por uso: rendimento escrito no nome (ex.: "30 LAVAGENS") */
+var rm=String(g.nm).toUpperCase().match(/(\d+)\s*(LAVAGENS|LAVAGEM|LAV|USOS|DOSES|APLICACOES)\b/);if(rm&&+rm[1]>0){var nu=+rm[1],pal=/LAV/.test(rm[2])?"lavagem":/DOSE/.test(rm[2])?"dose":/APLIC/.test(rm[2])?"aplicação":"uso";h+='<p class="small" style="margin:8px 0 0">Rende '+nu+' '+(pal=="lavagem"?"lavagens":pal=="aplicação"?"aplicações":pal+"s")+': <b>R$ '+R2(pl/nu)+' por '+pal+'</b>.</p>'}
+return h?'<div class="card"><h3 style="margin:0">Contas deste produto</h3>'+h+'</div>':""}
 function cmpCard(g){var c=CMP[GC[g.k]];if(!c)return"";var me=c.R.concat(c.O).filter(function(r){return r.g===g})[0];if(!me)return"";var pos=c.R.indexOf(me),b=c.R[0],pt=porTxt(c),st;
 if(me.old)st='<div class="status">Sua última compra deste produto foi há mais de 3 meses ('+dl(me.d)+', R$ '+R2(me.pe)+' '+pt+').'+(b?' Nos últimos 3 meses, o mais em conta foi '+esc(b.g.nv||b.g.nm)+': R$ '+R2(b.pe)+' '+pt+'.':'')+'</div>';
 else if(c.R.length<2)st='<div class="status">É o único deste tipo comprado nos últimos 3 meses. Os outros preços são antigos.</div>';
@@ -1311,19 +1547,22 @@ var fm=N.filter(function(n){return ehFarm(n)&&n.data.slice(0,7)==ym}).reduce(fun
 if(fm>0)h+='<p class="soft small" style="margin-top:8px">Farmácia à parte: R$ '+R2(fm)+' neste mês</p>';
 var e=ecoLinha();if(e)h+=e;
 return h+'</div>'}
-/* Quadro Preços: abas "Subiram" e "Economizar". */
-var PRT=null;
-function altList(){var a=[],cut=cutDate();Object.keys(G).forEach(function(k){var g=G[k];if(g.prev&&g.ch>1.1&&!g.last.sus&&g.last.n.data>=cut)a.push(g)});return a.sort(function(x,y){return y.ch-x.ch})}
+/* Quadro "Preços que subiram": período de 3, 6 ou 12 meses (o mesmo vale para o selo na página do produto).
+   Compara a primeira compra dentro do período com a última. Sem compra no período, usa a mais antiga e avisa ("desde mar/26"). */
+var PRP=3;try{PRP=+lsGet("mn_prp")||3}catch(e){}if([3,6,12].indexOf(PRP)<0)PRP=3;var PRALL=false,PRT=null;
+function altList(){return subiramList().map(function(x){return x.g})}
+function precoPer(g,m){var P=(g.ok||[]).filter(function(o){return o.pu>0&&!o.sus}).slice().sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:0});if(P.length<2)return null;
+var last=P[P.length-1],cut=mesesAtras(m||PRP),dentro=P.filter(function(o){return o!==last&&o.n.data>=cut}),base=dentro[0]||P[0];if(base===last||!(base.pu>0))return null;
+return{base:base,last:last,ch:last.pu/base.pu,desde:!dentro.length,kg:/kg/i.test(g.u||"")}}
+function mesCurto(d){return MESES[+d.slice(5,7)-1]+"/"+d.slice(2,4)}
 function ecoNome(e){return esc(e.b.g.nv||e.b.g.nm)+(e.b.g.v||e.b.f?' (do grupo)':'')}
-function precosCard(){var A=altList(),E=ecoList();if(!A.length&&!E.length)return"";var t=PRT||(A.length?"up":"eco");if(t=="up"&&!A.length)t="eco";if(t=="eco"&&!E.length)t="up";
-var h='<div class="card"><h3 style="margin:0">Preços</h3><div class="seg seg2" role="group" aria-label="Preços"><button type="button" aria-pressed="'+(t=="up")+'" data-act="prt" data-t="up">Subiram ('+A.length+')</button><button type="button" aria-pressed="'+(t=="eco")+'" data-act="prt" data-t="eco">Economizar ('+E.length+')</button></div><div class="list pr-l">';
-if(t=="up"){if(!A.length)h+='<p class="soft small">Nenhum produto subiu mais de 10% nos últimos 3 meses.</p>';
-A.slice(0,5).forEach(function(g){h+='<button type="button" class="pr" data-act="prod" data-k="'+esc(g.k)+'"><span class="pr-n">'+esc(g.nv||g.nm)+'</span><span class="up pr-v">'+pc(g.ch)+'</span></button>'});
-if(A.length>5)h+='<p class="soft small">E mais '+(A.length-5)+' na aba Produtos.</p>'}
-else{if(!E.length)h+='<p class="soft small">Nada para trocar por enquanto.</p>';
-E.slice(0,3).forEach(function(e){h+='<button type="button" class="pr dois" data-act="cmd" data-c="'+esc(e.c.k)+'"><span class="pr-a"><span class="pr-n">'+esc(e.lab)+'</span><span class="down pr-v">~R$ '+Math.round(e.save)+'/ano</span></span><span class="soft small">'+ecoNome(e)+' no '+esc(sn(e.b.s))+': R$ '+R2(e.b.p)+'</span></button>'});
-if(E.length)h+='<button type="button" class="link" data-act="tab" data-v="ec">Ver todos ('+E.length+')</button>'}
-return h+'</div></div>'}
+function subiramList(){var cut12=mesesAtras(12),L=[];Object.keys(G).forEach(function(k){var g=G[k];if(g.v||!g.last||g.last.n.data<cut12||ehFarm(g.last.n))return;var r=precoPer(g);if(r&&r.ch>=1.05)L.push({g:g,r:r})});return L.sort(function(a,b){return b.r.ch-a.r.ch})}
+function precosCard(){var L=subiramList(),n=L.length,suf=function(r){return r.kg?"/kg":""};
+var h='<div class="card"><h3 style="margin:0">Preços que subiram</h3><div class="seg seg3" role="group" aria-label="Período">'+[3,6,12].map(function(m){return'<button type="button" aria-pressed="'+(PRP==m)+'" data-act="prp" data-m="'+m+'">'+m+' meses</button>'}).join("")+'</div><div class="list pr-l">';
+if(!n)h+='<p class="soft small">Nenhum produto subiu nesse período.</p>';
+(PRALL?L:L.slice(0,5)).forEach(function(x){var r=x.r;h+='<button type="button" class="pr dois" data-act="prod" data-k="'+esc(x.g.k)+'"><span class="pr-a"><span class="pr-n">'+esc(x.g.nv||x.g.nm)+'</span><span class="up pr-v">'+pc(r.ch)+'</span></span><span class="soft small">R$ '+R2(r.base.pu)+suf(r)+' → R$ '+R2(r.last.pu)+suf(r)+(r.desde?' · desde '+mesCurto(r.base.n.data):'')+'</span></button>'});
+if(n>5)h+='<button type="button" class="link" data-act="prall">'+(PRALL?'Mostrar menos':'Ver todos ('+n+')')+'</button>';
+return h+'</div><button type="button" class="row lmini" data-act="tab" data-v="cm"><span class="txt"><span class="t">Ver marcas mais baratas</span></span><span class="r" aria-hidden="true">→</span></button></div>'}
 /* Comparar mercados: o mais barato quando já dá para comparar; senão, uma barra com quanto falta. */
 function cmpProg(){var cut=cutDate(),pm={};Object.keys(G).forEach(function(k){G[k].occ.forEach(function(o){if(o.n.data<cut||ehFarm(o.n))return;var s=sk(o.n);(pm[s]=pm[s]||{})[k]=1})});
 var ss=Object.keys(pm),best=0;for(var i=0;i<ss.length;i++)for(var j=i+1;j<ss.length;j++){var c=0;Object.keys(pm[ss[i]]).forEach(function(k){if(pm[ss[j]][k])c++});if(c>best)best=c}return{m:ss.length,n:Math.min(best,IXMIN)}}
@@ -1475,14 +1714,14 @@ function pl(){var q=norm(Q),raw=dig(Q),h="",c=0;
 Object.keys(G).map(function(k){return G[k]}).sort(function(a,b){return a.nm.localeCompare(b.nm,"pt")}).forEach(function(g){if(!gMatch(g,q,raw))return;c++;
 var ss=Object.keys(g.s).sort(function(a,b){return avg(g,a)-avg(g,b)});
 var on=SELM&&SELS[g.k];
-h+='<button type="button" class="row"'+(on?' style="border-color:var(--acc);background:var(--acc-soft)"':'')+' data-act="'+(SELM?"sel":"prod")+'" data-k="'+esc(g.k)+'"'+(SELM?' aria-pressed="'+!!on+'"':'')+'><span class="main">'+(SELM?'<span class="ck" aria-hidden="true"'+(on?' aria-checked="true"':'')+'>'+(on?CHK:"")+'</span>':'')+'<span class="txt"><span class="t">'+esc(g.nv||g.nm)+'</span><span class="soft small">Última: '+dl(g.last.n.data)+' · '+esc(sn(g.last.s))+'</span>'+(g.prev?upTag(g.ch):"")+'</span></span><span class="r">R$ '+R2(g.last.pu)+(ss.length>1?'<span class="pill ok">'+esc(sn(ss[0]))+'</span>':'')+'</span></button>'});
+h+='<button type="button" class="row"'+(on?' style="border-color:var(--acc);background:var(--acc-soft)"':'')+' data-act="'+(SELM?"sel":"prod")+'" data-k="'+esc(g.k)+'"'+(SELM?' aria-pressed="'+!!on+'"':'')+'><span class="main">'+(SELM?'<span class="ck" aria-hidden="true"'+(on?' aria-checked="true"':'')+'>'+(on?CHK:"")+'</span>':'')+'<span class="txt"><span class="t">'+esc(g.nv||g.nm)+'</span><span class="soft small">Última: '+dl(g.last.n.data)+' · '+esc(sn(g.last.s))+'</span>'+perTag(g)+(function(){var b=cheapestPago(g);return b&&b.s!==g.last.s&&b.p<g.last.pu-.005?'<span class="mbchip">Mais barato: '+esc(sn(b.s))+' R$ '+R2(b.p)+(b.f?' (grupo)':'')+'</span>':''})()+'</span></span><span class="r">R$ '+R2(g.last.pu)+'</span></button>'});
 return c?h:'<p class="soft" style="padding:16px">Nenhum produto encontrado.</p>'}
 function vpd(){var g=G[PK];if(!g){V="p";return vp()}
 var L=g.occ,Lk=g.ok,f=Lk[0].pu,l=Lk[Lk.length-1],avgp=Lk.reduce(function(t,o){return t+o.pu},0)/Lk.length,ss=Object.keys(g.s).sort(function(a,b){return avg(g,a)-avg(g,b)}),mn=avg(g,ss[0]),un=g.u&&/kg/i.test(g.u)?"kg":"unidade",lp=l.pu;
 var h='<button type="button" class="link back" data-act="tab" data-v="p">‹ Voltar para produtos</button>'+bcCard(g)+cxCard(CXQ.filter(function(c){return c.g===g}),1)+'<div class="card">';
 h+=RENAME?'<div class="ed"><label class="f">Nome do produto em todas as notas<input type="text" id="rn" value="'+esc(g.nv||g.nm)+'" autocomplete="off"></label><div class="btns"><button type="button" class="btn sm" data-act="rnsave">Salvar nome</button><button type="button" class="btn sm line" data-act="rncancel">Cancelar</button></div></div>':'<div class="row flat"><h2 style="margin:0">'+esc(g.nv||g.nm)+'</h2><button type="button" class="ib" aria-label="Renomear produto" data-act="rename">'+PEN+'</button></div>'+(g.nota&&norm(g.nota)!==norm(g.nv||g.nm)?'<p class="soft small">Na nota: '+esc(g.nota)+'</p>':'');
-h+='<p class="soft small">'+(g.code?"Código "+esc(g.code)+" · ":"")+'preço por '+un+' · '+L.length+' compra'+(L.length==1?"":"s")+'</p>'+(g.prev?upTag(g.ch):"")+chart(Lk,ss)+'<div class="k3"><div><b>R$ '+R2(lp)+'</b><span>última</span></div><div><b>R$ '+R2(avgp)+'</b><span>média</span></div><div><b class="'+(lp>f?"up":lp<f?"down":"")+'">'+pc(f?lp/f:1)+'</b><span>desde a 1ª</span></div></div></div>';
-h+=cmpCard(g)+famCard(g)+vtCard(g)+dcCard(g)+catSel(g);
+h+='<p class="soft small">'+(g.code?"Código "+esc(g.code)+" · ":"")+'preço por '+un+' · '+L.length+' compra'+(L.length==1?"":"s")+'</p>'+perTag(g)+chart(Lk,ss)+(function(){var b=cheapest(g);return'<div class="k3"><div><b>R$ '+R2(lp)+'</b><span>última</span></div><div><b>R$ '+R2(avgp)+'</b><span>média</span></div>'+(b?'<div><b class="down">R$ '+R2(b.p)+'</b><span>mais barato · '+esc(sn(b.s))+(b.f?' (grupo)':b.vi?' (anotado)':'')+'</span></div>':'')+'</div>'})()+'</div>';
+h+=mercCard(g)+cmpCard(g)+famCard(g)+vtCard(g)+dcCard(g)+catSel(g);
 h+='<h3>Histórico de compras</h3><div class="card"><table>';
 L.slice().reverse().forEach(function(o){var ch=o.ch,cls=ch>1.001?"up":ch<.999?"down":"soft";
 var k=emb(o.it);if(o.cq)cls="up";
@@ -1523,10 +1762,10 @@ for(var g=0;g<3;g++){var v=mn+(mx-mn)*g/2,y=Y(v);s+='<line x1="'+pl+'" x2="'+(W-
 s+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+(H-pb)+'" y2="'+(H-pb)+'" stroke="var(--line)"/>';
 ss.forEach(function(st){var q=P.filter(function(o){return o.s==st}),c=storeColor(st);
 if(q.length>1)s+='<polyline fill="none" stroke="'+c+'" stroke-width="2.5" stroke-linejoin="round" points="'+q.map(function(o){return X(o.d).toFixed(1)+","+Y(o.p).toFixed(1)}).join(" ")+'"/>';
-q.forEach(function(o){s+='<circle cx="'+X(o.d).toFixed(1)+'" cy="'+Y(o.p).toFixed(1)+'" r="5.5" fill="'+c+'" stroke="var(--card)" stroke-width="2"/>'})});
+q.forEach(function(o){var cx=X(o.d).toFixed(1),cy=Y(o.p).toFixed(1),t=sn(st)+' · '+dl(o.d)+': R$ '+R2(o.p);s+='<circle cx="'+cx+'" cy="'+cy+'" r="5.5" fill="'+c+'" stroke="var(--card)" stroke-width="2"/><circle cx="'+cx+'" cy="'+cy+'" r="14" fill="transparent" style="cursor:pointer" data-act="cpt" data-t="'+esc(t)+'" role="button" aria-label="'+esc(t)+'"><title>'+esc(t)+'</title></circle>'})});
 /* Rótulos de preço: no primeiro ponto e sempre que o preço muda. Se passar de 12, só primeira, última, menor e maior. */
-var lab=[];ss.forEach(function(st){var q=P.filter(function(o){return o.s==st});q.forEach(function(o,i){var a=q[i-1],b=q[i+1];o.bl=(a||b)&&(!a||a.p>o.p)&&(!b||b.p>o.p);if(i==0||Math.abs(o.p-q[i-1].p)>=.005)lab.push(o)})});
-if(lab.length>12){var imn=0,imx=0;P.forEach(function(o,i){if(o.p<P[imn].p)imn=i;if(o.p>P[imx].p)imx=i});var last=P.reduce(function(a,o){return o.d>=a.d?o:a},P[0]);lab=[P[0],last,P[imn],P[imx]].filter(function(o,i,a){return a.indexOf(o)==i})}
+/* Rótulos: só o primeiro e o último ponto de cada mercado; os outros valores aparecem ao tocar no ponto. */
+var lab=[];ss.forEach(function(st){var q=P.filter(function(o){return o.s==st});q.forEach(function(o,i){var a=q[i-1],b=q[i+1];o.bl=(a||b)&&(!a||a.p>o.p)&&(!b||b.p>o.p)});if(q.length)lab.push(q[q.length-1]);if(q.length>1)lab.push(q[0])});
 var placed=[];lab.forEach(function(o){var x=X(o.d),y=Y(o.p),ly=o.bl&&y+19<H-pb-3?y+19:y-10,hit=function(yy){return placed.some(function(q){return Math.abs(q.x-x)<34&&Math.abs(q.y-yy)<13})};
 if(ly<11)ly=y+19;if(hit(ly))ly=ly<y?y+19:y-10;if(hit(ly)||ly>H-pb-3)return;placed.push({x:x,y:ly});var an=x<pl+18?"start":x>W-pr-18?"end":"middle";
 s+='<text x="'+x.toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="11" font-weight="700" text-anchor="'+an+'" fill="var(--ink)" data-lb="1">'+R2(o.p)+'</text>'});
@@ -1885,7 +2124,9 @@ if(!(window.claude&&claude.use)){copy();return}
 claude.use("downloads").then(function(d){if(!d){copy();return}return d.save({filename:"de-olho-no-carrinho.csv",data:"﻿"+t}).then(function(){out("Planilha enviada para download.")},function(){out("Download cancelado.")})},copy)}
 function toggleTag(list,t){var i=list.indexOf(t);if(i>=0)list.splice(i,1);else list.push(t);return list}
 document.addEventListener("click",function(ev){var b=ev.target.closest("[data-act]");if(!b)return;var a=b.getAttribute("data-act"),d=b.dataset,n;
-if(a=="tab"){if(d.v=="new"&&V=="new")return;go(d.v)}
+if(a=="tab"){if(d.v=="new"&&V=="new")return;if(d.v=="dc")DCOPEN="";go(d.v)}
+if(a=="dcf"){DCF=DCF==d.g?"":d.g;render();return}
+if(a=="dcabre"){DCOPEN=d.id;DCQ="";DCF="";go("dc");setTimeout(function(){var e=document.querySelector('[data-dc="'+d.id+'"]');if(e)window.scrollTo(0,e.getBoundingClientRect().top+window.scrollY-90)},60);return}
 else if(a=="gm"){if(!d.m)return;GP={fim:d.m,per:1,cat:null};V="gm";render();window.scrollTo(0,0)}
 else if(a=="gpp"||a=="gpn"){if(GP.per==0)return;GP.fim=ymAdd(GP.fim,(a=="gpp"?-1:1)*GP.per);GP.cat=null;render()}
 else if(a=="gper"){GP.per=+d.p;GP.cat=null;render()}
@@ -1896,6 +2137,9 @@ else if(a=="orcx"){orcFecha()}
 else if(a=="orcmed"){var om=document.getElementById("orcv");if(om){om.value=R2(+d.v);om.focus()}}
 else if(a=="orcav"){b.setAttribute("aria-checked",String(b.getAttribute("aria-checked")!=="true"))}
 else if(a=="prt"){PRT=d.t;render()}
+else if(a=="prp"){PRP=+d.m;PRALL=false;lsSet("mn_prp",String(PRP));render()}
+else if(a=="prall"){PRALL=!PRALL;render()}
+else if(a=="cpt"){toast(d.t)}
 else if(a=="ecf"){ECF=d.f;render()}
 else if(a=="orccancel"){ORCE=false;render()}
 else if(a=="orcsave"){var vv=num((document.getElementById("orcv")||{}).value);if(!(vv>0)){toast("Digite um valor maior que zero.");return}var sw1=document.querySelector("#orcsh [data-act=orcav]");orcSalva(vv);CFG.orc.av=!sw1||sw1.getAttribute("aria-checked")==="true";saveCfg();orcFecha();render();toast("Orçamento salvo.")}
