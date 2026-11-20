@@ -817,18 +817,27 @@ function bcProd(e){var b="e:"+e;if(PAR[b]!==undefined&&G[fnd(b)])return G[fnd(b)
 function bcBtn(){return'<button type="button" class="row" data-act="bc"><span class="txt"><span class="t">Consultar pelo código de barras</span><span class="soft small">Leia o código do produto na prateleira e veja quanto você pagou da última vez</span></span><span class="r" aria-hidden="true" style="font-size:22px">›</span></button>'}
 function bcAbrir(e){var e2=eanNorm(e);if(!e2){BC={ean:"",cands:[],busy:false,erro:dig(e)};V="bc";render();return}
 var g=bcProd(e2);BC={ean:e2,k:g?g.k:null,nome:"",cands:[],busy:!g};BCQ="";if(g&&BCFROM=="v"){VTK={k:g.k,b:tpBases(g)[0],n:g.nm,c:e2};V="vt";render();window.scrollTo(0,0);setTimeout(function(){var x=document.getElementById("vtp");if(x)x.focus()},50);return}if(g){if(BCFROM=="l"){LP={k:g.k,ean:e2,v:0};V="l";render();window.scrollTo(0,0);setTimeout(function(){var x=document.getElementById("lpv");if(x)x.focus()},50);return}PK=g.k;V="pd";render();window.scrollTo(0,0);return}V="bc";render();window.scrollTo(0,0);bcNome(e2)}
-async function bcNome(e){try{var c=new AbortController(),tm=setTimeout(function(){c.abort()},8000);
-var r=await fetch("https://world.openfoodfacts.org/api/v2/product/"+e+".json?fields=product_name,product_name_pt,brands,quantity",{signal:c.signal});clearTimeout(tm);
-var j=await r.json(),p=j&&j.product||{},nm=[p.product_name_pt||p.product_name||"",p.brands||"",p.quantity||""].map(function(x){return String(x).split(",")[0].trim()}).filter(Boolean).join(" ").slice(0,120);
+/* Bases públicas e grátis, na ordem: alimentos, depois limpeza e outros, depois higiene. Só o código de barras sai do aparelho. */
+var BCBASES=["https://world.openfoodfacts.org","https://world.openproductsfacts.org","https://world.openbeautyfacts.org"];
+async function bcBase(h,e){var c=new AbortController(),tm=setTimeout(function(){c.abort()},6000);try{
+var r=await fetch(h+"/api/v2/product/"+e+".json?fields=product_name,product_name_pt,brands,quantity",{signal:c.signal});
+var j=await r.json(),p=j&&j.status==1&&j.product||{};return[p.product_name_pt||p.product_name||"",p.brands||"",p.quantity||""].map(function(x){return String(x).split(",")[0].trim()}).filter(Boolean).join(" ").slice(0,120)}
+catch(x){return""}finally{clearTimeout(tm)}}
+async function bcNome(e){var nm="";for(var i=0;i<BCBASES.length&&!nm;i++){nm=await bcBase(BCBASES[i],e);if(!BC||BC.ean!==e)return}
 if(BC&&BC.ean===e){BC.nome=nm;BC.cands=bcCands(nm);BC.busy=false;if(V=="bc")render()}}
-catch(x){if(BC&&BC.ean===e){BC.busy=false;BC.cands=[];if(V=="bc")render()}}}
 function bcCands(nm){if(!nm)return[];var tk=toks(nm),tn=tk.n.split(",").filter(Boolean),res=[];
 Object.keys(G).forEach(function(k){var g=G[k],t2=toks(g.nm),n2=t2.n.split(","),sc=0;
 tk.a.forEach(function(a){if(t2.a.some(function(b){return b===a||(a.length>=4&&b.indexOf(a)===0)||(b.length>=4&&a.indexOf(b)===0)}))sc+=2});
 tn.forEach(function(n){if(n2.indexOf(n)>=0)sc+=1});if(sc>=3)res.push([sc,g])});
 return res.sort(function(a,b){return b[0]-a[0]||b[1].occ.length-a[1].occ.length}).slice(0,6).map(function(x){return x[1]})}
 function bcRow(g){return'<button type="button" class="row" data-act="bcliga" data-k="'+esc(g.k)+'"><span class="txt"><span class="t">'+esc(g.nv||g.nm)+'</span><span class="soft small">'+g.occ.length+' compra'+(g.occ.length==1?'':'s')+' · última R$ '+R2(g.last.pu)+' em '+dl(g.last.n.data)+'</span></span></button>'}
-function bcl(){var q=norm(BCQ);if(q.length<2)return"";var L=Object.keys(G).map(function(k){return G[k]}).filter(function(g){return norm(g.nm).indexOf(q)>=0||norm(g.nv).indexOf(q)>=0}).sort(function(a,b){return b.occ.length-a.occ.length}).slice(0,8);
+/* Busca por palavras: cada palavra digitada tem de bater com o começo de uma palavra do nome (ou o contrário: "biscoito" acha "BISC"). */
+function bcWords(t){return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").split(/[^a-z0-9]+/).filter(Boolean)}
+function bcMatch(g,q){var Q=bcWords(q),W=bcWords(g.nm+" "+(g.nv||""));return Q.length>0&&Q.every(function(x){return W.some(function(w){return w.indexOf(x)===0||(w.length>=3&&x.indexOf(w)===0)})})}
+/* Sem nome na base pública: mostra os produtos comprados por último que ainda não têm código de barras ligado. */
+function bcRecentes(){var lig={};Object.keys(CFG.cods||{}).forEach(function(e){lig[CFG.cods[e]]=1});
+return Object.keys(G).map(function(k){return G[k]}).filter(function(g){return!g.v&&g.last&&!Object.keys(g.bases).some(function(b){return b.indexOf("e:")===0})&&!tpBases(g).some(function(b){return lig[b]})}).sort(function(a,b){return a.last.n.data<b.last.n.data?1:a.last.n.data>b.last.n.data?-1:b.occ.length-a.occ.length}).slice(0,8)}
+function bcl(){if(BCQ.trim().length<2)return"";var L=Object.keys(G).map(function(k){return G[k]}).filter(function(g){return bcMatch(g,BCQ)}).sort(function(a,b){return b.occ.length-a.occ.length}).slice(0,8);
 return L.length?L.map(bcRow).join(""):'<p class="soft small">Nenhum produto com esse nome no seu histórico.</p>'}
 function vbc(){var h=BCFROM=="v"?'<button type="button" class="link back" data-act="vtvolta">‹ Voltar para os preços anotados</button><div class="card">':'<button type="button" class="link back" data-act="tab" data-v="'+(BCFROM=="l"?"l":"p")+'">‹ Voltar para '+(BCFROM=="l"?"a lista":"produtos")+'</button><div class="card">';
 if(!BC||!BC.ean){h+='<h2 style="margin:0">Consultar pelo código de barras</h2>'+(BC&&BC.erro?'<div class="status warn">O código '+esc(BC.erro)+' não parece um código de barras válido. Confira os números.</div>':'')+'<label class="f">Números do código de barras<input type="text" id="bcm" inputmode="numeric" autocomplete="off" placeholder="7891234567890"></label><button type="button" class="btn" data-act="bcmanual">Consultar</button></div>';return h}
@@ -836,7 +845,8 @@ h+='<h2 style="margin:0">Código '+esc(BC.ean)+'</h2>';
 if(BC.busy)h+='<p class="soft"><span class="spin" aria-hidden="true"></span>Procurando o nome deste produto…</p>';
 else{h+='<p>Este código ainda não está ligado a um produto do seu histórico.'+(BC.nome?' Na base pública ele aparece como <b>'+esc(BC.nome)+'</b>.':' Não achei o nome dele na base pública.')+'</p>';
 if(BC.cands.length)h+='<p class="soft small">É um destes? Toque para ligar. O app guarda a ligação na sua conta e da próxima vez abre direto.</p><div class="list">'+BC.cands.map(bcRow).join("")+'</div>';
-h+='<label class="f">'+(BC.cands.length?'Ou procure':'Procure')+' o produto pelo nome<input type="search" id="bcq" data-in="bcq" value="'+esc(BCQ)+'" autocomplete="off" placeholder="ex.: arroz camil"></label><div class="list" id="bcl">'+bcl()+'</div>'}
+h+='<label class="f">'+(BC.cands.length?'Ou procure':'Procure')+' o produto pelo nome<input type="search" id="bcq" data-in="bcq" value="'+esc(BCQ)+'" autocomplete="off" placeholder="ex.: biscoito passatempo"></label><div class="list" id="bcl">'+bcl()+'</div>';
+if(!BC.cands.length){var rc=bcRecentes();if(rc.length)h+='<div id="bcrc"'+(BCQ.trim().length>=2?' hidden':'')+'><p class="soft small">Ou toque num dos produtos que você comprou por último. Você só precisa fazer isso uma vez: depois, este código abre direto.</p><div class="list">'+rc.map(bcRow).join("")+'</div></div>'}}
 if(BCFROM=="v"&&BC.ean&&!BC.busy)h+='<button type="button" class="btn line sm" data-act="vtbcnovo">Anotar como produto novo'+(BC.nome?': '+esc(BC.nome):'')+'</button>';return h+'<p class="soft small">Se você nunca comprou este produto, ele aparece aqui depois que você cadastrar uma nota com ele.</p></div>'}
 /* No produto aberto pelo código: comparar com o preço da prateleira. */
 function bcCard(g){if(!BC||BC.k!==g.k)return"";var un=g.u&&/kg/i.test(g.u)?" por kg":"";
@@ -1632,7 +1642,7 @@ else if(k=="catsel"){var gk=G[t.dataset.k];if(gk){CFG.cats=CFG.cats||{};var vb=t
 else if(k=="calc"){var ri=+t.dataset.i,rf=t.dataset.f;if(CALC.rows[ri]){CALC.rows[ri][rf]=t.value;var cr=document.getElementById("calcr");if(cr)cr.innerHTML=calcRes()}}
 else if(k=="lpv"){if(LP){LP.v=num(t.value);var lr=document.getElementById("lpr");if(lr)lr.innerHTML=LP.v?bcCompara(LP.v,G[LP.k]):""}}
 else if(k=="lpp"){var li=CFG.lista[+t.dataset.i];if(li){li.pp=num(t.value)||0;LPPD=true;var cc2=document.querySelector(".card[style*='acc-soft']");if(cc2)cc2.outerHTML=carrinhoCard()}}
-else if(k=="bcq"){BCQ=t.value;var bl=document.getElementById("bcl");if(bl)bl.innerHTML=bcl()}
+else if(k=="bcq"){BCQ=t.value;var bl=document.getElementById("bcl");if(bl)bl.innerHTML=bcl();var rc=document.getElementById("bcrc");if(rc)rc.hidden=BCQ.trim().length>=2}
 else if(k=="bcp"){var br=document.getElementById("bcr");if(br)br.innerHTML=bcCompara(num(t.value))}
 else if(k=="edcalc"){var et=document.getElementById("ed_tot"),g=function(id){var e=document.getElementById(id);return e?e.value:""};if(et)et.innerHTML=edTotTxt(num(g("ed_q")),num(g("ed_p")),num(g("ed_d")),g("ed_dt")||"r")}
 else if(k=="cq"){CQ=t.value;document.getElementById("cml").innerHTML=cml()}
