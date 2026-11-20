@@ -228,6 +228,7 @@ summary{cursor:pointer;list-style:none}
 .sw0{width:50px;height:30px;border-radius:15px;background:var(--line);position:relative;flex:none;transition:background .15s}.sw0 i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .15s}
 .swl[aria-checked="true"] .sw0{background:var(--acc)}.swl[aria-checked="true"] .sw0 i{left:23px}
 .link.err{color:var(--err)}
+.sf-d{border-left:1px solid var(--line);padding-left:10px}.proxn{background:var(--acc-soft);border-color:var(--acc)}
 .infc{gap:12px}.infv{font:800 28px/1.1 var(--display)}.flt{align-self:flex-end}
 .lgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .lbig{min-height:64px;display:flex;align-items:center;gap:10px;padding:0 14px;border:0;border-radius:14px;background:var(--acc-soft);color:var(--acc);font:700 14px var(--body);text-align:left;cursor:pointer}.lbig svg{width:24px;height:24px;flex:none}
@@ -715,8 +716,8 @@ return'<svg class="selo-svg" width="'+px+'" height="'+px+'" viewBox="0 0 100 100
 /* Aviso de novidade (uma vez) + faixa de selos. */
 function seloFaixa(){if(!NM().length)return"";var nov=CFG.conq&&CFG.conq.nov?'<div class="status ok"><b>Novidade: Conquistas!</b> Com as notas que você já cadastrou, você ganhou '+selosN()+' selo'+(selosN()==1?'':'s')+'. <button type="button" class="link" data-act="conq">Ver agora</button></div>':'';return nov+seloFaixa0()}
 function seloFaixa0(){var sel=CFG.selos||{},L=[];SERIES.forEach(function(S){var k=0,d="";S.n.forEach(function(x,i){var v=sel[S.id+":"+x];if(v){k=i+1;if(/^\d{4}-/.test(v)&&v>d)d=v}});if(k)L.push({S:S,k:k,d:d||"0"})});if(!L.length)return"";
-L.sort(function(a,b){return a.d<b.d?1:a.d>b.d?-1:b.k-a.k});var ns=selosN();
-return'<button type="button" class="selofaixa" data-act="conq" aria-label="Seus selos: '+ns+' de '+NSELOS+'. Ver conquistas"><span class="sf-l">'+L.map(function(x){return seloSvg(x.S,x.k,40)}).join("")+'</span><span class="sf-t"><b>'+ns+'</b><small>selos</small></span><span class="chev" aria-hidden="true">›</span></button>'}
+L.sort(function(a,b){return a.d<b.d?1:a.d>b.d?-1:b.k-a.k});var ns=selosN(),nd=desafios().length;
+return'<button type="button" class="selofaixa" data-act="conq" aria-label="Seus selos: '+ns+' de '+NSELOS+(nd?', '+nd+' desafio'+(nd==1?'':'s'):'')+'. Ver conquistas"><span class="sf-l">'+L.map(function(x){return seloSvg(x.S,x.k,40)}).join("")+'</span><span class="sf-t"><b>'+ns+'</b><small>selos</small></span>'+(nd?'<span class="sf-t sf-d"><b>🧩 '+nd+'</b><small>desafio'+(nd==1?'':'s')+'</small></span>':'')+'<span class="chev" aria-hidden="true">›</span></button>'}
 var NSELOS=SERIES.reduce(function(t,s){return t+s.n.length},0);
 function serieVal(id){var c=CFG.conq||{};switch(id){
 case"notas":return NM().length;case"merc":var mk={};NM().forEach(function(n){mk[sk(n)]=1});return Object.keys(mk).length;
@@ -856,6 +857,9 @@ function lcItens(n){var vis={},lig=lcLig(),o=[];(n.itens||[]).forEach(function(i
 function lcFalta(n){var L=lcItens(n);return{t:L.length,f:L.filter(function(x){return!x.ok}).length}}
 function lcUltima(){var L=NM().slice().sort(function(a,b){return a.data<b.data?1:a.data>b.data?-1:0});return L[0]||null}
 function lcNome(g){return esc(g.nv||g.nm)}
+/* Na nota mais recente: o próximo selo, quando falta pouco. */
+function proxNota(n){if(ehFarm(n)||N.some(function(x){return x!==n&&(x.data+(x.hora||""))>(n.data+(n.hora||""))}))return"";var p=proxSelo();if(!p||p.f<.6)return"";
+return'<button type="button" class="row proxn" data-act="conq"><span class="txt"><span class="small">'+p.S.e+' Falta pouco: '+faltaTxt(p).replace(/^faltam /,'')+' para o próximo selo de <b>'+esc(p.S.t)+'</b>.</span></span><span class="chev" aria-hidden="true">›</span></button>'}
 function lcCard(n){if(ehFarm(n))return"";var r=lcFalta(n);if(!r.t||!r.f)return"";
 return'<div class="card lc-oferta"><h3 style="margin:0">📦 Ligar os códigos de barras desta compra</h3><p class="soft small">Faltam '+r.f+' de '+r.t+' produtos. Leia o código de cada um em casa: depois, no mercado, o código abre direto o produto.</p><div class="lc-bar" aria-hidden="true"><i style="width:'+Math.round((r.t-r.f)/r.t*100)+'%"></i></div><button type="button" class="btn sm" data-act="lcabre" data-id="'+esc(n.id)+'">Ligar códigos</button></div>'}
 function vlc(){var n=byId(LCN);if(!n){V="n";return vn()}var L=lcItens(n),ok=L.filter(function(x){return x.ok}).length,pend=L.filter(function(x){return!x.ok});
@@ -1209,7 +1213,7 @@ var h='<div class="card" style="border-color:var(--acc)"><h3 style="margin:0">Vo
 L.forEach(function(it){var g=lg(it),on=sel[it.id]!==false;h+='<div class="item"><button type="button" class="ck" role="checkbox" aria-checked="'+on+'" aria-label="Tirar '+esc(g.nv||g.nm)+' da lista" data-act="fcsel" data-id="'+esc(it.id)+'">'+(on?CHK:'')+'</button><span class="txt"><b>'+esc(g.nv||g.nm)+'</b></span></div>'});
 return h+'</div><div class="btns"><button type="button" class="btn sm" data-act="fcok"'+(nm?'':' aria-disabled="true"')+'>Tirar da lista ('+nm+')</button><button type="button" class="btn sm line" data-act="fcno">Agora não</button></div></div>'}
 function vnd(){var n=byId(SEL);if(!n){V="n";return vn()}
-var s=sk(n),h='<button type="button" class="link back" data-act="tab" data-v="n">‹ Voltar para notas</button>'+fechaCard(n)+lcCard(n)+'<div class="card"><div class="row flat"><span class="main"><span class="dot" style="background:'+storeColor(s)+'"></span><span class="t">'+esc(sn(s))+'</span></span></div><p class="soft small">'+esc(n.loja)+'</p><p class="soft">'+dl(n.data)+(n.hora?" às "+esc(n.hora):"")+(n.cnpj?" · CNPJ "+esc(n.cnpj):"")+'</p>'+(n.chave?'<p class="key">Chave '+esc(fmtChave(n.chave))+'</p>':'')+'<p class="soft small">Etiquetas</p>'+tagEditor(n.tags||[],"ntag")+'</div>';
+var s=sk(n),h='<button type="button" class="link back" data-act="tab" data-v="n">‹ Voltar para notas</button>'+fechaCard(n)+proxNota(n)+lcCard(n)+'<div class="card"><div class="row flat"><span class="main"><span class="dot" style="background:'+storeColor(s)+'"></span><span class="t">'+esc(sn(s))+'</span></span></div><p class="soft small">'+esc(n.loja)+'</p><p class="soft">'+dl(n.data)+(n.hora?" às "+esc(n.hora):"")+(n.cnpj?" · CNPJ "+esc(n.cnpj):"")+'</p>'+(n.chave?'<p class="key">Chave '+esc(fmtChave(n.chave))+'</p>':'')+'<p class="soft small">Etiquetas</p>'+tagEditor(n.tags||[],"ntag")+'</div>';
 var al=[];n.itens.forEach(function(it,i){var g=gOf(n,i);if(!g)return;var o=g.occ.filter(function(o){return o.n===n&&o.i===i})[0];if(o&&o.ch>1.1&&!o.sus)al.push(esc(g.nv||g.nm)+" ("+pc(o.ch)+")")});
 if(al.length)h+='<div class="status warn">Subiram mais de 10% desde a compra anterior: '+al.join(", ")+'.</div>';
 if(ASK)h+='<div class="card"><p><b>Usar o nome “'+esc(ASK.nome)+'” também nas outras '+ASK.outras+' compras deste produto?</b></p><div class="btns"><button type="button" class="btn sm" data-act="askall">Em todas as notas</button><button type="button" class="btn sm line" data-act="askone">Só nesta nota</button></div></div>';
