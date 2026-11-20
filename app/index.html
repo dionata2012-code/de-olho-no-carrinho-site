@@ -198,6 +198,7 @@ summary{cursor:pointer;list-style:none}
 .selofaixa{display:flex;align-items:center;gap:10px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:8px 10px 8px 12px;cursor:pointer;box-shadow:var(--sombra);font:inherit;color:var(--ink);text-align:left}
 .sf-l{display:flex;gap:4px;flex:1;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}.sf-l svg{flex:none}
 .sf-t{display:flex;flex-direction:column;align-items:center;line-height:1.1;flex:none}.sf-t b{font:800 18px var(--display)}.sf-t small{font-size:11.5px;color:var(--soft);font-weight:600}
+.lc-bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin:8px 0 12px}.lc-bar i{display:block;height:100%;background:var(--acc);border-radius:99px}.lc-prog{margin-top:10px}.lc-oferta{border-color:var(--acc)}.lc-dig{margin:10px 0}.lc-dig summary{cursor:pointer;color:var(--acc);font-weight:600}.lc-dig .two{margin-top:8px;align-items:center}
 .selo-svg{display:block;flex:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18))}.serie.off .selo-svg{filter:none;opacity:.55}
 .desaf{display:flex;gap:10px;align-items:flex-start;padding-block:10px;border-top:1px solid var(--line)}.desaf:first-child{border-top:0;padding-top:0}.desaf .se,.serie .se{font-size:28px;line-height:1.15;flex:none;width:36px;text-align:center}.desaf .txt{gap:4px;flex:1}.desaf .btn{width:auto;margin-top:4px}
 .serie{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:var(--sombra)}.serie .txt{flex:1;gap:4px;align-items:stretch}.serie .pill{align-self:flex-start}.serie.off .se{filter:grayscale(1);opacity:.4}
@@ -648,7 +649,7 @@ Object.keys(by).forEach(function(k){var L=by[k];if(L.length<2)return;var pr=func
 function mesesAzul(){var v=+(CFG.orc&&CFG.orc.v)||0;if(!v)return 0;var ym=hojeISO().slice(0,7),de=CFG.orc.desde?String(CFG.orc.desde).slice(0,7):"",gm={};
 NM().forEach(function(n){var m=n.data.slice(0,7);if(m<ym&&(!de||m>=de))gm[m]=(gm[m]||0)+pago(n)});return Object.keys(gm).filter(function(m){return gm[m]<=v}).length}
 /* Correções que a pessoa já fez e que deixam os dados do app mais certos. */
-function ajudaN(){var c=CFG,n=(c.juntar||[]).length+Math.ceil((c.nao||[]).length/2)+Object.keys(c.saltos||{}).length+Object.keys(c.cats||{}).length+Object.keys(c.cods||{}).length+Object.keys(c.nomes||{}).length+Object.keys(c.tipos||{}).length;
+function ajudaN(){var c=CFG,n=(c.juntar||[]).length+Math.ceil((c.nao||[]).length/2)+Object.keys(c.saltos||{}).length+Object.keys(c.cats||{}).length+Object.keys(c.nomes||{}).length+Object.keys(c.tipos||{}).length;
 n+=Object.keys(c.apelidos||{}).filter(function(k){return k.length!=8}).length;N.forEach(function(nt){nt.itens.forEach(function(it){if(+it.cx>=1)n++})});return n}
 var SERIES=[
 {id:"notas",c:"#0A7347",e:"🧾",t:"Colecionador de notas",u:["nota cadastrada","notas cadastradas"],n:[1,10,25,50,100,200,365]},
@@ -659,6 +660,7 @@ var SERIES=[
 {id:"azul",c:"#2563eb",e:"💙",t:"Mês no azul",u:["mês dentro do orçamento","meses dentro do orçamento"],n:[1,3,6,12]},
 {id:"lista",c:"#6d28d9",e:"📝",t:"Lista na mão",u:["compra fechada com a lista","compras fechadas com a lista"],n:[1,5,15,30]},
 {id:"var",c:"#4d7c0f",e:"🛒",t:"Despensa variada",u:["produto diferente","produtos diferentes"],n:[25,100,250,500]},
+{id:"cod",c:"#4338ca",e:"📦",t:"Leitor de códigos",u:["código de barras ligado","códigos de barras ligados"],n:[5,15,40,100,250]},
 {id:"aj",c:"#57534e",e:"🛠️",t:"Ajudante do app",u:["correção feita","correções feitas"],n:[1,10,25,50,100]},
 {id:"fam",c:"#b91c1c",e:"👨‍👩‍👧",t:"Em família",u:["grupo da família","grupo da família"],n:[1]}];
 /* Desenho do selo: insígnia redonda com borda recortada, na cor da série, com o desenho no meio e uma fita com o nível. Sem nível ganho, fica cinza. */
@@ -678,7 +680,7 @@ var NSELOS=SERIES.reduce(function(t,s){return t+s.n.length},0);
 function serieVal(id){var c=CFG.conq||{};switch(id){
 case"notas":return NM().length;case"merc":var mk={};NM().forEach(function(n){mk[sk(n)]=1});return Object.keys(mk).length;
 case"cac":return ECO?ECO.abx:0;case"eco":return ECO?ECO.save:0;case"troca":return trocaN();case"azul":return mesesAzul();
-case"lista":return+c.lista||0;case"var":return Object.keys(G).length;case"aj":return ajudaN();
+case"lista":return+c.lista||0;case"var":return Object.keys(G).length;case"cod":return Object.keys(CFG.cods||{}).length;case"aj":return ajudaN();
 case"fam":try{return window.appNoGrupo&&appNoGrupo()?1:0}catch(e){return 0}}return 0}
 function qtdTxt(S,v){if(S.id=="fam")return v>=1?"Você está num grupo da família":"Entre num grupo da família, pelo carrinho do topo";return S.r?"R$ "+R2(v)+" "+(v==1?S.u[0]:S.u[1]):(Math.floor(v)+" "+(Math.floor(v)==1?S.u[0]:S.u[1]))}
 function serieNivel(S,v){var k=0;S.n.forEach(function(x){if(v>=x)k++});return k}
@@ -708,6 +710,7 @@ var semNome=Object.keys(ST).filter(function(s){var r=raiz(s);return/^\d{14}$/.te
 if(semNome.length)L.push({e:"🏪",t:"Dê o nome popular dos mercados",d:pl(semNome.length,"mercado aparece","mercados aparecem")+" com o nome da nota fiscal, como “"+esc(sn(semNome[0]))+"”. Coloque o nome que você conhece.",b:"Dar nome",a:"dmerc"});
 var out=Object.keys(G).filter(function(k){return catG(G[k])<0}).sort(function(a,b){return G[b].occ.length-G[a].occ.length});
 if(out.length)L.push({e:"🏷️",t:"Escolha a categoria",d:pl(out.length,"produto está","produtos estão")+" em “Outros”. Com a categoria certa, o gasto por período fica mais claro. Comece por: "+esc(G[out[0]].nv||G[out[0]].nm)+".",b:"Escolher",a:"dcat",k:out[0]});
+var nu=lcUltima(),lf=nu&&!ehFarm(nu)?lcFalta(nu):null;if(lf&&lf.f>=3)L.push({e:"📦",t:"Ligue os códigos da sua última compra",d:"Faltam "+lf.f+" de "+lf.t+" produtos do "+sn(sk(nu))+" de "+dl(nu.data)+". Leia o código de barras de cada um em casa: depois, no mercado, o código abre direto o produto. Conta para o selo Leitor de códigos.",b:"Ligar",a:"dcod"});
 if(!(+(CFG.orc&&CFG.orc.v)))L.push({e:"🎯",t:"Defina um orçamento",d:"Com um orçamento, o app mostra quanto já foi no mês e você pode ganhar os selos de Mês no azul.",b:"Definir",a:"dorc"});
 return L}
 function mesAno(d){return MESF[+d.slice(5,7)-1]+" de "+d.slice(0,4)}
@@ -802,6 +805,31 @@ h+='<table>'+o.map(function(x){return'<tr><td>Opção '+(x.i+1)+' · '+tam(x)+' 
 var big=o.filter(function(x){return x.s==S})[0],ex=[];o.forEach(function(x){if(x===big)return;var n=Math.round(S/x.s);if(n>=2&&Math.abs(n*x.s-S)/S<=.1)ex.push(n+' de '+tam(x)+' ('+fq(n*x.s,bs)+') saem R$ '+R2(n*x.p));else ex.push('na opção '+(x.i+1)+', '+fq(S,bs)+' sairiam R$ '+R2(x.pe*S))});
 if(ex.length)h+='<p class="small">Na prática, para levar '+fq(S,bs)+': '+ex.join("; ")+'; 1 de '+tam(big)+' sai R$ '+R2(big.p)+'.</p>';return h}
 
+/* ---------- Ligar os códigos de barras de uma compra ----------
+   Em casa, com a sacola: a pessoa lê o código de cada produto e toca no item da nota. Muitos mercados de MG usam código interno na nota,
+   então é assim que o código da embalagem passa a abrir o produto direto no mercado. Produto por peso não tem código fixo e fica de fora. */
+var LCN=null,LCE="";
+function lcLig(){var o={};Object.keys(CFG.cods||{}).forEach(function(e){o[CFG.cods[e]]=e});return o}
+function lcCod(g,lig){if(Object.keys(g.bases).some(function(b){return b.indexOf("e:")===0}))return true;lig=lig||lcLig();return tpBases(g).some(function(b){return lig[b]})}
+function lcItens(n){var vis={},lig=lcLig(),o=[];(n.itens||[]).forEach(function(it,i){if(uu(it)=="kg")return;var g=gOf(n,i);if(!g||vis[g.k])return;vis[g.k]=1;o.push({g:g,ok:lcCod(g,lig)})});return o}
+function lcFalta(n){var L=lcItens(n);return{t:L.length,f:L.filter(function(x){return!x.ok}).length}}
+function lcUltima(){var L=NM().slice().sort(function(a,b){return a.data<b.data?1:a.data>b.data?-1:0});return L[0]||null}
+function lcNome(g){return esc(g.nv||g.nm)}
+function lcCard(n){if(ehFarm(n))return"";var r=lcFalta(n);if(!r.t||!r.f)return"";
+return'<div class="card lc-oferta"><h3 style="margin:0">📦 Ligar os códigos de barras desta compra</h3><p class="soft small">Faltam '+r.f+' de '+r.t+' produtos. Leia o código de cada um em casa: depois, no mercado, o código abre direto o produto.</p><div class="lc-bar" aria-hidden="true"><i style="width:'+Math.round((r.t-r.f)/r.t*100)+'%"></i></div><button type="button" class="btn sm" data-act="lcabre" data-id="'+esc(n.id)+'">Ligar códigos</button></div>'}
+function vlc(){var n=byId(LCN);if(!n){V="n";return vn()}var L=lcItens(n),ok=L.filter(function(x){return x.ok}).length,pend=L.filter(function(x){return!x.ok});
+var h='<button type="button" class="link back" data-act="lcvolta">‹ Voltar para a nota</button><div class="card"><h2 style="margin:0">Ligar códigos de barras</h2><p class="soft small">'+esc(sn(sk(n)))+' · '+dl(n.data)+'</p>';
+h+='<div class="lc-prog"><b>'+ok+' de '+L.length+'</b> produtos ligados</div><div class="lc-bar" aria-hidden="true"><i style="width:'+(L.length?Math.round(ok/L.length*100):0)+'%"></i></div>';
+if(LCE){h+='<div class="status ok">Código <b>'+esc(LCE)+'</b> lido. Qual destes produtos é?</div>';
+h+=pend.length?'<div class="list">'+pend.map(function(x){return'<button type="button" class="row" data-act="lcpick" data-k="'+esc(x.g.k)+'"><span class="txt"><span class="t">'+lcNome(x.g)+'</span><span class="soft small">Na nota: '+esc(x.g.nm)+'</span></span><span class="r" aria-hidden="true">›</span></button>'}).join("")+'</div>':'<p class="small">Todos os produtos desta nota já estão ligados.</p>';
+h+='<button type="button" class="btn sm line" data-act="lcx">Não é nenhum destes</button></div>';return h}
+if(pend.length)h+='<button type="button" class="btn" data-act="lcbc">'+BARS+'Ler código de barras</button><details class="lc-dig"><summary>Digitar os números</summary><div class="two"><input type="text" id="lcm" inputmode="numeric" autocomplete="off" placeholder="7891234567890" aria-label="Números do código de barras"><button type="button" class="btn sm" data-act="lcmanual">Ligar</button></div></details>';
+else h+='<div class="status ok"><b>Pronto!</b> Todos os produtos desta compra estão ligados. No mercado, é só ler o código para ver quanto você pagou.</div>';
+if(pend.length)h+='<h3>Faltam</h3><div class="list">'+pend.map(function(x){return'<div class="item"><span class="txt"><b>'+lcNome(x.g)+'</b></span><span class="pill gray">sem código</span></div>'}).join("")+'</div>';
+var feitos=L.filter(function(x){return x.ok});if(feitos.length)h+='<h3>Ligados</h3><div class="list">'+feitos.map(function(x){return'<div class="item"><span class="txt"><b>'+lcNome(x.g)+'</b></span><span class="pill ok">✓ ligado</span></div>'}).join("")+'</div>';
+return h+'<p class="soft small">Frutas, carnes e outros produtos vendidos por peso não têm código fixo e ficam de fora.</p></div>'}
+/* Código lido nesta tela: se já abre um produto, só avisa; senão, pede para escolher o item da nota. */
+function lcLido(e2){var g=bcProd(e2);if(g){toast("Esse código já está ligado a "+(g.nv||g.nm)+".");LCE=""}else LCE=e2;V="lc";render();window.scrollTo(0,0)}
 /* ---------- Modo mercado (aba Lista): consulta pelo código ---------- */
 var LP=null,BCFROM="";
 function lpHtml(){var g=LP&&G[LP.k];if(!g)return"";var l=g.last,b=cheapest(g),ja=CFG.lista.filter(function(x){return lg(x)===g})[0];
@@ -815,7 +843,7 @@ var BC=null,BCQ="";
 function eanNorm(c){c=dig(c);if(c.length==12)c="0"+c;var i13=inner13(c);if(i13)return i13;if(c.length==14&&c[0]=="0")c=c.slice(1);return eanOk(c)?c:""}
 function bcProd(e){var b="e:"+e;if(PAR[b]!==undefined&&G[fnd(b)])return G[fnd(b)];var m=(CFG.cods||{})[e];if(m&&PAR[m]!==undefined&&G[fnd(m)])return G[fnd(m)];return null}
 function bcBtn(){return'<button type="button" class="row" data-act="bc"><span class="txt"><span class="t">Consultar pelo código de barras</span><span class="soft small">Leia o código do produto na prateleira e veja quanto você pagou da última vez</span></span><span class="r" aria-hidden="true" style="font-size:22px">›</span></button>'}
-function bcAbrir(e){var e2=eanNorm(e);if(!e2){BC={ean:"",cands:[],busy:false,erro:dig(e)};V="bc";render();return}
+function bcAbrir(e){var e2=eanNorm(e);if(BCFROM=="c"){if(e2)lcLido(e2);else{toast("Não li um código de barras válido. Tente de novo ou digite os números.");V="lc";render()}return}if(!e2){BC={ean:"",cands:[],busy:false,erro:dig(e)};V="bc";render();return}
 var g=bcProd(e2);BC={ean:e2,k:g?g.k:null,nome:"",cands:[],busy:!g};BCQ="";if(g&&BCFROM=="v"){VTK={k:g.k,b:tpBases(g)[0],n:g.nm,c:e2};V="vt";render();window.scrollTo(0,0);setTimeout(function(){var x=document.getElementById("vtp");if(x)x.focus()},50);return}if(g){if(BCFROM=="l"){LP={k:g.k,ean:e2,v:0};V="l";render();window.scrollTo(0,0);setTimeout(function(){var x=document.getElementById("lpv");if(x)x.focus()},50);return}PK=g.k;V="pd";render();window.scrollTo(0,0);return}V="bc";render();window.scrollTo(0,0);bcNome(e2)}
 /* Bases públicas e grátis, na ordem: alimentos, depois limpeza e outros, depois higiene. Só o código de barras sai do aparelho. */
 var BCBASES=["https://world.openfoodfacts.org","https://world.openproductsfacts.org","https://world.openbeautyfacts.org"];
@@ -934,13 +962,13 @@ if(v=="new"&&!DR){DR=blank();THUMBS=[];MSG={t:"",k:""};MODE=window.APP?"chave":"
 /* Topo: saudação pela hora do celular, com o nome que a pessoa escolheu, e o nome da aba. */
 function saudacao(){var h=new Date().getHours();return h>=5&&h<12?"Bom dia":h>=12&&h<18?"Boa tarde":"Boa noite"}
 function meuNome(){return String((CFG.perfil&&CFG.perfil.nome)||"").trim()}
-function cabecalho(){var t={m:"De Olho no Carrinho",n:"Notas",nd:"Nota",p:"Produtos",pd:"Produto",cm:"Comparar marcas",cmd:"Comparar marcas",bc:"Código de barras",gm:"Gasto por período",l:"Lista",nt:"Notícias",cfg:"Configurações",cq:"Conquistas",vt:"Preços anotados","new":DR&&DR.id?"Editar nota":"Nova nota"}[V]||"De Olho no Carrinho",a=document.getElementById("ttl"),b=document.getElementById("saud"),nm=meuNome();
+function cabecalho(){var t={m:"De Olho no Carrinho",n:"Notas",nd:"Nota",p:"Produtos",pd:"Produto",cm:"Comparar marcas",cmd:"Comparar marcas",bc:"Código de barras",gm:"Gasto por período",l:"Lista",nt:"Notícias",cfg:"Configurações",cq:"Conquistas",vt:"Preços anotados",lc:"Códigos da compra","new":DR&&DR.id?"Editar nota":"Nova nota"}[V]||"De Olho no Carrinho",a=document.getElementById("ttl"),b=document.getElementById("saud"),nm=meuNome();
 if(a)a.textContent=t;if(b)b.textContent=saudacao()+(nm?", "+nm.split(" ")[0]:"")}
 var PFE=false;
 function nomeCard(){if(meuNome()||(CFG.perfil&&CFG.perfil.pulou)||!N.length)return"";return'<div class="card" style="border-color:var(--acc)"><h3 style="margin:0">Como você quer ser chamado?</h3><p class="soft small">Aparece no topo do app: “'+saudacao()+', …”.</p><input type="text" id="pfn" maxlength="30" autocomplete="given-name" placeholder="Seu nome"><div class="btns"><button type="button" class="btn sm" data-act="pfsave">Salvar</button><button type="button" class="btn sm line" data-act="pfno">Agora não</button></div></div>'}
 function render(){comp();conqCheck();cabecalho();
 ["m","n","p","l","new"].forEach(function(x){document.getElementById("n_"+x).setAttribute("aria-pressed",String(V==x||((V=="pd"||V=="cm"||V=="cmd")&&x=="p")||((V=="gm"||V=="cq")&&x=="m")||(V=="bc"&&x==(BCFROM=="l"||BCFROM=="v"?"l":"p"))||(V=="vt"&&x=="l")||(V=="nd"&&x=="n")))});
-document.getElementById("app").innerHTML=({vt:vvt,cq:vcq,cfg:vcfg,m:vm,n:vn,nd:vnd,p:vp,pd:vpd,cm:vcm,cmd:vcmd,bc:vbc,gm:vgm,l:vl,new:vnew})[V]();
+document.getElementById("app").innerHTML=({vt:vvt,lc:vlc,cq:vcq,cfg:vcfg,m:vm,n:vn,nd:vnd,p:vp,pd:vpd,cm:vcm,cmd:vcmd,bc:vbc,gm:vgm,l:vl,new:vnew})[V]();
 if(V=="new"&&MODE=="foto")checkAI()}
 function empty(t){return'<div class="card"><h2>'+t+'</h2><p class="soft">Cadastre a primeira nota de compra para começar. Dá para usar '+(window.APP?'o QR code da nota, o PDF da consulta':'a foto do cupom, a chave de acesso')+' ou digitar os itens.</p><button type="button" class="btn" data-act="tab" data-v="new">Cadastrar nota</button>'+(window.APP?'<button type="button" class="btn line" data-act="demo">Ver como funciona, com notas de exemplo</button><p class="soft small">Conta: '+esc(window.APP_EMAIL||'')+'</p><button type="button" class="btn line" data-act="sair">Sair da conta</button><button type="button" class="btn danger" data-act="excluirconta">Excluir minha conta</button>'+(window.appRodape?appRodape():'')+'':'')+'</div>'}
 
@@ -1047,7 +1075,7 @@ var h='<div class="card" style="border-color:var(--acc)"><h3 style="margin:0">Vo
 L.forEach(function(it){var g=lg(it),on=sel[it.id]!==false;h+='<div class="item"><button type="button" class="ck" role="checkbox" aria-checked="'+on+'" aria-label="Tirar '+esc(g.nv||g.nm)+' da lista" data-act="fcsel" data-id="'+esc(it.id)+'">'+(on?CHK:'')+'</button><span class="txt"><b>'+esc(g.nv||g.nm)+'</b></span></div>'});
 return h+'</div><div class="btns"><button type="button" class="btn sm" data-act="fcok"'+(nm?'':' aria-disabled="true"')+'>Tirar da lista ('+nm+')</button><button type="button" class="btn sm line" data-act="fcno">Agora não</button></div></div>'}
 function vnd(){var n=byId(SEL);if(!n){V="n";return vn()}
-var s=sk(n),h='<button type="button" class="link back" data-act="tab" data-v="n">‹ Voltar para notas</button>'+fechaCard(n)+'<div class="card"><div class="row flat"><span class="main"><span class="dot" style="background:'+storeColor(s)+'"></span><span class="t">'+esc(sn(s))+'</span></span></div><p class="soft small">'+esc(n.loja)+'</p><p class="soft">'+dl(n.data)+(n.hora?" às "+esc(n.hora):"")+(n.cnpj?" · CNPJ "+esc(n.cnpj):"")+'</p>'+(n.chave?'<p class="key">Chave '+esc(fmtChave(n.chave))+'</p>':'')+'<p class="soft small">Etiquetas</p>'+tagEditor(n.tags||[],"ntag")+'</div>';
+var s=sk(n),h='<button type="button" class="link back" data-act="tab" data-v="n">‹ Voltar para notas</button>'+fechaCard(n)+lcCard(n)+'<div class="card"><div class="row flat"><span class="main"><span class="dot" style="background:'+storeColor(s)+'"></span><span class="t">'+esc(sn(s))+'</span></span></div><p class="soft small">'+esc(n.loja)+'</p><p class="soft">'+dl(n.data)+(n.hora?" às "+esc(n.hora):"")+(n.cnpj?" · CNPJ "+esc(n.cnpj):"")+'</p>'+(n.chave?'<p class="key">Chave '+esc(fmtChave(n.chave))+'</p>':'')+'<p class="soft small">Etiquetas</p>'+tagEditor(n.tags||[],"ntag")+'</div>';
 var al=[];n.itens.forEach(function(it,i){var g=gOf(n,i);if(!g)return;var o=g.occ.filter(function(o){return o.n===n&&o.i===i})[0];if(o&&o.ch>1.1&&!o.sus)al.push(esc(g.nv||g.nm)+" ("+pc(o.ch)+")")});
 if(al.length)h+='<div class="status warn">Subiram mais de 10% desde a compra anterior: '+al.join(", ")+'.</div>';
 if(ASK)h+='<div class="card"><p><b>Usar o nome “'+esc(ASK.nome)+'” também nas outras '+ASK.outras+' compras deste produto?</b></p><div class="btns"><button type="button" class="btn sm" data-act="askall">Em todas as notas</button><button type="button" class="btn sm line" data-act="askone">Só nesta nota</button></div></div>';
@@ -1542,6 +1570,13 @@ else if(a=="lbc"){BCFROM="l";if(window.Android&&Android.lerCodigo){Android.lerCo
 else if(a=="lpx"){LP=null;BCFROM="";render()}
 else if(a=="lpadd"){var gp=LP&&G[LP.k];if(!gp)return;var ex2=CFG.lista.filter(function(x){return lg(x)===gp})[0];if(ex2){ex2.q=(num(ex2.q)||1)+(ex2.ok?1:0);ex2.ok=true;if(LP.v)ex2.pp=r2(LP.v)}else CFG.lista.push({id:uid(),b:gp.k,n:gp.nm,q:1,ok:true,pp:LP.v?r2(LP.v):0});saveCfg();LP=null;BCFROM="";render();toast("No carrinho.")}
 else if(a=="bc"){BCFROM="";if(window.Android&&Android.lerCodigo){Android.lerCodigo()}else if(camOk()){camAbrir("bc")}else{BC={ean:"",cands:[],busy:false};V="bc";render()}}
+else if(a=="lcabre"){LCN=d.id;LCE="";BCFROM="c";V="lc";render();window.scrollTo(0,0)}
+else if(a=="lcvolta"){LCE="";BCFROM="";V="nd";SEL=LCN;render();window.scrollTo(0,0)}
+else if(a=="lcbc"){BCFROM="c";LCE="";if(window.Android&&Android.lerCodigo){Android.lerCodigo()}else if(camOk()){camAbrir("bc")}else{var lm=document.querySelector(".lc-dig");if(lm){lm.open=true;var li=document.getElementById("lcm");if(li)li.focus()}}}
+else if(a=="lcmanual"){var lmi=document.getElementById("lcm");BCFROM="c";bcAbrir(lmi?lmi.value:"")}
+else if(a=="lcx"){LCE="";render()}
+else if(a=="lcpick"){var gk=G[d.k];if(!gk||!LCE)return;CFG.cods=CFG.cods||{};CFG.cods[LCE]=tpBases(gk)[0];LCE="";saveCfg();render();toast("Ligado: "+(gk.nv||gk.nm)+".")}
+else if(a=="dcod"){var nu=lcUltima();if(!nu)return;LCN=nu.id;LCE="";BCFROM="c";V="lc";render();window.scrollTo(0,0)}
 else if(a=="bcdigitar"){camFechar();BC={ean:"",cands:[],busy:false};V="bc";render();var bm0=document.getElementById("bcm");if(bm0)bm0.focus()}
 else if(a=="bcmanual"){var bm=document.getElementById("bcm");bcAbrir(bm?bm.value:"")}
 else if(a=="bcliga"){var gl=G[d.k];if(!gl||!BC)return;CFG.cods=CFG.cods||{};CFG.cods[BC.ean]=tpBases(gl)[0];saveCfg();BC.k=gl.k;if(BCFROM=="v"){VTK={k:gl.k,b:tpBases(gl)[0],n:gl.nm,c:BC.ean};V="vt"}else if(BCFROM=="l"){LP={k:gl.k,ean:BC.ean,v:0};V="l"}else{PK=gl.k;V="pd"}render();window.scrollTo(0,0);toast("Código ligado a "+gl.nm+". Da próxima vez abre direto.")}
