@@ -44,6 +44,8 @@
   window.appArquivo = function (r) { var e = document.getElementById("cm"); if (e) e.textContent = r === "ok" ? "Escolha onde salvar a planilha ou com quem compartilhar." : "Não consegui gerar a planilha."; };
   window.appVoltar = function () {
     if (document.getElementById("login")) return false;
+    if (V === "pd" && PDRET === "ct") { go("ct"); window.scrollTo(0, CTY); return true; }
+    if (V === "ct") { go("p"); return true; }
     if (V === "pd" || V === "cm" || V === "bc") { go("p"); return true; }
     if (V === "cmd") { go("cm"); return true; }
     if (V === "nd") { go("n"); return true; }
