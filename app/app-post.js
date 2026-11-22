@@ -3,7 +3,8 @@
    e recebe as respostas da parte Android (window.appQR, window.appPortal, window.appVoltar). */
 (function () {
   /* No celular Android o leitor de PDF vem junto no app; na versão para iPhone (site instalável) vem da internet. */
-  if (window.Android) { LIB.pdf = "lib/pdf.min.js"; LIB.pdfw = "lib/pdf.worker.min.js"; }
+  /* No Android e no iPhone, as peças de fora vêm junto com o app (pasta lib), conferidas pela impressão digital (LIBH). */
+  if (window.Android || window.LIBS_LOCAIS) { LIB.pdf = "lib/pdf.min.js"; LIB.pdfw = "lib/pdf.worker.min.js"; LIB.qr = "lib/jsQR.js"; LIB.zx = "lib/zxing.min.js"; }
   var QRU = null; // {ck, url}: endereço lido do QR code, usado na consulta se for da Fazenda de MG
   function temPonte(f) { return !!(window.Android && typeof Android[f] === "function"); }
 
@@ -44,6 +45,10 @@
   window.appArquivo = function (r) { var e = document.getElementById("cm"); if (e) e.textContent = r === "ok" ? "Escolha onde salvar a planilha ou com quem compartilhar." : "Não consegui gerar a planilha."; };
   window.appVoltar = function () {
     if (document.getElementById("login")) return false;
+    /* janela aberta por cima (orçamento, selo novo): o Voltar fecha a janela, sem trocar de tela */
+    var jan = document.querySelector("#orcsh, #celeb, .sheet-bg");
+    if (jan) { if (jan.id === "orcsh" && window.orcFecha) orcFecha(); else jan.remove(); return true; }
+    if (window.navVoltar && navVoltar()) return true; // volta pelo caminho que a pessoa fez
     if (V === "pd" && PDRET === "ct") { go("ct"); window.scrollTo(0, CTY); return true; }
     if (V === "ct") { go("p"); return true; }
     if (V === "pd" || V === "cm" || V === "bc") { go("p"); return true; }
@@ -107,11 +112,17 @@
     if (NTLOAD || typeof window.appNoticias !== "function" || !(window.appLogado && appLogado())) return;
     if (!forcar && (Date.now() - (NT.t || 0) < idade || Date.now() - NTERR < 60e3)) return;
     NTLOAD = true;
-    appNoticias(isoDias(35)).then(function (r) {
+    return appNoticias(isoDias(35)).then(function (r) {
       NTLOAD = false; NTERR = 0; NT = { t: Date.now(), rows: Array.isArray(r) ? r : [] }; lsS(K_NT, JSON.stringify(NT));
       if (V === "nt" || V === "m" || V === "pd" || V === "p") render();
     }, function () { NTLOAD = false; NTERR = Date.now(); if (V === "nt") render(); });
   }
+  /* Para os avisos no celular: busca as notícias e diz quais são de produtos que a pessoa compra. */
+  window.appNtCarregar = function () { return Promise.resolve(carregarNoticias(0, true)); };
+  window.appNtMeus = function () {
+    comp();
+    return { semana: semanaAtual(), itens: linhas().filter(function (r) { return r.tipo === "produto"; }).map(function (r) { return { r: r, ps: seusProdutos(r) }; }).filter(function (x) { return x.ps.length; }) };
+  };
   /* Só a semana mais recente vale. */
   function semanaAtual() { var s = ""; NT.rows.forEach(function (r) { if (r && r.semana > s) s = r.semana; }); return s; }
   function linhas() { var s = semanaAtual(); return NT.rows.filter(function (r) { return r && r.semana === s; }); }
@@ -152,6 +163,7 @@
   function vnt() {
     var L = linhas(), s = semanaAtual(), res = L.filter(function (r) { return r.tipo === "resumo"; })[0];
     var h = '<div class="card"><h2 style="margin:0">Por que os preços mudam</h2><p class="soft small">Resumo semanal feito pelo Claude com boletins da Conab, da CeasaMinas e pesquisas de preço de BH. ' + (s ? 'Semana de ' + dl(s) + '. ' : '') + 'A tendência é a dos boletins e não garante o preço no seu mercado.</p></div>';
+    if (window.descLista) h = descLista() + h; /* Suas descobertas (uma por semana, das notas da pessoa) */
     if (!L.length) {
       if (NTLOAD) return h + '<div class="status"><span class="spin" aria-hidden="true"></span>Carregando notícias…</div>';
       return h + '<div class="card"><p class="soft">Ainda não há notícias aqui. Elas chegam toda segunda-feira de manhã. Confira se o celular está com internet.</p><button type="button" class="btn sm line" data-act="ntrec">Tentar de novo</button></div>';
@@ -207,12 +219,13 @@
   render = function () {
     if (V === "nt") {
       comp();
+      if (window.descNova && descNova()) { CFG.desc.nt = CFG.desc.h[0].id; saveCfg(); }
       ["m", "n", "p", "l", "new"].forEach(function (x) { var e = document.getElementById("n_" + x); if (e) e.setAttribute("aria-pressed", "false"); });
       var a = document.getElementById("app"); if (a) a.innerHTML = vnt();
     } else render0();
     carregarNoticias(V === "nt" ? 30 * 60e3 : 3 * 3600e3);
     var b = document.getElementById("n_nt");
-    if (b) { b.setAttribute("aria-pressed", String(V === "nt")); var sw = semanaAtual(); b.classList.toggle("novo", !!sw && V !== "nt" && lsG(K_NTV) !== sw); }
+    if (b) { b.setAttribute("aria-pressed", String(V === "nt")); var sw = semanaAtual(); b.classList.toggle("novo", V !== "nt" && ((!!sw && lsG(K_NTV) !== sw) || !!(window.descNova && descNova()))); }
     if (V === "nt" && window.cabecalho) cabecalho();
   };
   document.addEventListener("click", function (ev) { var b = ev.target.closest('[data-act="ntrec"]'); if (b) { carregarNoticias(0, true); render(); } });
@@ -244,8 +257,11 @@
   }
   var vm1 = vm;
   vm = function () {
+    var temNova = !!(NOVA && lsG(K_VF) !== String(NOVA.codigo));
+    window.AVISO_OCUPADO = temNova; /* com o aviso de versão nova, os outros avisos do topo esperam */
     var h = vm1();
-    if (NOVA && lsG(K_VF) !== String(NOVA.codigo)) {
+    window.AVISO_OCUPADO = false;
+    if (temNova) {
       var u = /^https:\/\//.test(NOVA.url || "") ? NOVA.url : "";
       h = '<div class="card" style="border-color:var(--acc)"><p><b>Saiu a versão ' + esc(NOVA.versao) + ' do app.</b> ' + (NOVA.mensagem ? esc(NOVA.mensagem) + ' ' : '') + (u ? '' : 'Peça o arquivo novo a quem te enviou o app.') + '</p>' +
         '<div class="btns">' + (u ? '<a class="btn sm" href="' + esc(u) + '">Baixar a versão nova</a>' : '') + '<button type="button" class="btn sm line" data-act="verfecha">Agora não</button></div></div>' + h;
@@ -349,8 +365,9 @@
       FAM = Array.isArray(rows) ? rows : []; T = Date.now(); guardar(); if (V === "m" || V === "pd" || V === "l" || V === "cmd" || V === "cfg") render();
     }, function () { if (FI === undefined) { FI = null; if (V === "m" || V === "cfg") render(); } });
   }
+  window.appFamAtualizar = function () { return atualizar(true); };
   function quando(iso) { var d = new Date(iso); if (isNaN(d)) return ""; return ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2) + " às " + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); }
-  var PRIV = 'O grupo vê só os preços e produtos dos últimos 3 meses, sem saber quem comprou. Suas notas, seus gastos e o que você compra junto continuam só com você.';
+  var PRIV = 'O grupo vê só o preço de cada produto por mercado e por semana, dos últimos 3 meses, sem saber quem comprou nem a quantidade. Suas notas, seus gastos e o que você compra junto continuam só com você.';
   function aviso2(n) { return n <= 2 ? '<p class="soft small">Num grupo de 2 pessoas, a outra pode deduzir que o preço é seu.</p>' : ''; }
   function msgHtml() { return FMSG ? '<div class="status' + (FMSG.k ? " " + FMSG.k : "") + '" role="status">' + esc(FMSG.t) + '</div>' : ''; }
   function card() {
@@ -436,4 +453,171 @@
   });
   (function primeiro() { if (!appUid()) { setTimeout(primeiro, 3000); return; } atualizar(FI === undefined || !T); })();
   document.addEventListener("visibilitychange", function () { if (!document.hidden) atualizar(false); });
+})();
+
+
+/* ---------- Avisos no celular (só no Android) ----------
+   O próprio celular confere e avisa: uma vez na hora marcada, o Android abre o app escondido, o app olha as notas,
+   as notícias e os preços do grupo e diz o que avisar. Nada sai do celular para isso, e não há serviço novo.
+   Os avisos começam desligados; a pessoa liga cada um em Configurações. O que já foi avisado fica guardado
+   neste celular (mn_av_env), para não repetir. */
+(function () {
+  if (!(window.Android && typeof Android.agendarAvisos === "function")) return;
+  var K_ENV = "mn_av_env", DIAS = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+  var TIPOS = [
+    { k: "nt", t: "Notícias da semana", d: "Na segunda de manhã, a tendência de preço dos produtos que você compra." },
+    { k: "rp", t: "Pode estar acabando", d: "No dia e na hora que você escolher, o que pode estar acabando em casa." },
+    { k: "fam", t: "Mais barato no grupo", d: "Quando alguém do grupo da família pagou menos num produto que você compra." },
+    { k: "lb", t: "Lembrete de cadastrar nota", d: "Se passar 7 dias sem nota nova." }
+  ];
+  function lsG(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsS(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function cfg() {
+    var a = CFG.avisos && typeof CFG.avisos === "object" ? CFG.avisos : {};
+    if (!(a.rpDia >= 0 && a.rpDia <= 6)) a.rpDia = 6;
+    if (!/^\d{2}:\d{2}$/.test(a.rpHora || "")) a.rpHora = "09:00";
+    return a;
+  }
+  function algum(a) { return TIPOS.some(function (x) { return a[x.k]; }); }
+  function enviados() { try { return JSON.parse(lsG(K_ENV) || "{}") || {}; } catch (e) { return {}; } }
+  function hm(t) { var p = String(t).split(":"); return [+p[0] || 0, +p[1] || 0]; }
+  function hojeD() { var d = new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+  /* Próxima vez (em milissegundos) em que o dia da semana "dia" (ou todo dia, se nulo) chega na hora "h:m". */
+  function proxima(dia, h, m, agora) {
+    var d = new Date(agora); d.setSeconds(0, 0); d.setHours(h, m);
+    for (var i = 0; i < 8; i++) { if (d.getTime() > agora + 60e3 && (dia == null || d.getDay() === dia)) return d.getTime(); d.setDate(d.getDate() + 1); d.setHours(h, m); }
+    return 0;
+  }
+  window.appAvisosProximo = function (agora) {
+    agora = agora || Date.now();
+    var a = cfg(), t = [];
+    if (a.nt) t.push(proxima(1, 9, 0, agora));
+    if (a.rp) { var r = hm(a.rpHora); t.push(proxima(a.rpDia, r[0], r[1], agora)); }
+    if (a.fam || a.lb) t.push(proxima(null, 19, 0, agora));
+    t = t.filter(function (x) { return x > 0; });
+    return t.length ? Math.min.apply(null, t) : 0;
+  };
+  function agendar() { try { Android.agendarAvisos(JSON.stringify({ proximo: window.appAvisosProximo() })); } catch (e) {} }
+  function lista(nomes) { var n = nomes.slice(0, 3).join(", "); return nomes.length > 3 ? n + " e mais " + (nomes.length - 3) : n; }
+  function nomeG(g) { return g.nv || g.nm; }
+
+  /* O que avisar agora. "agora" e "env" (o que já foi avisado) são parâmetros para os testes. */
+  window.appAvisosCalc = function (agora, env) {
+    agora = agora || Date.now(); env = env || enviados();
+    var a = cfg(), out = [], d = new Date(agora), hoje = hojeD(), min = d.getHours() * 60 + d.getMinutes();
+    comp();
+    /* Notícias da semana: na segunda a partir das 9h (ou na primeira conferência depois), uma vez por semana. */
+    if (a.nt && window.appNtMeus) {
+      var nt = appNtMeus();
+      if (nt.semana && env.nt !== nt.semana && nt.itens.length) {
+        var t = { desce: "tende a baixar", sobe: "tende a subir", estavel: "estável" };
+        var frases = nt.itens.map(function (x) { return x.r.produto + (t[x.r.tendencia] ? " " + t[x.r.tendencia] : ""); });
+        out.push({ id: "nt", marca: nt.semana, titulo: "Notícias de preço da semana", texto: lista(frases) + ".", tela: "nt" });
+      }
+    }
+    /* Pode estar acabando: no dia e hora escolhidos, uma vez por dia. */
+    if (a.rp && d.getDay() === a.rpDia && min >= hm(a.rpHora)[0] * 60 + hm(a.rpHora)[1] && env.rp !== hoje && window.rpPend) {
+      var P = rpPend();
+      if (P.length) out.push({ id: "rp", marca: hoje, titulo: P.length == 1 ? "1 item pode estar acabando" : P.length + " itens podem estar acabando", texto: lista(P.map(function (e) { return nomeG(e.g); })) + ". Toque para revisar.", tela: "rp" });
+    }
+    /* Mais barato no grupo: preço do grupo das últimas 2 semanas pelo menos 3% abaixo do que você pagou da última vez. */
+    if (a.fam) {
+      var cut = new Date(agora - 14 * 864e5), cutS = cut.getFullYear() + "-" + ("0" + (cut.getMonth() + 1)).slice(-2) + "-" + ("0" + cut.getDate()).slice(-2), novos = [], marcas = {};
+      Object.keys(G).forEach(function (k) {
+        var g = G[k]; if (!g.fam || !g.last || !(g.last.pu > 0)) return;
+        Object.keys(g.fam).forEach(function (st) {
+          var f = g.fam[st]; if (!(f.p > 0) || f.d < cutS || f.p > g.last.pu * 0.97) return;
+          var mk = k + "|" + st + "|" + f.p; marcas[mk] = 1;
+          if (!(env.fam || {})[mk]) novos.push({ g: g, s: st, f: f });
+        });
+      });
+      if (novos.length) {
+        novos.sort(function (x, y) { return (x.f.p / x.g.last.pu) - (y.f.p / y.g.last.pu); });
+        var b = novos[0];
+        out.push({ id: "fam", marca: marcas, titulo: novos.length == 1 ? "Mais barato no grupo" : novos.length + " produtos mais baratos no grupo",
+          texto: nomeG(b.g) + ": R$ " + R2(b.f.p) + " no " + sn(b.s) + " (você pagou R$ " + R2(b.g.last.pu) + ")" + (novos.length > 1 ? " e mais " + (novos.length - 1) : "") + ".", tela: "p" });
+      }
+    }
+    /* Lembrete: 7 dias ou mais desde a última nota, uma vez para cada última nota. */
+    if (a.lb && NM().length) {
+      var ult = NM().reduce(function (x, n) { return n.data > x ? n.data : x; }, "");
+      var dias = Math.floor((new Date(hoje + "T12:00").getTime() - new Date(ult + "T12:00").getTime()) / 864e5);
+      if (dias >= 7 && env.lb !== ult) out.push({ id: "lb", marca: ult, titulo: "Fez compras esta semana?", texto: "Faz " + dias + " dias sem nota nova. Cadastre a nota para acompanhar seus preços.", tela: "new" });
+    }
+    return out;
+  };
+  /* Guarda o que foi avisado (o celular chama depois de mostrar). */
+  function marcar(lista) {
+    var env = enviados();
+    lista.forEach(function (x) { env[x.id] = x.marca; });
+    lsS(K_ENV, JSON.stringify(env));
+  }
+
+  /* Conferência escondida: o Android abre o app com ?avisos=1, espera os dados e recebe a lista. */
+  if (/[?&]avisos=1/.test(location.search)) {
+    var fim = false;
+    var entregar = function () {
+      if (fim) return; fim = true;
+      var L = [];
+      try { L = window.appAvisosCalc(); marcar(L); } catch (e) { L = []; }
+      try { Android.avisosPronto(JSON.stringify({ lista: L.map(function (x) { return { id: x.id, titulo: x.titulo, texto: x.texto, tela: x.tela }; }), proximo: window.appAvisosProximo() })); } catch (e) {}
+    };
+    var a0 = cfg(), espera = [];
+    var t0 = Date.now();
+    var conta = new Promise(function (ok) { (function v() { if (window.DB || Date.now() - t0 > 20000) ok(); else setTimeout(v, 300); })(); });
+    espera.push(conta);
+    if (a0.nt && window.appNtCarregar) espera.push(conta.then(function () { return appNtCarregar(); }));
+    if (a0.fam && window.appFamAtualizar) espera.push(conta.then(function () { return appFamAtualizar(); }));
+    Promise.all(espera.map(function (p) { return p.catch(function () {}); })).then(entregar);
+    setTimeout(entregar, 45000);
+    return;
+  }
+
+  /* Abrir pela notificação: o Android chama com a tela do aviso. */
+  window.appAbrirTela = function (t) {
+    if (!t) return;
+    if (t === "rp") { go("l"); var b = document.querySelector('[data-act="rpv"]'); if (b) b.click(); return; }
+    go(t);
+  };
+
+  /* Configurações: um quadro com os quatro avisos. */
+  var PERM = null;
+  window.appAvisoPerm = function (ok) {
+    PERM = !!ok;
+    if (!ok && PERM_PEND) { var a = cfg(); a[PERM_PEND] = false; CFG.avisos = a; saveCfg(); toast("Sem permissão, o celular não mostra avisos. Dá para liberar nas configurações do Android."); }
+    PERM_PEND = null; agendar(); if (V === "cfg") render();
+  };
+  var PERM_PEND = null;
+  function quadro() {
+    var a = cfg(), h = '<div class="card" id="avisos"><h3 style="margin:0">Avisos no celular</h3><p class="soft small">O próprio celular confere e avisa, sem serviço novo. Começam desligados: ligue só o que quiser.</p>';
+    TIPOS.forEach(function (x) {
+      h += '<button type="button" class="swl" role="switch" aria-checked="' + !!a[x.k] + '" data-act="avtg" data-k="' + x.k + '"><span><b>' + x.t + '</b><br><span class="soft small">' + x.d + '</span></span><span class="sw0" aria-hidden="true"><i></i></span></button>';
+      if (x.k === "rp" && a.rp) {
+        h += '<div class="row flat" style="gap:8px"><label class="f" style="flex:1">Dia<select id="av_dia" data-act="avdia">' + DIAS.map(function (n, i) { return '<option value="' + i + '"' + (i === a.rpDia ? ' selected' : '') + '>' + n + '</option>'; }).join("") + '</select></label>' +
+          '<label class="f" style="flex:1">Hora<input type="time" id="av_hora" style="min-height:50px" value="' + esc(a.rpHora) + '"></label></div>';
+      }
+    });
+    if (algum(a)) { var p = window.appAvisosProximo(); if (p) { var dd = new Date(p); h += '<p class="soft small">Próxima conferência: ' + DIAS[dd.getDay()] + ', ' + ("0" + dd.getHours()).slice(-2) + ':' + ("0" + dd.getMinutes()).slice(-2) + '. Notícias às 9h de segunda; grupo e lembrete às 19h.</p>'; } }
+    return h + '</div>';
+  }
+  var vcfg0 = vcfg;
+  vcfg = function () {
+    var h = vcfg0(), i = h.indexOf('<div class="card"><h3 style="margin:0">Seus dados</h3>');
+    return i >= 0 ? h.slice(0, i) + quadro() + h.slice(i) : h + quadro();
+  };
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest('[data-act="avtg"]'); if (!b) return;
+    var k = b.getAttribute("data-k"), a = cfg(); a[k] = !a[k]; CFG.avisos = a; saveCfg();
+    if (a[k]) { PERM_PEND = k; try { Android.pedirAvisos(); } catch (e) { PERM_PEND = null; } }
+    agendar(); render();
+  });
+  document.addEventListener("change", function (ev) {
+    var t = ev.target; if (!t || (t.id !== "av_dia" && t.id !== "av_hora")) return;
+    var a = cfg();
+    if (t.id === "av_dia") a.rpDia = +t.value;
+    if (t.id === "av_hora" && /^\d{2}:\d{2}$/.test(t.value)) a.rpHora = t.value;
+    CFG.avisos = a; saveCfg(); agendar(); render();
+  });
+  /* Toda vez que o app abre, reagenda (a configuração pode ter mudado em outro aparelho). */
+  setTimeout(agendar, 3000);
 })();
