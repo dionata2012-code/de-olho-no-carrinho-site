@@ -1,5 +1,5 @@
 /* De Olho no Carrinho: cópia do app para abrir sem internet (gerado por build_pwa.py). */
-var CACHE = "deolho-549e23269a", ARQ = ["./", "index.html", "manifest.webmanifest", "icone-180.png", "icone-192.png", "icone-512.png", "app-pre.js?v=e3ee4e0a", "app-post.js?v=70fef6a1", "fontes/inter-bold.woff", "fontes/inter-medium.woff", "fontes/inter-regular.woff", "fontes/inter-semibold.woff", "fontes/sora.woff", "lib/jsQR.js", "lib/pdf.min.js", "lib/pdf.worker.min.js", "lib/zxing.min.js"];
+var CACHE = "deolho-52129fc193", ARQ = ["./", "index.html", "manifest.webmanifest", "icone-180.png", "icone-192.png", "icone-512.png", "app-pre.js?v=54008590", "app-post.js?v=ea7a6f02", "fontes/inter-bold.woff", "fontes/inter-medium.woff", "fontes/inter-regular.woff", "fontes/inter-semibold.woff", "fontes/sora.woff", "lib/jsQR.js", "lib/pdf.min.js", "lib/pdf.worker.min.js", "lib/zxing.min.js"];
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(ARQ); }).then(function () { return self.skipWaiting(); }));
 });

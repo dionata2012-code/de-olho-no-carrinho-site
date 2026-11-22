@@ -462,7 +462,16 @@
    Os avisos começam desligados; a pessoa liga cada um em Configurações. O que já foi avisado fica guardado
    neste celular (mn_av_env), para não repetir. */
 (function () {
-  if (!(window.Android && typeof Android.agendarAvisos === "function")) return;
+  if (!(window.Android && typeof Android.agendarAvisos === "function")) {
+    /* iPhone: o app não manda avisos; um quadro curto explica, para ninguém ficar procurando. */
+    var vc = vcfg;
+    vcfg = function () {
+      var h = vc(), i = h.indexOf('<div class="card"><h3 style="margin:0">Seus dados</h3>');
+      var q = '<div class="card"><h3 style="margin:0">Avisos no celular</h3><p class="soft small">Por enquanto, os avisos (notícias da semana, o que pode estar acabando, preço mais barato no grupo e lembrete de nota) existem só no app Android. No iPhone o app não manda notificações.</p></div>';
+      return i >= 0 ? h.slice(0, i) + q + h.slice(i) : h + q;
+    };
+    return;
+  }
   var K_ENV = "mn_av_env", DIAS = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
   var TIPOS = [
     { k: "nt", t: "Notícias da semana", d: "Na segunda de manhã, a tendência de preço dos produtos que você compra." },
@@ -620,4 +629,122 @@
   });
   /* Toda vez que o app abre, reagenda (a configuração pode ter mudado em outro aparelho). */
   setTimeout(agendar, 3000);
+})();
+
+
+/* ---------- Registro de erros ----------
+   Quando algo falha, o app manda para a conta do dono do app (Supabase) só: versão, Android ou iPhone, a tela, o tipo do erro
+   e o lugar no código. Nunca nota, produto, CPF ou chave: qualquer sequência de 6 números ou mais vira #, e o texto é curto.
+   Começa ligado; a pessoa desliga em Configurações (CFG.relatorio.off). No máximo 5 por vez que o app abre, sem repetir. */
+(function () {
+  var ENV = {}, N_ENV = 0, VER = "";
+  try { VER = window.Android && Android.versao ? String(Android.versao()) : ""; } catch (e) { VER = ""; }
+  if (!VER) { var sc = document.querySelector('script[src*="app-post.js?v="]'); VER = sc ? "web-" + sc.getAttribute("src").split("v=")[1] : "web"; }
+  function ligado() { return !(CFG.relatorio && CFG.relatorio.off); }
+  function limpa(t, n) { return String(t || "").replace(/\d{6,}/g, "#").replace(/\s+/g, " ").trim().slice(0, n); }
+  function onde(arq, l, c) { var f = String(arq || "").split("?")[0].split("/").pop(); return limpa((f || "?") + ":" + (l || 0) + ":" + (c || 0), 80); }
+  function enviar(tipo, lugar) {
+    if (!ligado() || !window.appRegistrarErro || !(window.appLogado && appLogado()) || navigator.onLine === false) return;
+    tipo = limpa(tipo, 200);
+    if (!tipo || /^Script error\.?$|ResizeObserver loop/i.test(tipo)) return;
+    var k = tipo + "|" + lugar; if (ENV[k] || N_ENV >= 5) return; ENV[k] = 1; N_ENV++;
+    try { appRegistrarErro({ versao: VER, plataforma: window.Android ? "android" : "iphone", tela: String(window.V || ""), tipo: tipo, onde: lugar }).catch(function () {}); } catch (e) {}
+  }
+  window.appErroTeste = enviar; /* para os testes */
+  window.addEventListener("error", function (ev) {
+    if (!ev || ev.target !== window && ev.target && ev.target.tagName) return; /* falha de imagem ou script carregado: não é erro do app */
+    enviar(String(ev.message || (ev.error && ev.error.name) || "").replace(/^Uncaught\s+/, ""), onde(ev.filename, ev.lineno, ev.colno));
+  });
+  window.addEventListener("unhandledrejection", function (ev) {
+    var r = ev && ev.reason;
+    if (r && (r.code === "unavailable" || r.code === "offline" || r.code === "timeout" || r.code === "sem_sessao" || r.name === "AbortError")) return; /* sem internet não é erro do app */
+    var st = r && r.stack ? String(r.stack).split("\n")[1] || "" : "", m = st.match(/([^\/\s(]+\.(?:html|js))(?:\?[^:]*)?:(\d+):(\d+)/);
+    enviar("Promessa: " + (r && (r.name ? r.name + ": " : "") + (r.message || r.code || "") || String(r)), m ? onde(m[1], m[2], m[3]) : "promessa");
+  });
+  /* Configurações: chave para desligar. */
+  var vc = vcfg;
+  vcfg = function () {
+    var h = vc(), i = h.indexOf('<div class="card"><h3 style="margin:0">Seus dados</h3>');
+    var q = '<div class="card"><h3 style="margin:0">Relatório de erros</h3><button type="button" class="swl" role="switch" aria-checked="' + ligado() + '" data-act="relatg"><span><b>Enviar relatório de erros</b><br><span class="soft small">Quando algo falha, o app manda só o tipo do erro, a tela e a versão, para ser corrigido. Nunca suas notas, produtos ou CPF.</span></span><span class="sw0" aria-hidden="true"><i></i></span></button></div>';
+    return i >= 0 ? h.slice(0, i) + q + h.slice(i) : h + q;
+  };
+  document.addEventListener("click", function (ev) {
+    if (!ev.target.closest('[data-act="relatg"]')) return;
+    CFG.relatorio = CFG.relatorio || {}; if (ligado()) CFG.relatorio.off = 1; else delete CFG.relatorio.off;
+    saveCfg(); render(); toast(ligado() ? "Relatório de erros ligado." : "Relatório de erros desligado.");
+  });
+})();
+
+
+/* ---------- Códigos de barras compartilhados ----------
+   Com a chave ligada (CFG.compart.on, começa desligada), o app manda para a base do app só os pares
+   "código de barras -> nome do produto na nota": os códigos que vêm nas notas e os que a pessoa ligou à mão.
+   Sem mercado, preço, data nem quem mandou. Quando alguém lê um código que não está nas notas dele, o app pergunta
+   primeiro à base do app e depois às bases públicas (Open Food Facts...). Desligar apaga o que a pessoa mandou. */
+(function () {
+  if (!window.appCodigos) return;
+  var K = "mn_cod_env", BUSY = false;
+  function lsG(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsS(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function ligado() { return !!(CFG.compart && CFG.compart.on); }
+  function enviados() { try { var o = JSON.parse(lsG(K) || "null"); return o && o.uid === appUid() ? o : { uid: appUid(), k: {} }; } catch (e) { return { uid: appUid(), k: {} }; } }
+  /* Pares código -> nome: das notas (bases "e:") e das ligações feitas à mão (CFG.cods). */
+  window.appCodigosPares = function () {
+    comp();
+    var o = {};
+    Object.keys(G).forEach(function (k) {
+      var g = G[k]; if (g.v) return;
+      Object.keys(g.bases).forEach(function (b) { if (b.indexOf("e:") === 0 && eanOk(b.slice(2))) o[b.slice(2)] = g.nm; });
+    });
+    Object.keys(CFG.cods || {}).forEach(function (e) {
+      var b = CFG.cods[e], g = b && PAR[b] !== undefined ? G[fnd(b)] : null;
+      if (g && eanOk(e) && !g.v) o[e] = g.nm;
+    });
+    return Object.keys(o).map(function (e) { return { e: e, n: String(o[e]).slice(0, 120) }; });
+  };
+  async function sincronizar() {
+    if (BUSY || !ligado() || !(window.appLogado && appLogado()) || navigator.onLine === false) return 0;
+    BUSY = true;
+    var env = enviados(), novos = appCodigosPares().filter(function (x) { return env.k[x.e] !== x.n; }), total = 0;
+    try {
+      for (var i = 0; i < novos.length; i += 500) {
+        var parte = novos.slice(i, i + 500);
+        total += +(await appCodigos.enviar(parte)) || 0;
+        parte.forEach(function (x) { env.k[x.e] = x.n; });
+        lsS(K, JSON.stringify(env));
+      }
+    } catch (e) {}
+    BUSY = false;
+    return total;
+  }
+  window.appCodigosSincronizar = sincronizar;
+  /* Leitura de código: primeiro a base do app, depois as bases públicas. */
+  var bcNome0 = bcNome;
+  bcNome = async function (e) {
+    try {
+      var r = await appCodigos.buscar(e);
+      if (r && r.nome && BC && BC.ean === e) { BC.nome = String(r.nome); BC.cands = bcCands(BC.nome); BC.busy = false; if (V == "bc") render(); return; }
+    } catch (x) {}
+    if (BC && BC.ean === e) return bcNome0(e);
+  };
+  /* Configurações */
+  var vc = vcfg;
+  vcfg = function () {
+    var h = vc(), i = h.indexOf('<div class="card"><h3 style="margin:0">Seus dados</h3>'), n = appCodigosPares().length;
+    var q = '<div class="card"><h3 style="margin:0">Códigos de barras</h3><button type="button" class="swl" role="switch" aria-checked="' + ligado() + '" data-act="codtg"><span><b>Compartilhar meus códigos de barras</b><br><span class="soft small">Ajuda outras pessoas a achar o nome do produto pelo código. Vão só o código e o nome do produto na nota (' + n + ' agora), sem mercado, preço, data nem quem mandou. Desligar apaga o que você mandou.</span></span><span class="sw0" aria-hidden="true"><i></i></span></button></div>';
+    return i >= 0 ? h.slice(0, i) + q + h.slice(i) : h + q;
+  };
+  document.addEventListener("click", function (ev) {
+    if (!ev.target.closest('[data-act="codtg"]')) return;
+    CFG.compart = CFG.compart || {};
+    if (ligado()) {
+      CFG.compart.on = 0; saveCfg(); render();
+      appCodigos.apagar().then(function () { lsS(K, ""); toast("Desligado. O que você mandou foi apagado da base."); }, function () { toast("Sem conexão: tente desligar de novo com internet."); CFG.compart.on = 1; saveCfg(); render(); });
+    } else {
+      CFG.compart.on = 1; saveCfg(); render();
+      sincronizar().then(function (t) { toast(t ? "Obrigado! " + t + " códigos compartilhados." : "Ligado. Os códigos vão assim que houver internet."); });
+    }
+  });
+  setTimeout(sincronizar, 8000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) setTimeout(sincronizar, 3000); });
 })();

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-k21I3ElgFZgUNjsFMudK2rg/6+GULFMTMSsF6/BVTbg=' 'sha256-LJGqE2zEAYQ/UYKCKKd+ssCpaLEtcPh1w0Cfqjo9fG0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: blob:; connect-src 'self' data: blob: https://mcunapjixjgvwlsdpcjo.supabase.co https://world.openfoodfacts.org https://world.openproductsfacts.org https://world.openbeautyfacts.org; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-k21I3ElgFZgUNjsFMudK2rg/6+GULFMTMSsF6/BVTbg=' 'sha256-v0FQebXaA+Q1+sjPtafC2EA91AkNpHKIsesU7e8P7m0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: blob:; connect-src 'self' data: blob: https://mcunapjixjgvwlsdpcjo.supabase.co https://brasilapi.com.br https://world.openfoodfacts.org https://world.openproductsfacts.org https://world.openbeautyfacts.org; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <link rel="manifest" href="manifest.webmanifest">
@@ -278,7 +278,7 @@ summary{cursor:pointer;list-style:none}
 <button type="button" id="n_l" data-act="tab" data-v="l"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg></span>Lista</button>
 </div></nav>
 
-<script src="app-pre.js?v=e3ee4e0a"></script>
+<script src="app-pre.js?v=54008590"></script>
 <script>
 var KEY="mn_v3",KEY_CFG="mn_cfg";
 var CO=["#1d4ed8","#c0266a","#c26a00","#0b8585","#6d28d9","#4d7c0f","#0a7347","#b91c1c"];
@@ -315,7 +315,7 @@ var PDHALL=null,ST={},G={},OKEY={},SUG=[],IX={},IXN={},IXMIN=5,PAR={},BI={},ALIA
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function sv(){lsSet(KEY,JSON.stringify(N))}
-function blankCfg(){return{cores:{},etiquetas:[],nomes:{},juntar:[],nao:[],lista:[],apelidos:{},sugIA:[],tipos:{},saltos:{},diag:{},cods:{},cats:{},ucats:[],orc:{},repo:{},rp:{},lojas:{},perfil:{},selos:{},conq:{},vistos:[],apagadas:{},avisos:{},desc:{h:[]},qz:{},upd:0}}
+function blankCfg(){return{cores:{},etiquetas:[],nomes:{},juntar:[],nao:[],lista:[],apelidos:{},sugIA:[],tipos:{},saltos:{},diag:{},cods:{},cats:{},ucats:[],orc:{},repo:{},rp:{},lojas:{},perfil:{},selos:{},conq:{},vistos:[],apagadas:{},avisos:{},desc:{h:[]},qz:{},cnpjs:{},relatorio:{},compart:{},upd:0}}
 function loadCfg(o){var c=blankCfg();if(o&&typeof o=="object"){Object.keys(c).forEach(function(k){if(k!=="upd"&&o[k]!=null&&Array.isArray(o[k])===Array.isArray(c[k])&&typeof o[k]==="object")c[k]=o[k]});c.upd=+o.upd||0}return c}
 function valid(n){return n&&typeof n.id=="string"&&n.loja&&/^\d{4}-\d{2}-\d{2}$/.test(n.data||"")&&Array.isArray(n.itens)}
 try{N=JSON.parse(lsGet(KEY)||"[]")}catch(e){N=[]}
@@ -763,9 +763,9 @@ return'<svg class="selo-svg" width="'+px+'" height="'+px+'" viewBox="0 0 100 100
 function novCard(){return NM().length&&CFG.conq&&CFG.conq.nov?'<div class="status ok"><b>Novidade: Conquistas!</b> Com as notas que você já cadastrou, você ganhou '+selosN()+' selo'+(selosN()==1?'':'s')+'. <button type="button" class="link" data-act="conq">Ver agora</button> · <button type="button" class="link" data-act="novok">Depois</button></div>':''}
 function seloFaixa(){if(!NM().length)return"";return seloFaixa0()}
 /* Avisos do topo da aba Gastos: um por vez, para o orçamento e o gráfico não ficarem lá embaixo.
-   Ordem: novidade das Conquistas, nome, descoberta da semana. Quando a pessoa fecha um, aparece o próximo.
+   Ordem: novidade das Conquistas, nome, nome dos mercados pelo CNPJ, descoberta da semana. Quando a pessoa fecha um, aparece o próximo.
    O aviso de versão nova do app (AVISO_OCUPADO) vem antes de todos. A descoberta só é marcada como vista quando aparece. */
-function avisoTopo(){if(window.AVISO_OCUPADO)return"";var h=novCard();if(h)return h;h=nomeCard();if(h)return h;return descCard()}
+function avisoTopo(){if(window.AVISO_OCUPADO)return"";var h=novCard();if(h)return h;h=nomeCard();if(h)return h;h=cnpjCard();if(h)return h;return descCard()}
 function seloFaixa0(){var sel=CFG.selos||{},L=[];SERIES.forEach(function(S){var k=0,d="";S.n.forEach(function(x,i){var v=sel[S.id+":"+x];if(v){k=i+1;if(/^\d{4}-/.test(v)&&v>d)d=v}});if(k)L.push({S:S,k:k,d:d||"0"})});if(!L.length)return"";
 L.sort(function(a,b){return a.d<b.d?1:a.d>b.d?-1:b.k-a.k});var ns=selosN(),nd=desafios().length;
 return'<button type="button" class="selofaixa" data-act="conq" aria-label="Seus selos: '+ns+' de '+NSELOS+(nd?', '+nd+' desafio'+(nd==1?'':'s'):'')+'. Ver conquistas"><span class="sf-l">'+L.map(function(x){return seloSvg(x.S,x.k,40)}).join("")+'</span><span class="sf-t"><b>'+ns+'</b><small>selos</small></span>'+(nd?'<span class="sf-t sf-d"><b>🧩 '+nd+'</b><small>desafio'+(nd==1?'':'s')+'</small></span>':'')+'<span class="chev" aria-hidden="true">›</span></button>'}
@@ -1619,6 +1619,30 @@ function meuNome(){return String((CFG.perfil&&CFG.perfil.nome)||"").trim()}
 function cabecalho(){var t={m:"Gastos",ec:"Dá pra economizar",n:"Notas",nd:"Nota",p:"Produtos",pd:"Produto",cm:"Comparar marcas",cmd:"Comparar marcas",bc:"Código de barras",gm:"Gasto por período",l:"Lista",nt:"Notícias",cfg:"Configurações",cq:"Conquistas",vt:"Preços anotados",lc:"Códigos da compra",ct:"Categorias",inf:"Sua inflação",rp:"Repor",dc:"Dicas",qz:"Adivinhe o preço","new":DR&&DR.id?"Editar nota":"Nova nota"}[V]||"De Olho no Carrinho",a=document.getElementById("ttl"),b=document.getElementById("saud"),nm=meuNome();
 if(a)a.textContent=t;if(b)b.textContent=saudacao()+(nm?", "+nm.split(" ")[0]:"")}
 var PFE=false;
+/* ---------- Nome do mercado pelo CNPJ ----------
+   O cadastro público da Receita (pela BrasilAPI, grátis) dá o nome fantasia e o bairro de cada loja. Só o CNPJ da loja sai do
+   aparelho; nada da pessoa. O resultado fica em CFG.cnpjs[cnpj] = {f: nome sugerido, b: bairro, c: cidade, t: quando, x: 1 se a
+   pessoa recusou a sugestão}. Até 4 consultas por vez que o app abre, uma de cada vez. O nome sugerido só aparece para mercados
+   sem nome popular; quem já tem nome não muda. O bairro aparece embaixo do nome, em Seus mercados. */
+var CNPJ_API="https://brasilapi.com.br/api/cnpj/v1/",CNPJB=0;
+function titulo(t){return String(t||"").toLowerCase().replace(/(^|[\s(\/-])([a-zà-ú])/g,function(m,a,b){return a+b.toUpperCase()}).replace(/\b(De|Da|Do|Dos|Das|E)\b/g,function(w){return w.toLowerCase()}).replace(/^./,function(c){return c.toUpperCase()}).trim()}
+/* O cadastro da Receita vem sem acento: "SACOLAO", "RIBEIRAO", "CONCEICAO". Põe o acento nos finais mais comuns. */
+function acentos(t){return String(t||"").replace(/\b(S)ao\b/g,"$1ão").replace(/\b(s)ao\b/g,"$1ão").replace(/cao\b/g,"ção").replace(/coes\b/g,"ções").replace(/([a-zà-ú])ao\b/g,"$1ão").replace(/([a-zà-ú])oes\b/g,"$1ões")}
+function cnpjInfo(s){var x=(CFG.cnpjs||{})[s];return x&&x.t?x:null}
+function semNomePop(s){var r=raiz(s);return/^\d{14}$/.test(s)&&!CFG.apelidos[s]&&!(r&&(CFG.apelidos[r]||POP[r]))}
+function cnpjSug(){return Object.keys(ST).filter(function(s){var x=cnpjInfo(s);return semNomePop(s)&&x&&x.f&&!x.x&&norm(x.f)!==norm(apelido(s))})}
+async function cnpjBusca(){if(CNPJB||typeof fetch!="function")return;CNPJB=1;CFG.cnpjs=CFG.cnpjs||{};
+var falta=Object.keys(ST).filter(function(s){return cnpjOk(s)&&!cnpjInfo(s)}).slice(0,4),mudou=false;
+for(var i=0;i<falta.length;i++){var s=falta[i],c=new AbortController(),tm=setTimeout(function(){c.abort()},8000);
+try{var r=await fetch(CNPJ_API+s,{signal:c.signal});clearTimeout(tm);
+if(r.status===404){CFG.cnpjs[s]={f:"",b:"",c:"",t:Date.now()};mudou=true;continue}if(!r.ok)break;
+var j=await r.json(),f=limpaNome(j.nome_fantasia||j.razao_social||"");
+CFG.cnpjs[s]={f:acentos(f).slice(0,40),b:acentos(titulo(j.bairro)).slice(0,40),c:acentos(titulo(j.municipio)).slice(0,40),t:Date.now()};mudou=true}catch(e){clearTimeout(tm);break}}
+if(mudou){saveCfg();if(V=="m")render()}}
+function cnpjLocal(s){var x=cnpjInfo(s);if(!x||!(x.b||x.c))return"";return esc(x.b&&x.c?x.b+", "+x.c:x.b||x.c)}
+function cnpjCard(){var L=cnpjSug();if(!L.length)return"";var h='<div class="card" style="border-color:var(--acc)"><h3 style="margin:0">Nome dos seus mercados</h3><p class="soft small">Achei no cadastro público da Receita, pelo CNPJ da loja.</p><div class="list">';
+L.slice(0,3).forEach(function(s){var x=cnpjInfo(s);h+='<div class="row flat" style="align-items:flex-start;gap:10px"><span class="txt"><span class="t">'+esc(x.f)+'</span><span class="soft small">'+(cnpjLocal(s)?cnpjLocal(s)+' · ':'')+'na nota: '+esc(ST[s].n)+'</span></span><span class="pills"><button type="button" class="btn sm" data-act="cnpjsim" data-s="'+esc(s)+'">Usar</button><button type="button" class="btn sm line" data-act="cnpjnao" data-s="'+esc(s)+'">Não</button></span></div>'});
+return h+'</div></div>'}
 function nomeCard(){if(meuNome()||(CFG.perfil&&CFG.perfil.pulou)||!N.length)return"";return'<div class="card" style="border-color:var(--acc)"><h3 style="margin:0">Como você quer ser chamado?</h3><p class="soft small">Aparece no topo do app: “'+saudacao()+', …”.</p><input type="text" id="pfn" maxlength="30" autocomplete="given-name" placeholder="Seu nome"><div class="btns"><button type="button" class="btn sm" data-act="pfsave">Salvar</button><button type="button" class="btn sm line" data-act="pfno">Agora não</button></div></div>'}
 function render(){comp();conqCheck();cabecalho();
 ["m","n","p","l","new"].forEach(function(x){document.getElementById("n_"+x).setAttribute("aria-pressed",String(V==x||((V=="pd"||V=="cm"||V=="cmd")&&x=="p")||((V=="gm"||V=="cq"||V=="ec"||V=="qz")&&x=="m")||(V=="bc"&&x==(BCFROM=="l"||BCFROM=="v"?"l":"p"))||((V=="vt"||V=="rp")&&x=="l")||((V=="nd"||V=="inf")&&x=="n")))});
@@ -1803,17 +1827,18 @@ function descLista(){var H=(CFG.desc&&CFG.desc.h)||[],at=descSemana(),L=H.filter
 return'<div class="card"><h3 style="margin:0">Suas descobertas</h3><p class="soft small">Uma por semana, tirada só das suas notas.</p><div class="list">'+L.map(function(d){return'<div class="desct"><span class="se" aria-hidden="true">'+d.e+'</span><span><b>'+d.t+'</b><span class="soft small" style="display:block;margin-top:2px">'+d.x+' · semana de '+dl(d.d)+'</span>'+(d.k&&G[d.k]?'<button type="button" class="link" data-act="prod" data-k="'+esc(d.k)+'">Ver o produto ›</button>':'')+'</span></div>'}).join("")+'</div></div>'}
 function descNova(){var H=(CFG.desc&&CFG.desc.h)||[];return!!(H[0]&&CFG.desc.nt!==H[0].id)}
 function vm(){
+if(N.length&&!CNPJB)setTimeout(cnpjBusca,1500);
 if(!N.length)return empty("Bem-vindo ao De Olho no Carrinho");
 var rk=Object.keys(IX).sort(function(a,b){return IX[a]-IX[b]}),ss=Object.keys(ST);
 var h=avisoTopo()+seloFaixa()+gCard()+precosCard()+dobra("sus",susCard())+cmpStrip();
 if(!MCA.merc)return h;h+='<h3>Seus mercados ('+ss.length+')</h3><div class="list">';
 ss.sort(function(a,b){return(rk.indexOf(a)<0?99:IX[a])-(rk.indexOf(b)<0?99:IX[b])||(IXN[b]||0)-(IXN[a]||0)}).forEach(function(s){var nn=N.filter(function(n){return sk(n)==s}),g=nn.reduce(function(t,n){return t+pago(n)},0),x=rk.indexOf(s)>=0?(IX[s]-1)*100:null,c=storeColor(s);
-h+='<div class="card"><div class="row flat"><span class="main"><span class="dot" style="background:'+c+'"></span><span class="txt"><span class="t">'+esc(sn(s))+'</span><span class="soft small">'+esc(ST[s].n)+'</span></span></span>'+(x!=null?'<span class="r"><span class="'+(x<0?"down":"up")+'">'+pc(IX[s])+'</span>'+(s==rk[0]?'<span class="pill ok">mais barato</span>':'')+'</span>':'<span class="r"><span class="pill gray">poucos dados</span></span>')+'</div>';
+h+='<div class="card"><div class="row flat"><span class="main"><span class="dot" style="background:'+c+'"></span><span class="txt"><span class="t">'+esc(sn(s))+'</span><span class="soft small">'+(cnpjLocal(s)?cnpjLocal(s)+' · ':'')+esc(ST[s].n)+'</span></span></span>'+(x!=null?'<span class="r"><span class="'+(x<0?"down":"up")+'">'+pc(IX[s])+'</span>'+(s==rk[0]?'<span class="pill ok">mais barato</span>':'')+'</span>':'<span class="r"><span class="pill gray">poucos dados</span></span>')+'</div>';
 var rec3=nn.some(function(n){return n.data>=cutDate()});
 h+='<p class="soft small">'+(x!=null?'Comparado em '+IXN[s]+' produtos dos últimos 3 meses':!rec3?'Sem compras nos últimos 3 meses':(IXN[s]||0)+' produto'+(IXN[s]==1?'':'s')+' em comum com outros mercados nos últimos 3 meses (precisa de '+IXMIN+')')+'</p>';
 if(x!=null)h+='<div class="bar"><i style="width:'+Math.max(10,Math.min(100,55+x*5))+'%;background:'+c+'"></i></div>';
 h+='<div class="row flat"><p class="soft small">'+nn.length+' compra'+(nn.length==1?"":"s")+' · R$ '+R2(g)+' no total</p><span class="pills"><button type="button" class="cbtn" data-act="apl" data-s="'+esc(s)+'" aria-expanded="'+(APL===s)+'">'+PEN.replace('<svg ','<svg width="16" height="16" ')+'Nome</button><button type="button" class="cbtn" data-act="pick" data-s="'+esc(s)+'" aria-expanded="'+(PICK===s)+'"><span class="dot" style="background:'+c+'"></span>Cor</button><button type="button" class="cbtn" data-act="lojaf" data-s="'+esc(s)+'" aria-pressed="'+farmS(s)+'">'+(farmS(s)?'💊 Farmácia':'É farmácia?')+'</button></span></div>'+(farmS(s)?'<p class="soft small">Farmácia: fica fora do gasto do mercado e da comparação de preços entre mercados.</p>':'')+'';
-if(APL===s)h+='<div class="ed"><label class="f">Nome popular do mercado<input type="text" id="apn" value="'+esc(apelido(s))+'" maxlength="40" autocomplete="off"></label><p class="soft small">Vale também para as próximas notas desta rede. Deixe vazio para voltar ao nome automático.</p><div class="btns"><button type="button" class="btn sm" data-act="aplsave" data-s="'+esc(s)+'">Salvar nome</button><button type="button" class="btn sm line" data-act="aplcancel">Cancelar</button></div></div>';
+if(APL===s)h+='<div class="ed"><label class="f">Nome popular do mercado<input type="text" id="apn" value="'+esc(apelido(s))+'" maxlength="40" autocomplete="off"></label>'+(function(){var x=cnpjInfo(s);return x&&x.f&&norm(x.f)!==norm(apelido(s))?'<div class="chips"><button type="button" class="chip" data-act="cnpjusa" data-v="'+esc(x.f)+'">Usar “'+esc(x.f)+'” (Receita)</button></div>':''})()+'<p class="soft small">Vale também para as próximas notas desta rede. Deixe vazio para voltar ao nome automático.</p><div class="btns"><button type="button" class="btn sm" data-act="aplsave" data-s="'+esc(s)+'">Salvar nome</button><button type="button" class="btn sm line" data-act="aplcancel">Cancelar</button></div></div>';
 if(PICK===s){h+='<div class="sw" role="group" aria-label="Escolha a cor de '+esc(sn(s))+'">';CO.forEach(function(k,i){h+='<button type="button" style="background:'+k+'" aria-label="'+CON[i]+'" aria-pressed="'+(c===k)+'" data-act="cor" data-s="'+esc(s)+'" data-c="'+k+'"></button>'});h+='</div>'}
 h+='</div>'});
 return h+'</div>'+'<p class="soft small">Só preços dos últimos 3 meses e produtos comprados em mais de um mercado.</p>'}
@@ -2506,6 +2531,9 @@ if(!lb||!(qq>0)){toast("Preencha o tipo e o tamanho da embalagem.");return}ov={t
 Object.keys(g5.bases).forEach(function(b){delete CFG.tipos[b]});CFG.tipos[tpBases(g5)[0]]=ov;saveCfg();TPE=false;render();toast(ov.x?"Este produto não entra mais na comparação de marcas.":"Comparação ajustada.")}
 else if(a=="pick"){PICK=PICK===d.s?null:d.s;APL=null;render()}
 else if(a=="apl"){APL=APL===d.s?null:d.s;PICK=null;render();var ea=document.getElementById("apn");if(ea){ea.focus();ea.select()}}
+else if(a=="cnpjsim"){var xs=cnpjInfo(d.s);if(xs&&xs.f){CFG.apelidos[d.s]=xs.f;var rz2=raiz(d.s);if(rz2&&!CFG.apelidos[rz2])CFG.apelidos[rz2]=xs.f;saveCfg();render();toast("Nome salvo: "+xs.f)}}
+else if(a=="cnpjnao"){var xn=cnpjInfo(d.s);if(xn){xn.x=1;saveCfg()}render()}
+else if(a=="cnpjusa"){var ia=document.getElementById("apn");if(ia){ia.value=d.v;ia.focus()}}
 else if(a=="aplcancel"){APL=null;render()}
 else if(a=="aplsave"){var va=(document.getElementById("apn").value||"").replace(/\s+/g," ").trim(),rz=raiz(d.s);if(va){CFG.apelidos[d.s]=va;if(rz)CFG.apelidos[rz]=va}else{delete CFG.apelidos[d.s];if(rz)delete CFG.apelidos[rz]}saveCfg();APL=null;render();toast("Nome salvo: "+apelido(d.s))}
 else if(a=="selon"){SELM=true;SELS={};render()}
@@ -2603,7 +2631,7 @@ if(ev.key=="Enter"&&b.id=="pfn"){ev.preventDefault();var ps=document.querySelect
 if(ev.key=="Enter"&&b.id=="lq"){ev.preventDefault();var f=document.querySelector("#ls [data-act]");if(f)f.click()}});
 document.documentElement.lang="pt-BR";repair();render();initDb();
 </script>
-<script src="app-post.js?v=70fef6a1"></script>
+<script src="app-post.js?v=ea7a6f02"></script>
 
 <style>
 /* Só no app: sem a aba Foto, sem o botão do Claude, e a tela de entrada por cima de tudo. */

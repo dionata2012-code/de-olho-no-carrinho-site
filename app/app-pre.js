@@ -123,6 +123,14 @@ window.APP = true;
     remover: function (id) { return rpc("familia_remover", { p_user: id }); },
     precos: function () { return rpc("familia_precos"); }
   };
+  /* Registro de erros (tabela erros, só pela função registrar_erro, que limpa e limita). */
+  window.appRegistrarErro = function (o) { return rest("POST", "rpc/registrar_erro", { p_versao: o.versao, p_plataforma: o.plataforma, p_tela: o.tela, p_tipo: o.tipo, p_onde: o.onde }); };
+  /* Códigos de barras compartilhados entre os usuários (só código e nome do produto, sem quem mandou). */
+  window.appCodigos = {
+    enviar: function (lista) { return rpc("codigos_enviar", { p: lista }); },
+    buscar: function (e) { return rpc("codigo_buscar", { p_ean: e }); },
+    apagar: function () { return rpc("codigos_apagar_meus"); }
+  };
   window.appUid = function () { return SES && SES.user ? SES.user.id : ""; };
   window.claude = { use: function (n) { return Promise.resolve({ db: db, user: user, downloads: downloads }[n] || null); } };
 
