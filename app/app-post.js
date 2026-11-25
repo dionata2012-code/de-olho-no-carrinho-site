@@ -748,3 +748,84 @@
   setTimeout(sincronizar, 8000);
   document.addEventListener("visibilitychange", function () { if (!document.hidden) setTimeout(sincronizar, 3000); });
 })();
+
+
+/* ---------- Foto do cupom ----------
+   Android: a foto é lida no próprio celular pelo leitor de texto do Google (ML Kit), sem internet e sem mandar a foto
+   para ninguém. O texto lido passa pela leitura de cupom (parseCupom) ou, se for um print do portal, pela do portal.
+   iPhone: o iPhone não deixa o app ler a foto sozinho; a aba Foto explica como copiar o texto da foto (Texto ao Vivo)
+   e colar aqui. Em qualquer caso a pessoa confere os itens antes de salvar. */
+(function () {
+  var ANDROID = !!(window.Android && typeof Android.textoDaFoto === "function"), ESP = {}, SEQ = 0;
+  window.appFotoTexto = function (j) {
+    var o = null; try { o = JSON.parse(j); } catch (e) { o = null; }
+    if (o && ESP[o.id]) { var f = ESP[o.id]; delete ESP[o.id]; f(o); }
+  };
+  function ocr(b64) {
+    return new Promise(function (ok) {
+      var id = "f" + (++SEQ); ESP[id] = ok;
+      setTimeout(function () { if (ESP[id]) { delete ESP[id]; ok({ id: id, erro: "demorou" }); } }, 60000);
+      try { Android.textoDaFoto(b64, id); } catch (e) { delete ESP[id]; ok({ id: id, erro: "ponte" }); }
+    });
+  }
+  function base64(blob) { return new Promise(function (ok, no) { var r = new FileReader(); r.onload = function () { ok(String(r.result).split(",")[1] || ""); }; r.onerror = no; r.readAsDataURL(blob); }); }
+  /* CPF e números de cartão nunca ficam guardados no texto de diagnóstico */
+  function semDados(t) { return String(t || "").replace(/\d{3}[.\s]?\d{3}[.\s]?\d{3}[-\s]?\d{2}/g, "###.###.###-##").replace(/(\d[ \d]{11,}\d)/g, function (x) { var d = x.replace(/\D/g, ""); return d.length == 44 && chaveOk(d) ? x : "#"; }); }
+  function lerTexto(t) {
+    var j = parsePortal(t);
+    if (!(j && j.itens.length)) { var c = parseCupom(t); if (c && c.itens.length) j = c; }
+    return j && j.itens.length ? j : null;
+  }
+  window.appLerTextoFoto = lerTexto; /* para os testes */
+
+  if (ANDROID) {
+    checkAI = async function () {
+      var e = document.getElementById("aist");
+      if (e) e.textContent = "A foto é lida no seu celular, sem internet. Com boa luz e a nota reta, sai melhor. Se ela for comprida, tire várias fotos. Confira os itens antes de salvar; quando a nota tem QR code, ele é o caminho mais certo.";
+    };
+    photos = async function (inp) {
+      var fs = Array.prototype.slice.call(inp.files || []); inp.value = "";
+      if (!fs.length || BUSY) return;
+      readForm(); BUSY = true; render();
+      var tot0 = { add: 0, dup: 0, ruins: 0, found: false, chaveRuim: false }, falhou = 0, somaOk = null, ultimo = "";
+      for (var i = 0; i < fs.length; i++) {
+        msg("Lendo a foto " + (i + 1) + " de " + fs.length + " no celular…", "busy");
+        try {
+          var b = await shrink(fs[i]); THUMBS.push(URL.createObjectURL(b)); var e0 = document.getElementById("thumbs"); if (e0) e0.innerHTML = thumbs();
+          var r = await ocr(await base64(b));
+          var j = r && r.texto ? lerTexto(r.texto) : null;
+          if (!j) { falhou++; if (r && r.texto) ultimo = r.texto; continue; }
+          var m = merge(j); tot0.add += m.add; tot0.dup += m.dup; tot0.ruins += m.ruins; tot0.found = tot0.found || m.found; tot0.chaveRuim = tot0.chaveRuim || m.chaveRuim;
+          if (j.total > 0) somaOk = Math.abs(tot(DR) - j.total) < 0.015;
+          refreshDraft();
+        } catch (x) { falhou++; }
+      }
+      BUSY = false; render();
+      if (!tot0.add && !tot0.dup) {
+        if (ultimo) { CFG.diag = { quando: new Date().toISOString(), url: "foto", a: semDados(ultimo).slice(0, 20000), b: "" }; saveCfg(); }
+        msg("Não consegui ler os produtos nessa foto. Tente de novo mais perto, com boa luz e a nota bem reta" + (ultimo ? " (guardei o texto lido, sem CPF, para melhorar a leitura)" : "") + ". Se a nota tem QR code, use a aba Chave ou PDF.", "warn");
+        return;
+      }
+      msg(resumoLeitura(tot0, (somaOk === true ? " A soma bate com o total da nota." : somaOk === false ? " A soma não bateu com o total da nota: confira os valores." : "") + (falhou ? " " + falhou + " foto(s) não puderam ser lidas." : "")), somaOk === false || falhou ? "warn" : "ok");
+    };
+  } else if (window.APP) {
+    /* iPhone: Texto ao Vivo */
+    var IP = '<p class="soft">No iPhone, o app não consegue ler a foto sozinho, mas o próprio iPhone lê:</p>' +
+      '<ol class="how"><li>Tire a foto da nota com a câmera do iPhone e abra em <b>Fotos</b>.</li><li>Toque e segure no texto da nota, toque em <b>Selecionar tudo</b> e depois em <b>Copiar</b>.</li><li>Volte aqui, cole abaixo e toque em <b>Ler texto da foto</b>.</li></ol>' +
+      '<label class="f">Texto da foto<textarea id="fx" placeholder="Cole aqui o texto copiado da foto"></textarea></label>' +
+      '<button type="button" class="btn" data-act="lerfx">Ler texto da foto</button><p class="soft small">Se a nota tem QR code, a aba Chave ou PDF é o caminho mais certo.</p>';
+    var vnew1 = vnew;
+    vnew = function () {
+      var h = vnew1();
+      if (MODE !== "foto") return h;
+      return h.replace(/<p class="soft">Enquadre a nota[\s\S]*?<p class="soft small" id="aist">[^<]*<\/p>/, IP);
+    };
+    checkAI = async function () {};
+    document.addEventListener("click", function (ev) {
+      if (!ev.target.closest('[data-act="lerfx"]')) return;
+      readForm(); var t = (document.getElementById("fx") || {}).value || "";
+      if (!t.trim()) { msg("Cole o texto copiado da foto antes de tocar em Ler texto da foto.", "warn"); return; }
+      fromText(t, "texto da foto");
+    });
+  }
+})();
